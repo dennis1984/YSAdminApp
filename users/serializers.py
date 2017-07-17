@@ -2,7 +2,7 @@
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from users.models import ConsumerUser, IdentifyingCode
+from users.models import AdminUser, IdentifyingCode
 from horizon.serializers import BaseListSerializer, timezoneStringTostring
 from django.conf import settings
 from horizon.models import model_to_dict
@@ -29,7 +29,7 @@ class WXUserSerializer(serializers.ModelSerializer):
             super(WXUserSerializer, self).__init__(instance, **kwargs)
 
     class Meta:
-        model = ConsumerUser
+        model = AdminUser
         fields = ('phone', 'out_open_id', 'nickname', 'gender',
                   'province', 'city', 'head_picture')
 
@@ -76,7 +76,7 @@ class WXUserSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ConsumerUser
+        model = AdminUser
         fields = '__all__'
         # fields = ('id', 'phone', 'business_name', 'head_picture',
         #           'food_court_id')
@@ -102,7 +102,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserInstanceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ConsumerUser
+        model = AdminUser
         fields = ('id', 'phone', 'nickname', 'head_picture',)
 
 
