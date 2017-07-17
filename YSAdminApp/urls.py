@@ -32,6 +32,9 @@ urlpatterns = [
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     url(r'^auth/', include('users.urls', namespace='user')),
+
+    url(r'business/', include('business.urls', namespace='business')),
+
     # url(r'^orders/', include('orders.urls', namespace='orders')),
     # url(r'^shopping_cart/', include('shopping_cart.urls', namespace='shopping_cart')),
     # url(r'^hot_sale/', include('hot_sale.urls', namespace='hot_sale')),

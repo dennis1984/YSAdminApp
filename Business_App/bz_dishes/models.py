@@ -110,3 +110,30 @@ class Dishes(models.Model):
         dishes_dict['food_court_id'] = getattr(food_instance, 'id', None)
 
         return dishes_dict
+
+
+class City(models.Model):
+    """
+    城市信息
+    """
+    city = models.CharField('城市名称', max_length=40, db_index=True, unique=True)
+    province = models.CharField('省份', max_length=40)
+    user_id = models.IntegerField('创建者')
+
+    created = models.DateTimeField(default=now)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'ys_city'
+        app_label = 'Business_App.bz_dishes.models.City'
+
+    def __unicode__(self):
+        return self.city
+
+    @classmethod
+    def get_object(cls, **kwargs):
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
