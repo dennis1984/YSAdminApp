@@ -64,7 +64,7 @@ class AdminUser(AbstractBaseUser):
     date_joined = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
 
-    objects = ConsumerUserManager()
+    objects = AdminUserManager()
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['channel']
