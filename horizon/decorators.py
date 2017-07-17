@@ -1,5 +1,5 @@
 #-*- coding:utf8 -*-
-from users.models import ConsumerUser
+from users.models import AdminUser
 from rest_framework.request import Request
 from django.db.models import Model
 
@@ -16,7 +16,7 @@ def has_permission_to_update(func):
     def decorator(self, request, *args, **kwargs):
         if not isinstance(request, Request):
             return func(self, request, *args, **kwargs)
-        for item in [args] + [kwargs.values()]:
+        for item in [args] + list(kwargs.values()):
             if isinstance(item, Model):
                 user_id = getattr(item, 'user_id')
                 if user_id and user_id != request.user.id:
