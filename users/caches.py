@@ -7,7 +7,7 @@ from django.conf import settings
 from horizon import redis
 from django.utils.timezone import now
 
-from users.models import ConsumerUser
+from users.models import AdminUser
 
 
 # 过期时间（单位：秒）
@@ -38,7 +38,7 @@ class BusinessUserCache(object):
         key = self.get_user_id_key(user_id)
         user_instance = self.handle.get(key)
         if not user_instance:
-            user_instance = ConsumerUser.get_object(**{'pk': user_id})
+            user_instance = AdminUser.get_object(**{'pk': user_id})
             if isinstance(user_instance, Exception):
                 return user_instance
             self.set_user_to_cache(key, user_instance)
@@ -48,7 +48,7 @@ class BusinessUserCache(object):
         key = self.get_user_name_key(user_name)
         user_instance = self.handle.get(key)
         if not user_instance:
-            user_instance = ConsumerUser.get_object(**{'phone': user_name})
+            user_instance = AdminUser.get_object(**{'phone': user_name})
             if isinstance(user_instance, Exception):
                 return user_instance
             self.set_user_to_cache(key, user_instance)
