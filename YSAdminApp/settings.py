@@ -132,7 +132,7 @@ DATABASES = {
 }
 
 
-DATABASE_ROUTERS = ['Business_App.router.BusinessAppRouter']
+DATABASE_ROUTERS = ['YSAdminApp.router.AdminAppRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -171,7 +171,7 @@ AUTH_USER_MODEL = 'users.ConsumerUser'
 
 AUTHENTICATION_BACKENDS = (
     # 'django.contrib.auth.backends.ModelBackend',
-    'users.auth.ConsumerUserBackend',
+    'users.auth.AdminUserBackend',
 )
 
 # Static files (CSS, JavaScript, Images)
@@ -205,9 +205,6 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
     ),
-
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    # 'PAGE_SIZE': 100,
 }
 
 # pagination
@@ -227,6 +224,7 @@ WEB_URL_FIX = os.path.join('http://', DOMAIN_NAME)
 # 图片根目录
 BUSINESS_PICTURE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'business', 'picture')
 CONSUMER_PICTURE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'consumer', 'picture')
+ADMIN_PICTURE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'admin', 'picture')
 
 PICTURE_DIRS = {
     'consumer': {
@@ -237,7 +235,11 @@ PICTURE_DIRS = {
         'dishes': os.path.join(BUSINESS_PICTURE_ROOT, 'dishes'),               # 菜品图片目录
         'head_picture': os.path.join(BUSINESS_PICTURE_ROOT, 'head_picture'),   # 用户头像图片目录
         'qrcode': os.path.join(BUSINESS_PICTURE_ROOT, 'qrcode'),               # 二维码图片目录
-    }
+    },
+    'admin': {
+        'head_picture': os.path.join(ADMIN_PICTURE_ROOT, 'head_picture'),   # 用户头像图片目录
+        'qrcode': os.path.join(ADMIN_PICTURE_ROOT, 'qrcode'),               # 二维码图片目录
+    },
 }
 
 # 缓存服务器配置
@@ -247,5 +249,6 @@ REDIS_SETTINGS = {
     'db_set': {
         'business': 0,
         'consumer': 1,
+        'admin': 2,
         }
 }

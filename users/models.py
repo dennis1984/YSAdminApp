@@ -12,10 +12,10 @@ import re
 import os
 
 
-class ConsumerUserManager(BaseUserManager):
+class AdminUserManager(BaseUserManager):
     def create_user(self, username, password, **kwargs):
         """
-        创建消费者用户，
+        创建管理后台用户，
         参数包括：username （手机号）
                  password （长度必须不小于6位）
         """
@@ -41,7 +41,7 @@ class ConsumerUserManager(BaseUserManager):
 HEAD_PICTURE_PATH = settings.PICTURE_DIRS['consumer']['head_picture']
 
 
-class ConsumerUser(AbstractBaseUser):
+class AdminUser(AbstractBaseUser):
     phone = models.CharField(u'手机号', max_length=20, unique=True, db_index=True, null=True)
     out_open_id = models.CharField(u'第三方唯一标识', max_length=64, unique=True,
                                    db_index=True, null=True)

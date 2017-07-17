@@ -33,13 +33,13 @@ urlpatterns = [
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     url(r'^auth/', include('users.urls', namespace='user')),
-    url(r'^orders/', include('orders.urls', namespace='orders')),
-    url(r'^shopping_cart/', include('shopping_cart.urls', namespace='shopping_cart')),
-    url(r'^hot_sale/', include('hot_sale.urls', namespace='hot_sale')),
-    url(r'^collect/', include('collect.urls', namespace='collect')),
-    url(r'^comment/', include('comment.urls', namespace='comment')),
-
-    # 钱包
-    url(r'^wallet/', include('wallet.urls', namespace='wallet')),
+    # url(r'^orders/', include('orders.urls', namespace='orders')),
+    # url(r'^shopping_cart/', include('shopping_cart.urls', namespace='shopping_cart')),
+    # url(r'^hot_sale/', include('hot_sale.urls', namespace='hot_sale')),
+    # url(r'^collect/', include('collect.urls', namespace='collect')),
+    # url(r'^comment/', include('comment.urls', namespace='comment')),
+    #
+    # # 钱包
+    # url(r'^wallet/', include('wallet.urls', namespace='wallet')),
 
 ]

@@ -1,12 +1,12 @@
-from users.models import ConsumerUser
+from users.models import AdminUser
 from django.utils.timezone import now
 
 
-class ConsumerUserBackend(object):
+class AdminUserBackend(object):
     def authenticate(self, username=None, password=None):
         try:
-            user = ConsumerUser.objects.get(phone=username)
-        except ConsumerUser.DoesNotExist:
+            user = AdminUser.objects.get(phone=username)
+        except AdminUser.DoesNotExist:
             pass
         else:
             if user.check_password(password):
@@ -17,6 +17,6 @@ class ConsumerUserBackend(object):
 
     def get_user(self, user_id):
         try:
-            return ConsumerUser.objects.get(pk=user_id)
-        except ConsumerUser.DoesNotExist:
+            return AdminUser.objects.get(pk=user_id)
+        except AdminUser.DoesNotExist:
             return None
