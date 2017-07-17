@@ -20,14 +20,8 @@ from users.forms import (CreateUserForm,
                          UsersInputForm,
                          SetPasswordForm,
                          WXAuthCreateUserForm)
-from users.wx_auth.views import Oauth2AccessToken
 
 from Business_App.bz_users.models import BusinessUser
-
-from horizon.views import APIView
-from horizon.main import make_random_number_of_string
-from horizon import main
-import copy
 
 
 class UserAction(generics.GenericAPIView):

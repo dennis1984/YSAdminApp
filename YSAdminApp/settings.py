@@ -41,12 +41,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'users',
-    'orders',
-    'shopping_cart',
-    'hot_sale',
-    'wallet',
-    'collect',
-    'comment',
+    # 'orders',
+    # 'shopping_cart',
+    # 'hot_sale',
+    # 'wallet',
+    # 'collect',
+    # 'comment',
 
     # 允许跨域请求
     'corsheaders',
