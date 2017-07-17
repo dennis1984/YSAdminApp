@@ -66,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'YSConsumerApp.urls'
+ROOT_URLCONF = 'YSAdminApp.urls'
 
 # 跨域请求配置
 CORS_ORIGIN_WHITELIST = (
@@ -98,7 +98,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'YSConsumerApp.wsgi.application'
+WSGI_APPLICATION = 'YSAdminApp.wsgi.application'
 
 
 # Database
