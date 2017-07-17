@@ -1,5 +1,4 @@
 # -*- coding:utf8 -*-
-from PAY.wxpay import settings as wx_settings
 from oauthlib.common import generate_token
 from django.conf import settings
 from django.utils.timezone import now
@@ -159,37 +158,6 @@ def make_dict_to_xml(source_dict, use_cdata=True):
                                 xml_declaration=True,
                                 standalone=None)
     return xml_string.split('\n', 1)[1]
-
-
-def make_sign_for_wxpay(source_dict):
-    """
-    生成签名（微信支付）
-    """
-    key_list = []
-    for _key in source_dict:
-        if not source_dict[_key] or _key == 'sign':
-            continue
-        key_list.append({'key': _key, 'value': source_dict[_key]})
-    key_list.sort(key=lambda x: x['key'])
-
-    string_param = ''
-    for item in key_list:
-        string_param += '%s=%s&' % (item['key'], item['value'])
-        # 把密钥和其它参数组合起来
-    string_param += 'key=%s' % wx_settings.KEY
-    md5_string = md5(string_param.encode('utf8')).hexdigest()
-    return md5_string.upper()
-
-
-# def verify_sign_for_alipay(params_str, source_sign):
-#     """
-#     支付宝支付验证签名（公钥验证签名）
-#     """
-#     pub_key = RSA.importKey(open(ali_settings.ALI_PUBLIC_KEY_FILE_PATH))
-#     source_sign = base64.b64decode(source_sign)
-#     _sign = SHA256.new(params_str)
-#     verifer = PKCS1_v1_5.new(pub_key)
-#     return verifer.verify(_sign, source_sign)
 
 
 def make_dict_to_verify_string(params_dict):
