@@ -10,7 +10,7 @@ from users.serializers import (UserSerializer,
                                UserListSerializer,
                                IdentifyingCodeSerializer)
 from users.permissions import IsAdminOrReadOnly
-from users.models import (ConsumerUser,
+from users.models import (AdminUser,
                           make_token_expire,
                           IdentifyingCode)
 from users.forms import (CreateUserForm,
@@ -48,7 +48,7 @@ class UserAction(generics.GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_object_of_user(self, request):
-        return ConsumerUser.get_object(**{'pk': request.user.id})
+        return AdminUser.get_object(**{'pk': request.user.id})
 
     def put(self, request, *args, **kwargs):
         """
@@ -76,7 +76,7 @@ class UserDetail(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
     def post(self, request, *args, **kwargs):
-        user = ConsumerUser.get_user_detail(request)
+        user = AdminUser.get_user_detail(request)
         if isinstance(user, Exception):
             return Response({'Error': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -98,5 +98,5 @@ class AuthLogout(generics.GenericAPIView):
 class UserViewSet(viewsets.ModelViewSet):
     """
     """
-    queryset = ConsumerUser.objects.all().order_by('-date_joined')
+    queryset = AdminUser.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
