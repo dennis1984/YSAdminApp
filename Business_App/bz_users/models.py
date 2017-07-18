@@ -3,10 +3,25 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.timezone import now
 from django.contrib.auth.hashers import make_password
+
 from horizon.models import model_to_dict
+
 from django.conf import settings
 import datetime
 import os
+
+
+def get_perfect_filter_params(cls, **kwargs):
+    opts = cls._meta
+    fields = ['pk']
+    for f in opts.concrete_fields:
+        fields.append(f.name)
+
+    _kwargs = {}
+    for key in kwargs:
+        if key in fields:
+            _kwargs[key] = kwargs[key]
+    return _kwargs
 
 
 class BusinessUserManager(BaseUserManager):
@@ -44,7 +59,6 @@ USER_PICTURE_DIR = settings.PICTURE_DIRS['business']['head_picture']
 
 
 class BusinessUser(AbstractBaseUser):
-    # username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(
         verbose_name='email address',
         max_length=255,
@@ -112,6 +126,42 @@ class BusinessUser(AbstractBaseUser):
 
         return cls.join_user_and_food_court(business_user, food_court)
 
+    @classmethod
+    def filter_users_detail(cls, **kwargs):
+        """
+        获取用户列表
+        """
+        _kwargs = get_perfect_filter_params(**kwargs)
+        if 'start_created' in kwargs:
+            _kwargs['created__gte'] = kwargs['start_created']
+        if 'end_created' in kwargs:
+            _kwargs['created__lte'] = kwargs['end_created']
+        try:
+            _instances_list = cls.objects.filter(**_kwargs)
+        except Exception as e:
+            return e
+
+        results = []
+        for _instance in _instances_list:
+            try:
+                food_court = FoodCourt.objects.get(pk=_instance.food_court_id)
+            except Exception as e:
+                return e
+            user_data = cls.join_user_and_food_court(_instance, food_court)
+            results.append(user_data)
+        return results
+
+    @classmethod
+    def join_user_and_food_court(cls, user_instance, food_court_instance):
+        business_user = model_to_dict(user_instance)
+        business_user['user_id'] = business_user['id']
+        if food_court_instance:
+            business_user.update(**model_to_dict(food_court_instance))
+            business_user['food_court_name'] = business_user['name']
+        if business_user['last_login'] is None:
+            business_user['last_login'] = business_user['date_joined']
+        return business_user
+
 
 class FoodCourt(models.Model):
     """
@@ -127,10 +177,23 @@ class FoodCourt(models.Model):
     class Meta:
         db_table = 'ys_food_court'
         unique_together = ('name', 'mall')
-        app_label = 'Business_App.bz_users.models.FoodCourt'
+        app_label = 'Business_App.bz_dishes.models.FoodCourt'
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def get_perfect_filter_params(cls, **kwargs):
+        opts = cls._meta
+        fields = ['pk']
+        for f in opts.concrete_fields:
+            fields.append(f.name)
+
+        _kwargs = {}
+        for key in kwargs:
+            if key in fields:
+                _kwargs[key] = kwargs[key]
+        return _kwargs
 
     @classmethod
     def get_object(cls, **kwargs):
@@ -141,9 +204,10 @@ class FoodCourt(models.Model):
 
     @classmethod
     def get_object_list(cls, **kwargs):
-        if 'page_size' in kwargs:
-            kwargs.pop('page_size')
-        if 'page_index' in kwargs:
-            kwargs.pop('page_index')
-        return cls.objects.filter(**kwargs)
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        try:
+            return cls.objects.filter(**_kwargs)
+        except Exception as e:
+            return e
+
 

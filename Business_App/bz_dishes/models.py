@@ -10,19 +10,6 @@ from django.conf import settings
 import os
 
 
-def get_perfect_filter_params(cls, **kwargs):
-    opts = cls._meta
-    fields = ['pk']
-    for f in opts.concrete_fields:
-        fields.append(f.name)
-
-    _kwargs = {}
-    for key in kwargs:
-        if key in fields:
-            _kwargs[key] = kwargs[key]
-    return _kwargs
-
-
 class DishesManager(models.Manager):
     def get(self, *args, **kwargs):
         object_data = super(DishesManager, self).get(status=1, *args, **kwargs)
@@ -125,41 +112,6 @@ class Dishes(models.Model):
         return dishes_dict
 
 
-class FoodCourt(models.Model):
-    """
-    美食城数据表
-    """
-    name = models.CharField('美食城名字', max_length=200)
-    city = models.CharField('所属城市', max_length=100, null=False)
-    district = models.CharField('所属市区', max_length=100, null=False)
-    mall = models.CharField('所属购物中心', max_length=200, default='')
-    address = models.CharField('购物中心地址', max_length=256, null=True, blank=True)
-    extend = models.TextField('扩展信息', default='', blank=True, null=True)
-
-    class Meta:
-        db_table = 'ys_food_court'
-        unique_together = ('name', 'mall')
-        app_label = 'Business_App.bz_dishes.models.FoodCourt'
-
-    def __unicode__(self):
-        return self.name
-
-    @classmethod
-    def get_object(cls, **kwargs):
-        try:
-            return cls.objects.get(**kwargs)
-        except Exception as e:
-            return e
-
-    @classmethod
-    def get_object_list(cls, **kwargs):
-        _kwargs = get_perfect_filter_params(cls, **kwargs)
-        try:
-            return cls.objects.filter(**_kwargs)
-        except Exception as e:
-            return e
-
-
 class City(models.Model):
     """
     城市信息
@@ -179,8 +131,21 @@ class City(models.Model):
         return self.city
 
     @classmethod
+    def get_perfect_filter_params(cls, **kwargs):
+        opts = cls._meta
+        fields = ['pk']
+        for f in opts.concrete_fields:
+            fields.append(f.name)
+
+        _kwargs = {}
+        for key in kwargs:
+            if key in fields:
+                _kwargs[key] = kwargs[key]
+        return _kwargs
+
+    @classmethod
     def get_object(cls, **kwargs):
-        _kwargs = get_perfect_filter_params(cls, **kwargs)
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.get(**_kwargs)
         except Exception as e:
@@ -188,7 +153,7 @@ class City(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        _kwargs = get_perfect_filter_params(cls, **kwargs)
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:
