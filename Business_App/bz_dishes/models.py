@@ -145,7 +145,7 @@ class City(models.Model):
 
     @classmethod
     def get_object(cls, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(kwargs)
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.get(**_kwargs)
         except Exception as e:
@@ -153,7 +153,7 @@ class City(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(kwargs)
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:
