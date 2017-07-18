@@ -131,16 +131,31 @@ class City(models.Model):
         return self.city
 
     @classmethod
+    def get_perfect_filter_params(cls, **kwargs):
+        opts = cls._meta
+        fields = []
+        for f in opts.concrete_fields:
+            fields.append(f.name)
+
+        _kwargs = {}
+        for key in kwargs:
+            if key in fields:
+                _kwargs[key] = kwargs[key]
+        return _kwargs
+
+    @classmethod
     def get_object(cls, **kwargs):
+        _kwargs = cls.get_perfect_filter_params(kwargs)
         try:
-            return cls.objects.get(**kwargs)
+            return cls.objects.get(**_kwargs)
         except Exception as e:
             return e
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        _kwargs = cls.get_perfect_filter_params(kwargs)
         try:
-            return cls.objects.filter(**kwargs)
+            return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
 

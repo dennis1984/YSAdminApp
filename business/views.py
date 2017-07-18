@@ -55,7 +55,7 @@ class CityList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_city_list(self, request, cld):
-        return City.filter_objects(**cld)
+        return City.filter_objects(cld)
 
     def make_perfect_data(self, params_dict):
         for key in params_dict:
