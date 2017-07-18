@@ -139,6 +139,7 @@ class FoodCourt(models.Model):
     class Meta:
         db_table = 'ys_food_court'
         unique_together = ('name', 'mall')
+        app_label = 'Business_App.bz_dishes.models.FoodCourt'
 
     def __unicode__(self):
         return self.name
