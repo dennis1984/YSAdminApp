@@ -3,10 +3,14 @@ from horizon import forms
 
 
 class CityInputForm(forms.Form):
-    city = forms.CharField(max_length=40)
-    province = forms.CharField(max_length=40)
+    city = forms.CharField(min_length=2, max_length=20)
+    province = forms.CharField(min_length=2, max_length=20)
 
 
+class CityListForm(forms.Form):
+    province = forms.CharField(min_length=2, max_length=20)
+    page_size = forms.IntegerField(min_value=1)
+    page_index = forms.IntegerField(min_value=1)
 
 
 

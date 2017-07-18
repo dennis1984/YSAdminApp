@@ -42,6 +42,10 @@ class CitySerializer(BaseModelSerializer):
             return e
 
 
+class CityListSerializer(BaseListSerializer):
+    child = CitySerializer()
+
+
 
 # class UserSerializer(serializers.ModelSerializer):
 #     class Meta:
