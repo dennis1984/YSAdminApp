@@ -5,14 +5,18 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from business.serializers import (CitySerializer,
-                                  CityListSerializer)
+                                  CityListSerializer,
+                                  FoodCourtSerializer,
+                                  FoodCourtListSerializer)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
                             CityListForm,
-                            )
+                            FoodCourtInputForm,
+                            FoodCourtListForm)
 
 from Business_App.bz_dishes.models import (City,
-                                           Dishes)
+                                           Dishes,
+                                           FoodCourt)
 from Business_App.bz_users.models import BusinessUser
 
 
@@ -78,3 +82,67 @@ class CityList(generics.GenericAPIView):
         return Response(datas, status=status.HTTP_200_OK)
 
 
+class FoodCourtAction(generics.GenericAPIView):
+    """
+    美食城创建
+    """
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_city_object(self, city_id):
+        return City.get_object(pk=city_id)
+
+    def get_perfect_params(self, params_dict, city):
+        params_dict.pop('city_id')
+        params_dict['city'] = city.city
+
+    def post(self, request, *args, **kwargs):
+        """
+        创建美食城
+        """
+        form = FoodCourtInputForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        city_data = self.get_city_object(cld['city_id'])
+        if isinstance(city_data, Exception):
+            return Response({'Detail': city_data.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        self.get_perfect_params(cld, city_data)
+        serializer = FoodCourtSerializer(data=cld)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FoodCourtList(generics.GenericAPIView):
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_object_list(self, **kwargs):
+        return FoodCourt.get_object_list(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        美食城信息列表
+        返回数据格式为：{'count': 当前返回的数据量,
+                       'all_count': 总数据量,
+                       'has_next': 是否有下一页,
+                       'data': [{
+                                 FoodCourt model数据
+                                },...]
+                       }
+        """
+        form = FoodCourtListForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        datas = self.get_object_list(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = FoodCourtListSerializer(datas)
+        results = serializer.list_data(**cld)
+        if isinstance(results, Exception):
+            return Response({'Detail': results.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(results, status=status.HTTP_200_OK)

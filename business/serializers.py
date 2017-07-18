@@ -3,7 +3,9 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from Business_App.bz_dishes.models import City, Dishes
+from Business_App.bz_dishes.models import (City,
+                                           Dishes,
+                                           FoodCourt)
 
 from horizon.serializers import (BaseListSerializer,
                                  BaseModelSerializer,
@@ -44,6 +46,22 @@ class CitySerializer(BaseModelSerializer):
 
 class CityListSerializer(BaseListSerializer):
     child = CitySerializer()
+
+
+class FoodCourtSerializer(BaseModelSerializer):
+    def __init__(self, instance=None, data=None, **kwargs):
+        if data:
+            super(FoodCourtSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(FoodCourtSerializer, self).__init__(instance, **kwargs)
+
+    class Meta:
+        model = FoodCourt
+        fields = '__all__'
+
+
+class FoodCourtListSerializer(BaseListSerializer):
+    child = FoodCourtSerializer()
 
 
 
