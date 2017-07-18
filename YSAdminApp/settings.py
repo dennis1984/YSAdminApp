@@ -252,3 +252,6 @@ REDIS_SETTINGS = {
         'admin': 2,
         }
 }
+
+# 默认文件存储器
+DEFAULT_FILE_STORAGE = 'horizon.storage.YSFileSystemStorage'
