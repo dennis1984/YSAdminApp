@@ -12,7 +12,7 @@ import os
 
 def get_perfect_filter_params(cls, **kwargs):
     opts = cls._meta
-    fields = []
+    fields = ['pk']
     for f in opts.concrete_fields:
         fields.append(f.name)
 
