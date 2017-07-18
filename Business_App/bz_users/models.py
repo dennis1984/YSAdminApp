@@ -131,7 +131,7 @@ class BusinessUser(AbstractBaseUser):
         """
         获取用户列表
         """
-        _kwargs = get_perfect_filter_params(**kwargs)
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
         if 'start_created' in kwargs:
             _kwargs['created__gte'] = kwargs['start_created']
         if 'end_created' in kwargs:
@@ -183,19 +183,6 @@ class FoodCourt(models.Model):
         return self.name
 
     @classmethod
-    def get_perfect_filter_params(cls, **kwargs):
-        opts = cls._meta
-        fields = ['pk']
-        for f in opts.concrete_fields:
-            fields.append(f.name)
-
-        _kwargs = {}
-        for key in kwargs:
-            if key in fields:
-                _kwargs[key] = kwargs[key]
-        return _kwargs
-
-    @classmethod
     def get_object(cls, **kwargs):
         try:
             return cls.objects.get(**kwargs)
@@ -204,7 +191,7 @@ class FoodCourt(models.Model):
 
     @classmethod
     def get_object_list(cls, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:
