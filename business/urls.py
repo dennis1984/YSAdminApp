@@ -12,6 +12,9 @@ urlpatterns = [
     url(r'food_court_action/$', views.FoodCourtAction.as_view()),
     url(r'food_court_list/$', views.FoodCourtList.as_view()),
 
+    url(r'user_action/$', views.UserAction.as_view()),
+    url(r'user_list/$', views.UserList.as_view()),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
