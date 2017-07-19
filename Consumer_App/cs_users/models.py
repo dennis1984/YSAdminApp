@@ -2,20 +2,19 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.timezone import now
-from django.contrib.auth.hashers import make_password
 from django.conf import settings
-from oauth2_provider.models import AccessToken
+
 from horizon.models import model_to_dict
-from horizon.main import minutes_15_plus
+from Consumer_App.cs_wallet.models import Wallet
 import datetime
 import re
 import os
 
 
-class AdminUserManager(BaseUserManager):
+class ConsumerUserManager(BaseUserManager):
     def create_user(self, username, password, **kwargs):
         """
-        创建管理后台用户，
+        创建消费者用户，
         参数包括：username （手机号）
                  password （长度必须不小于6位）
         """
@@ -37,11 +36,10 @@ class AdminUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-
 HEAD_PICTURE_PATH = settings.PICTURE_DIRS['consumer']['head_picture']
 
 
-class AdminUser(AbstractBaseUser):
+class ConsumerUser(AbstractBaseUser):
     phone = models.CharField(u'手机号', max_length=20, unique=True, db_index=True, null=True)
     out_open_id = models.CharField(u'第三方唯一标识', max_length=64, unique=True,
                                    db_index=True, null=True)
@@ -64,17 +62,14 @@ class AdminUser(AbstractBaseUser):
     date_joined = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
 
-    objects = AdminUserManager()
+    objects = ConsumerUserManager()
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['channel']
 
     class Meta:
         db_table = 'ys_auth_user'
-        # unique_together = ('nickname', 'food_court_id')
-
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
+        app_label = 'Consumer_App.cs_users.models.ConsumerUser'
 
     @property
     def is_binding(self):
@@ -85,75 +80,45 @@ class AdminUser(AbstractBaseUser):
         return True
 
     @classmethod
+    def get_perfect_filter_params(cls, **kwargs):
+        opts = cls._meta
+        fields = ['pk']
+        for f in opts.concrete_fields:
+            fields.append(f.name)
+
+        _kwargs = {}
+        for key in kwargs:
+            if key in fields:
+                _kwargs[key] = kwargs[key]
+        return _kwargs
+
+    @classmethod
     def get_object(cls, **kwargs):
+        kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.get(**kwargs)
         except cls.DoesNotExist as e:
             return Exception(e)
 
     @classmethod
-    def get_user_detail(cls, request):
-        """
-        return: ConsumerUser instance
-        """
+    def filter_users_detail(cls, **kwargs):
+        kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
-            return cls.objects.get(pk=request.user.id)
+            users = cls.objects.filter(**kwargs)
         except Exception as e:
             return e
+        return cls.join_user_and_wallet(users, wallets=None)
 
     @classmethod
-    def get_objects_list(cls, request, **kwargs):
-        """
-        获取用户列表
-        权限控制：只有管理员可以访问这些数据
-        """
-        if not request.user.is_admin:
-            return Exception('Permission denied, Cannot access the method')
+    def join_user_and_wallet(cls, users, wallets=None):
+        if not wallets:
+            wallets = Wallet.filter_objects()
 
-        _kwargs = {}
-        if 'start_created' in kwargs:
-            _kwargs['created__gte'] = kwargs['start_created']
-        if 'end_created' in kwargs:
-            _kwargs['created__lte'] = kwargs['end_created']
-        _kwargs['is_admin'] = False
-        try:
-            return cls.objects.filter(**_kwargs)
-        except Exception as e:
-            return e
-
-
-def make_token_expire(request):
-    """
-    置token过期
-    """
-    header = request.META
-    token = header['HTTP_AUTHORIZATION'].split()[1]
-    try:
-        _instance = AccessToken.objects.get(token=token)
-        _instance.expires = now()
-        _instance.save()
-    except:
-        pass
-    return True
-
-
-class IdentifyingCode(models.Model):
-    phone = models.CharField(u'手机号', max_length=20, db_index=True)
-    identifying_code = models.CharField(u'手机验证码', max_length=6)
-    expires = models.DateTimeField(u'过期时间', default=minutes_15_plus)
-
-    class Meta:
-        db_table = 'ys_identifying_code'
-        ordering = ['-expires']
-
-    def __unicode__(self):
-        return self.phone
-
-    @classmethod
-    def get_object_by_phone(cls, phone):
-        instances = cls.objects.filter(**{'phone': phone, 'expires__gt': now()})
-        if instances:
-            return instances[0]
-        else:
-            return None
+        users_detail = []
+        wallets_dict = {item.user_id: item for item in wallets}
+        for user in users:
+            user_dict = model_to_dict(user)
+            user_dict['balance'] = wallets_dict.get(user.id, '0')
+            users_detail.append(user_dict)
+        return users_detail
 
