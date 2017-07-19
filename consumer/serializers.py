@@ -15,8 +15,9 @@ class UserDetailSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     phone = serializers.CharField(max_length=20, allow_blank=True,
                                   allow_null=True)
-    nickname = serializers.CharField(max_length=100, required=False)
-    out_open_id = serializers.CharField(max_length=64)
+    nickname = serializers.CharField(max_length=100, required=False,
+                                     allow_null=True, allow_blank=True)
+    out_open_id = serializers.CharField(max_length=64, allow_null=True)
     balance = serializers.CharField(max_length=16)
     last_login = serializers.DateTimeField(allow_null=True)
 
