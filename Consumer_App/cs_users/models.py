@@ -120,7 +120,10 @@ class ConsumerUser(AbstractBaseUser):
         wallets_dict = {item.user_id: item for item in wallets}
         for user in users:
             user_dict = model_to_dict(user)
-            user_dict['balance'] = wallets_dict.get(user.id, '0')
+            if user.id in wallets_dict:
+                user_dict['balance'] = wallets_dict[user.id].balance
+            else:
+                user_dict['balance'] = '0'
             users_detail.append(user_dict)
         return users_detail
 
