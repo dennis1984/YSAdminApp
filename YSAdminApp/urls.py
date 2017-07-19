@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^auth/', include('users.urls', namespace='user')),
 
     url(r'business/', include('business.urls', namespace='business')),
+    url(r'consumer/', include('consumer.urls', namespace='consumer')),
 
     # url(r'^orders/', include('orders.urls', namespace='orders')),
     # url(r'^shopping_cart/', include('shopping_cart.urls', namespace='shopping_cart')),

@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'users',
+    'business',
+    'consumer',
     # 'orders',
     # 'shopping_cart',
     # 'hot_sale',
