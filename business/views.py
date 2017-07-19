@@ -16,11 +16,13 @@ from business.forms import (CityInputForm,
                             FoodCourtInputForm,
                             FoodCourtListForm,
                             UsersInputForm,
-                            UserListForm)
+                            UserListForm,
+                            DishesListForm)
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
                                            FoodCourt)
+from Business_App.bz_dishes.caches import Dishes
 from Business_App.bz_users.models import BusinessUser
 
 
@@ -187,6 +189,34 @@ class UserList(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         form = UserListForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        _objects = self.get_objects_list(**cld)
+        if isinstance(_objects, Exception):
+            return Response({'Detail': _objects.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserListSerializer(data=_objects)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
+
+
+class DishesList(generics.GenericAPIView):
+    """
+    用户信息列表
+    """
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_objects_list(self, **kwargs):
+        return Dishes.filter_users_detail(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = DishesListForm(request.data)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 

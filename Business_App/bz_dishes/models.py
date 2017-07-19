@@ -64,6 +64,13 @@ class Dishes(models.Model):
             return e
 
     @classmethod
+    def filter_objects(cls, **kwargs):
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
     def get_hot_sale_object(cls, **kwargs):
         try:
             dishes = cls.objects.get(**kwargs)
@@ -110,6 +117,12 @@ class Dishes(models.Model):
         dishes_dict['food_court_id'] = getattr(food_instance, 'id', None)
 
         return dishes_dict
+
+    @classmethod
+    def filter_dishes_detail_list(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
 
 
 class City(models.Model):

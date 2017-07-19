@@ -11,29 +11,35 @@ from Business_App.bz_dishes.models import Dishes
 
 
 # 过期时间（单位：秒）
-EXPIRES_24_HOURS = 24 * 60 * 60
+EXPIRES_10_HOURS = 10 * 60 * 60
 
 
-class DishesDetailCache(object):
+class DishesCache(object):
     def __init__(self):
         pool = redis.ConnectionPool(host=settings.REDIS_SETTINGS['host'],
                                     port=settings.REDIS_SETTINGS['port'],
-                                    db=settings.REDIS_SETTINGS['db_set']['consumer'])
+                                    db=settings.REDIS_SETTINGS['db_set']['business'])
         self.handle = redis.Redis(connection_pool=pool)
 
-    def get_dishes_id_key(self, dishes_id):
-        return 'dishes_detail_id:%s' % dishes_id
+    def set_dishes_detail_list(self, user_id, dishes_list):
+        key = self.get_dishes_detail_list_key(user_id)
+        self.handle.delete(key)
+        self.handle.rpush(key, *dishes_list)
+        self.handle.expire(key, EXPIRES_10_HOURS)
 
-    def set_dishes_to_cache(self, key, data):
-        self.handle.set(key, data)
-        self.handle.expire(key, EXPIRES_24_HOURS)
+    def get_dishes_detail_list(self, user_id, **kwargs):
+        key = self.get_dishes_detail_list_key(user_id)
+        dishes_list = self.handle.lrange(key)
+        if not dishes_list:
+            _dishes_list = Dishes.get_object_list(request, **kwargs)
+            self.set_dishes_detail_list(user_id, _dishes_list)
+            return _dishes_list
+        return dishes_list
 
-    def get_dishes_detail(self, dishes_id):
-        key = self.get_dishes_id_key(dishes_id)
-        instance = self.handle.get(key)
-        if not instance:
-            instance = Dishes.get_dishes_detail_dict_with_user_info(**{'pk': dishes_id})
-            if isinstance(instance, Exception):
-                return instance
-            self.set_dishes_to_cache(key, instance)
-        return instance
+    def get_dishes_detail_list_key(self, user_id):
+        return 'dishes_detail_list_key:%s' % user_id
+
+    def delete_dishes_detail_list(self, user_id):
+        key = self.get_dishes_detail_list_key(user_id)
+        self.handle.delete(key)
+

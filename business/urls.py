@@ -15,6 +15,9 @@ urlpatterns = [
     url(r'user_action/$', views.UserAction.as_view()),
     url(r'user_list/$', views.UserList.as_view()),
 
+    url(r'dishes_list/$', views.DishesList.as_view()),
+
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
