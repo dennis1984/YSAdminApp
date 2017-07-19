@@ -44,6 +44,7 @@ class Wallet(models.Model):
 
     class Meta:
         db_table = 'ys_wallet'
+        app_label = 'Consumer_App.cs_wallet.models.Wallet'
 
     def __unicode__(self):
         return str(self.user_id)
