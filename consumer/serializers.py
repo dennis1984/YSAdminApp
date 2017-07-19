@@ -12,18 +12,20 @@ import copy
 
 
 class UserDetailSerializer(serializers.Serializer):
-    pk = serializers.IntegerField()
+    id = serializers.IntegerField()
     phone = serializers.CharField(max_length=20, allow_blank=True,
                                   allow_null=True)
     nickname = serializers.CharField(max_length=100, required=False)
     out_open_id = serializers.CharField(max_length=64)
     balance = serializers.CharField(max_length=16)
-    last_login = serializers.DateTimeField()
+    last_login = serializers.DateTimeField(allow_null=True)
 
     gender = serializers.IntegerField(default=0)
     channel = serializers.CharField(default='YS')
-    province = serializers.CharField(max_length=16)
-    city = serializers.CharField(max_length=32)
+    province = serializers.CharField(max_length=16, allow_null=True,
+                                     allow_blank=True)
+    city = serializers.CharField(max_length=32, allow_blank=True,
+                                 allow_null=True)
 
 
 class UserListSerializer(BaseListSerializer):
