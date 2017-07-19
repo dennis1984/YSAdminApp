@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'user_list/$', views.UserList.as_view()),
 
     url(r'dishes_list/$', views.DishesList.as_view()),
+    url(r'dishes_action/$', views.DishesAction.as_view()),
 
 
 ]
