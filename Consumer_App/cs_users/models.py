@@ -107,7 +107,9 @@ class ConsumerUser(AbstractBaseUser):
             users = cls.objects.filter(**kwargs)
         except Exception as e:
             return e
-        return cls.join_user_and_wallet(users, wallets=None)
+
+        wallets = Wallet.filter_objects(**kwargs)
+        return cls.join_user_and_wallet(users, wallets)
 
     @classmethod
     def join_user_and_wallet(cls, users, wallets=None):
