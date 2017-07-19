@@ -31,7 +31,8 @@ class DishesCache(object):
         key = self.get_dishes_detail_list_key(user_id)
         dishes_list = self.handle.lrange(key)
         if not dishes_list:
-            _dishes_list = Dishes.get_object_list(request, **kwargs)
+            kwargs['user_id'] = user_id
+            _dishes_list = Dishes.filter_dishes_detail_list(**kwargs)
             self.set_dishes_detail_list(user_id, _dishes_list)
             return _dishes_list
         return dishes_list

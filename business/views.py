@@ -9,7 +9,8 @@ from business.serializers import (CitySerializer,
                                   FoodCourtSerializer,
                                   FoodCourtListSerializer,
                                   UserInstanceSerializer,
-                                  UserListSerializer)
+                                  UserListSerializer,
+                                  DishesSerializer)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
                             CityListForm,
@@ -17,7 +18,8 @@ from business.forms import (CityInputForm,
                             FoodCourtListForm,
                             UsersInputForm,
                             UserListForm,
-                            DishesListForm)
+                            DishesListForm,
+                            DishesUpdateForm)
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
@@ -206,9 +208,10 @@ class UserList(generics.GenericAPIView):
         return Response(datas, status=status.HTTP_200_OK)
 
 
+#### 需要再完善
 class DishesList(generics.GenericAPIView):
     """
-    用户信息列表
+    菜品列表
     """
     permission_classes = (IsAdminOrReadOnly, )
 
@@ -232,4 +235,30 @@ class DishesList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class DishesAction(generics.GenericAPIView):
+    """
+    菜品更新
+    """
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_dishes_instance(self, dishes_id):
+        return Dishes.get_object(**{'pk': dishes_id})
+
+    def post(self, request, *args, **kwargs):
+        form = DishesUpdateForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_dishes_instance(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = DishesSerializer(instance)
+        result = serializer.update_dishes_recommend_status(instance, cld)
+        if isinstance(result, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

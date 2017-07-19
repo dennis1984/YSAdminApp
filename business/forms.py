@@ -51,3 +51,8 @@ class DishesListForm(forms.Form):
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
 
+
+class DishesUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    is_recommend = forms.IntegerField(min_value=0, max_value=1)
+

@@ -99,8 +99,16 @@ class Dishes(models.Model):
         instance = cls.get_object(**kwargs)
         if isinstance(instance, Exception):
             return instance
-        user = BusinessUser.get_object(pk=instance.user_id)
-        dishes_dict = model_to_dict(instance)
+
+        return cls.get_perfect_dishes_detail(instance)
+
+    @classmethod
+    def get_perfect_dishes_detail(cls, dishes):
+        """
+        获取带商户信息及美食城信息的菜品详情
+        """
+        user = BusinessUser.get_object(pk=dishes.user_id)
+        dishes_dict = model_to_dict(dishes)
         dishes_dict['business_name'] = getattr(user, 'business_name', '')
         dishes_dict['business_id'] = dishes_dict['user_id']
 
@@ -115,7 +123,6 @@ class Dishes(models.Model):
         food_instance = FoodCourt.get_object(pk=user.food_court_id)
         dishes_dict['food_court_name'] = getattr(food_instance, 'name', '')
         dishes_dict['food_court_id'] = getattr(food_instance, 'id', None)
-
         return dishes_dict
 
     @classmethod

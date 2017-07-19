@@ -101,3 +101,16 @@ class UserDetailSerializer(serializers.Serializer):
 
 class UserListSerializer(BaseListSerializer):
     child = UserDetailSerializer()
+
+
+class DishesSerializer(BaseModelSerializer):
+    class Meta:
+        model = Dishes
+        fields = '__all__'
+
+    def update_dishes_recommend_status(self, instance, validated_data):
+        kwargs = {'is_recommend': validated_data['is_recommend']}
+        try:
+            return super(DishesSerializer, self).update(instance, kwargs)
+        except Exception as e:
+            return e
