@@ -225,6 +225,7 @@ class AdvertPicture(models.Model):
     class Meta:
         db_table = 'ys_advert_picture'
         ordering = ['-created']
+        app_label = 'Business_App.bz_dishes.models.AdvertPicture'
 
     def __unicode__(self):
         return self.name
