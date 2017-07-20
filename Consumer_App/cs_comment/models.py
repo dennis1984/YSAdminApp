@@ -64,7 +64,7 @@ class Comment(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        kwargs = cls.get_perfect_filter_params(kwargs)
+        kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
