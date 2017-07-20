@@ -59,7 +59,7 @@ class DishesUpdateForm(forms.Form):
 
 class AdvertPictureInputForm(forms.Form):
     name = forms.CharField(max_length=20)
-    image = forms.ImageField(required=False)
+    image = forms.ImageField()
 
 
 class AdvertPictureDeleteForm(forms.Form):
