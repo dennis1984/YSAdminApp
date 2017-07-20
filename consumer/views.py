@@ -40,7 +40,7 @@ class CommentList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_comment_list(self, cld):
-        return Comment.get_object(**cld)
+        return Comment.filter_objects(**cld)
 
     def post(self, request, *args, **kwargs):
         form = CommentListForm(request.data)
