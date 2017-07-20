@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.timezone import now
 
+from horizon.models import model_to_dict
 import json
 import datetime
 
@@ -42,6 +43,19 @@ class Comment(models.Model):
         return self.orders_id
 
     @classmethod
+    def get_perfect_filter_params(cls, **kwargs):
+        opts = cls._meta
+        fields = ['pk']
+        for f in opts.concrete_fields:
+            fields.append(f.name)
+
+        _kwargs = {}
+        for key in kwargs:
+            if key in fields:
+                _kwargs[key] = kwargs[key]
+        return _kwargs
+
+    @classmethod
     def get_object(cls, **kwargs):
         try:
             return cls.objects.get(**kwargs)
@@ -50,7 +64,21 @@ class Comment(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        kwargs = cls.get_perfect_filter_params(kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def filter_comment_details(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        for instance in instances:
+            ins_dict = model_to_dict(instance)
+            ins_dict['business_comment'] = json.loads(ins_dict['business_comment'])
+            ins_dict['dishes_comment'] = json.loads(ins_dict['dishes_comment'])
+            details.append(ins_dict)
+        return details

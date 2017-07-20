@@ -40,7 +40,7 @@ class CommentList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_comment_list(self, cld):
-        return Comment.filter_objects(**cld)
+        return Comment.filter_comment_details(**cld)
 
     def post(self, request, *args, **kwargs):
         form = CommentListForm(request.data)
@@ -52,7 +52,9 @@ class CommentList(generics.GenericAPIView):
         if isinstance(instances, Exception):
             return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = CommentListSerializer(instances)
+        serializer = CommentListSerializer(data=instances)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)

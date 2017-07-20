@@ -1,6 +1,7 @@
 # -*- coding:utf8 -*-
 from rest_framework import serializers
 from horizon.serializers import (BaseListSerializer,
+                                 BaseSerializer,
                                  BaseModelSerializer)
 
 from Consumer_App.cs_comment.models import Comment
@@ -30,14 +31,21 @@ class UserListSerializer(BaseListSerializer):
     child = UserDetailSerializer()
 
 
-class CommentSerializer(BaseModelSerializer):
-    class Meta:
-        model = Comment
-        fields = '__all__'
+class CommentDetailSerializer(BaseSerializer):
+    user_id = serializers.IntegerField()
+    orders_id = serializers.CharField(max_length=32)
+    business_id = serializers.IntegerField()
+    business_name = serializers.CharField(max_length=100)
+    business_comment = serializers.ListField()
+    dishes_comment = serializers.ListField()
+
+    messaged = serializers.CharField(max_length=2048,
+                                     allow_null=True, allow_blank=True)
+    created = serializers.DateTimeField()
 
 
 class CommentListSerializer(BaseListSerializer):
-    child = CommentSerializer()
+    child = CommentDetailSerializer()
 
 
 
