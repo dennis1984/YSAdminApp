@@ -1,12 +1,9 @@
 # -*- coding:utf8 -*-
 from rest_framework import serializers
-from horizon.serializers import BaseListSerializer
-from django.conf import settings
-from horizon.models import model_to_dict
-from horizon import main
-import urllib
-import os
-import json
+from horizon.serializers import (BaseListSerializer,
+                                 BaseModelSerializer)
+
+from Consumer_App.cs_comment.models import Comment
 import re
 import copy
 
@@ -31,6 +28,16 @@ class UserDetailSerializer(serializers.Serializer):
 
 class UserListSerializer(BaseListSerializer):
     child = UserDetailSerializer()
+
+
+class CommentSerializer(BaseModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
+
+
+class CommentListSerializer(BaseListSerializer):
+    child = CommentSerializer()
 
 
 
