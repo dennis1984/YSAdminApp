@@ -14,6 +14,7 @@ from business.serializers import (CitySerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
+                            CityUpdateForm,
                             CityDeleteForm,
                             CityListForm,
                             FoodCourtInputForm,
@@ -66,6 +67,25 @@ class CityAction(generics.GenericAPIView):
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        """
+        更新城市数据
+        """
+        form = CityUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_city_object(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CitySerializer(instance)
+        data = serializer.update(instance, cld)
+        if isinstance(data, Exception):
+            return Response({'Detail': data.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data, status=status.HTTP_206_PARTIAL_CONTENT)
 
     def delete(self, request, *args, **kwargs):
         """
