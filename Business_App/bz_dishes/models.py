@@ -137,7 +137,7 @@ class City(models.Model):
     城市信息
     """
     city = models.CharField('城市名称', max_length=40, db_index=True)
-    province = models.CharField('省份', max_length=40)
+    province = models.CharField('省份', max_length=40, null=True)
     district = models.CharField('所属市区', max_length=100)
 
     user_id = models.IntegerField('创建者')

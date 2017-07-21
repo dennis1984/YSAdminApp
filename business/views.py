@@ -88,7 +88,6 @@ class CityAction(generics.GenericAPIView):
         return Response(status.HTTP_204_NO_CONTENT)
 
 
-
 class CityList(generics.GenericAPIView):
     """
     城市列表
