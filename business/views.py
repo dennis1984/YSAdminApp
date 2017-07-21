@@ -13,6 +13,7 @@ from business.serializers import (CitySerializer,
                                   DishesSerializer)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
+                            CityDeleteForm,
                             CityListForm,
                             FoodCourtInputForm,
                             FoodCourtListForm,
@@ -40,6 +41,9 @@ class CityAction(generics.GenericAPIView):
                 param_list = params_dict[key].split()
                 params_dict[key] = ''.join(param_list)
 
+    def get_city_object(self, pk):
+        return City.get_object(pk=pk)
+
     def post(self, request, *args, **kwargs):
         """
         创建城市
@@ -58,6 +62,27 @@ class CityAction(generics.GenericAPIView):
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        删除数据
+        """
+        form = CityDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_city_object(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CitySerializer(instance)
+        try:
+            serializer.delete(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_204_NO_CONTENT)
+
 
 
 class CityList(generics.GenericAPIView):
