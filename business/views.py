@@ -85,7 +85,7 @@ class CityAction(generics.GenericAPIView):
         data = serializer.update(instance, cld)
         if isinstance(data, Exception):
             return Response({'Detail': data.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data, status=status.HTTP_206_PARTIAL_CONTENT)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
     def delete(self, request, *args, **kwargs):
         """
