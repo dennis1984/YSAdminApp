@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'dishes_list/$', views.DishesList.as_view()),
     url(r'dishes_action/$', views.DishesAction.as_view()),
 
+    url(r'advert_picture_action/$', views.AdvertPictureAction.as_view()),
+
 
 ]
 

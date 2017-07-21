@@ -6,7 +6,8 @@ from rest_framework import serializers
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
                                            FoodCourt)
-from Business_App.bz_users.models import BusinessUser
+from Business_App.bz_users.models import (BusinessUser,
+                                          AdvertPicture)
 
 from horizon.serializers import (BaseListSerializer,
                                  BaseModelSerializer,
@@ -120,3 +121,27 @@ class DishesSerializer(BaseModelSerializer):
             return super(DishesSerializer, self).update(instance, kwargs)
         except Exception as e:
             return e
+
+
+class AdvertPictureSerializer(BaseModelSerializer):
+    def __init__(self, instance=None, data=None, **kwargs):
+        if data:
+            # 处理管理后台上传图片图片名字没有后缀的问题
+            if 'image' in data:
+                image_names = data['image'].name.split('.')
+                if len(image_names) == 1:
+                    data['image'].name = '%s.png' % image_names[0]
+            super(AdvertPictureSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(AdvertPictureSerializer, self).__init__(instance, **kwargs)
+
+    class Meta:
+        model = AdvertPicture
+        fields = '__all__'
+
+    def delete(self, instance):
+        validated_data = {'status': 2,
+                          'name': '%s-%s' % (instance.name,
+                                             main.make_random_char_and_number_of_string(5))}
+        return super(AdvertPictureSerializer, self).update(instance, validated_data)
+

@@ -10,7 +10,8 @@ from business.serializers import (CitySerializer,
                                   FoodCourtListSerializer,
                                   UserInstanceSerializer,
                                   UserListSerializer,
-                                  DishesSerializer)
+                                  DishesSerializer,
+                                  AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
                             CityDeleteForm,
@@ -20,13 +21,16 @@ from business.forms import (CityInputForm,
                             UsersInputForm,
                             UserListForm,
                             DishesListForm,
-                            DishesUpdateForm)
+                            DishesUpdateForm,
+                            AdvertPictureInputForm,
+                            AdvertPictureDeleteForm)
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
                                            FoodCourt)
 from Business_App.bz_dishes.caches import Dishes
-from Business_App.bz_users.models import BusinessUser
+from Business_App.bz_users.models import (BusinessUser,
+                                          AdvertPicture)
 
 
 class CityAction(generics.GenericAPIView):
@@ -271,7 +275,7 @@ class DishesAction(generics.GenericAPIView):
     def get_dishes_instance(self, dishes_id):
         return Dishes.get_object(**{'pk': dishes_id})
 
-    def post(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         form = DishesUpdateForm(request.data)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -285,5 +289,53 @@ class DishesAction(generics.GenericAPIView):
         result = serializer.update_dishes_recommend_status(instance, cld)
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
+class AdvertPictureAction(generics.GenericAPIView):
+    """
+    轮播广告
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_instance(self, pk):
+        return AdvertPicture.get_object(pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        """
+        添加广告图片
+        """
+        form = AdvertPictureInputForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        serializer = AdvertPictureSerializer(data=cld)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.save()
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        删除广告图片
+        """
+        form = AdvertPictureDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_instance(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = AdvertPictureSerializer(instance)
+        try:
+            serializer.delete(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
