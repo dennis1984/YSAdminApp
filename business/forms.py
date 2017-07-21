@@ -27,10 +27,14 @@ class CityListForm(forms.Form):
 
 class FoodCourtInputForm(forms.Form):
     name = forms.CharField(min_length=2, max_length=60)
+    type = forms.ChoiceField(choices=((10, 1),
+                                      (20, 2)),
+                             error_messages={'required': u'type值为 [10, 20] 中的一个'})
     city_id = forms.IntegerField(min_value=1)
     district = forms.CharField(min_length=2, max_length=30)
     mall = forms.CharField(min_length=2, max_length=60)
     address = forms.CharField(min_length=2, max_length=60)
+    image = forms.ImageField(required=False)
 
 
 class FoodCourtListForm(forms.Form):

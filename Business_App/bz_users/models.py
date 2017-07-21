@@ -24,6 +24,16 @@ def get_perfect_filter_params(cls, **kwargs):
     return _kwargs
 
 
+class BaseManager(models.Manager):
+    def get(self, *args, **kwargs):
+        kwargs['status'] = 1
+        return super(BaseManager, self).get(*args, **kwargs)
+
+    def filter(self, *args, **kwargs):
+        kwargs['status'] = 1
+        return super(BaseManager, self).filter(*args, **kwargs)
+
+
 class BusinessUserManager(BaseUserManager):
     def create_user(self, username, password, business_name, food_court_id, **kwargs):
         """
@@ -162,21 +172,32 @@ class BusinessUser(AbstractBaseUser):
             business_user['last_login'] = business_user['date_joined']
         return business_user
 
+FOOD_COURT_DIR = settings.PICTURE_DIRS['business']['food_court']
+
 
 class FoodCourt(models.Model):
     """
     美食城数据表
     """
     name = models.CharField('美食城名字', max_length=200)
+    # 美食城类别 10: 公元铭 20：食代铭
+    type = models.IntegerField('美食城类别', default=10)
     city = models.CharField('所属城市', max_length=100, null=False)
     district = models.CharField('所属市区', max_length=100, null=False)
     mall = models.CharField('所属购物中心', max_length=200, default='')
     address = models.CharField('购物中心地址', max_length=256, null=True, blank=True)
+    image = models.ImageField('美食城平面图',
+                              upload_to=FOOD_COURT_DIR,
+                              default=os.path.join(FOOD_COURT_DIR, 'noImage.png'), )
+    # 状态：1：有效 2：已删除
+    status = models.IntegerField('数据状态', default=1)
     extend = models.TextField('扩展信息', default='', blank=True, null=True)
+
+    objects = BaseManager()
 
     class Meta:
         db_table = 'ys_food_court'
-        unique_together = ('name', 'mall')
+        unique_together = ('name', 'mall', 'status')
         app_label = 'Business_App.bz_dishes.models.FoodCourt'
 
     def __unicode__(self):
@@ -201,16 +222,6 @@ class FoodCourt(models.Model):
 ADVERT_PICTURE_DIR = settings.PICTURE_DIRS['business']['advert']
 
 
-class AdvertPictureManager(models.Manager):
-    def get(self, *args, **kwargs):
-        kwargs['status'] = 1
-        return super(AdvertPictureManager, self).get(*args, **kwargs)
-
-    def filter(self, *args, **kwargs):
-        kwargs['status'] = 1
-        return super(AdvertPictureManager, self).filter(*args, **kwargs)
-
-
 class AdvertPicture(models.Model):
     name = models.CharField(u'图片名称', max_length=60, unique=True, db_index=True)
     image = models.ImageField(u'图片', upload_to=ADVERT_PICTURE_DIR,)
@@ -220,7 +231,7 @@ class AdvertPicture(models.Model):
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'更新时间', auto_now=True)
 
-    objects = AdvertPictureManager()
+    objects = BaseManager()
 
     class Meta:
         db_table = 'ys_advert_picture'
