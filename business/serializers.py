@@ -115,8 +115,8 @@ class CitySerializer(BaseModelSerializer):
 
 class CityDetailSerializer(BaseSerializer):
     city = serializers.CharField(max_length=40)
-    province = serializers.CharField(max_length=40)
-    district = serializers.ListField()
+    province = serializers.CharField(max_length=40, required=False)
+    district = serializers.ListField(required=False)
 
     user_id = serializers.IntegerField()
     status = serializers.IntegerField()
