@@ -17,6 +17,9 @@ from business.forms import (CityInputForm,
                             CityUpdateForm,
                             CityDeleteForm,
                             CityListForm,
+                            DistrictInputForm,
+                            DistrictUpdateForm,
+                            DistrictDeleteForm,
                             FoodCourtInputForm,
                             FoodCourtListForm,
                             UsersInputForm,
@@ -106,6 +109,64 @@ class CityAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status.HTTP_204_NO_CONTENT)
+
+
+class DistrictAction(generics.GenericAPIView):
+    """
+    城市辖区管理
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_city_object(self, pk):
+        return City.get_object(pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        form = DistrictInputForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        city = self.get_city_object(cld['city_id'])
+        if isinstance(city, Exception):
+            return Response({'Detail': city.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CitySerializer(city)
+        result = serializer.add_district(city, cld['district'])
+        if isinstance(result, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        form = DistrictUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        city = self.get_city_object(cld['city_id'])
+        if isinstance(city, Exception):
+            return Response({'Detail': city.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CitySerializer(city)
+        result = serializer.update_district(city, cld['district_id'], cld['district'])
+        if isinstance(request, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+    def delete(self, request):
+        form = DistrictDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        city = self.get_city_object(cld['city_id'])
+        if isinstance(city, Exception):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        serializer = CitySerializer(city)
+        result = serializer.delete_district(city, cld['district_id'])
+        if isinstance(request, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
 class CityList(generics.GenericAPIView):

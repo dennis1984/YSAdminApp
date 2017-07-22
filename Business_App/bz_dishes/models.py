@@ -138,7 +138,10 @@ class City(models.Model):
     """
     city = models.CharField('城市名称', max_length=40, db_index=True)
     province = models.CharField('省份', max_length=40, null=True)
-    district = models.CharField('所属市区', max_length=100)
+    # 市区数据结构：
+    # [{'id': 1, 'name': u'大兴区'}, ...
+    # ]
+    district = models.TextField('市区信息')
 
     user_id = models.IntegerField('创建者')
     # 城市信息状态：1：有效 2：已删除
@@ -149,7 +152,7 @@ class City(models.Model):
     class Meta:
         db_table = 'ys_city'
         ordering = ['-updated']
-        unique_together = ('city', 'district', 'status')
+        unique_together = ('city', 'status')
         app_label = 'Business_App.bz_dishes.models.City'
 
     def __unicode__(self):

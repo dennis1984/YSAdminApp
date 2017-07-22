@@ -8,6 +8,8 @@ from business import views
 urlpatterns = [
     url(r'city_action/$', views.CityAction.as_view()),
     url(r'city_list/$', views.CityList.as_view()),
+    url(r'district_action/$', views.DistrictAction.as_view()),
+    url(r'district_list/$', views.DistrictAction.as_view()),
 
     url(r'food_court_action/$', views.FoodCourtAction.as_view()),
     url(r'food_court_list/$', views.FoodCourtList.as_view()),

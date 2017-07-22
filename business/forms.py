@@ -19,6 +19,22 @@ class CityDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
 
+class DistrictInputForm(forms.Form):
+    city_id = forms.IntegerField(min_value=1)
+    district = forms.CharField(min_length=2, max_length=20)
+
+
+class DistrictUpdateForm(forms.Form):
+    city_id = forms.IntegerField(min_value=1)
+    district_id = forms.IntegerField(min_value=1)
+    district = forms.CharField(min_length=2, max_length=20)
+
+
+class DistrictDeleteForm(CityDeleteForm):
+    city_id = forms.IntegerField(min_value=1)
+    district_id = forms.IntegerField(min_value=1)
+
+
 class CityListForm(forms.Form):
     province = forms.CharField(min_length=2, max_length=20, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
