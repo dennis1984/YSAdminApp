@@ -7,7 +7,9 @@ from django.conf import settings
 from Business_App.bz_users.models import BusinessUser, FoodCourt
 from horizon.models import model_to_dict
 from django.conf import settings
+
 import os
+import json
 
 
 class DishesManager(models.Manager):
@@ -187,3 +189,18 @@ class City(models.Model):
         except Exception as e:
             return e
 
+    @classmethod
+    def filter_details(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+
+        details = []
+        for ins in instances:
+            detail = model_to_dict(ins)
+            try:
+                detail['district'] = json.loads(detail['district'])
+            except:
+                detail['district'] = []
+            details.append(detail)
+        return details

@@ -113,8 +113,19 @@ class CitySerializer(BaseModelSerializer):
         return super(CitySerializer, self).update(instance, validated_data)
 
 
+class CityDetailSerializer(BaseSerializer):
+    city = serializers.CharField(max_length=40)
+    province = serializers.CharField(max_length=40)
+    district = serializers.ListField()
+
+    user_id = serializers.IntegerField()
+    status = serializers.IntegerField()
+    created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
+
+
 class CityListSerializer(BaseListSerializer):
-    child = CitySerializer()
+    child = CityDetailSerializer()
 
 
 class FoodCourtSerializer(BaseModelSerializer):
