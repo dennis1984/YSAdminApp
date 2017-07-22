@@ -72,7 +72,7 @@ class CitySerializer(BaseModelSerializer):
             if district_name == item['name']:
                 return Exception('District %s does exist.' % district_name)
         district_dict = {
-            'id': len(district_list),
+            'id': len(district_list) + 1,
             'name': district_name,
         }
         district_list.append(district_dict)
