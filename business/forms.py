@@ -4,7 +4,6 @@ from horizon import forms
 
 class CityInputForm(forms.Form):
     city = forms.CharField(min_length=2, max_length=20)
-    district = forms.CharField(min_length=2, max_length=30)
     province = forms.CharField(min_length=2, max_length=20, required=False)
 
 
