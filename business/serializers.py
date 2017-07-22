@@ -61,7 +61,13 @@ class CitySerializer(BaseModelSerializer):
         return super(CitySerializer, self).update(instance, validated_data)
 
     def add_district(self, instance, district_name):
-        district_list = json.loads(instance.district)
+        try:
+            district_list = json.loads(instance.district)
+        except Exception as e:
+            if not instance.district:
+                district_list = []
+            else:
+                return e
         for item in district_list:
             if district_name == item['name']:
                 return Exception('District %s does exist.' % district_name)
@@ -74,7 +80,13 @@ class CitySerializer(BaseModelSerializer):
         return super(CitySerializer, self).update(instance, validated_data)
 
     def delete_district(self, instance, pk):
-        district_list = json.loads(instance.district)
+        try:
+            district_list = json.loads(instance.district)
+        except Exception as e:
+            if not instance.district:
+                district_list = []
+            else:
+                return e
         district_dict = {item['id']: item for item in district_list}
         if pk not in district_dict:
             return instance
@@ -84,7 +96,13 @@ class CitySerializer(BaseModelSerializer):
         return super(CitySerializer, self).update(instance, validated_data)
 
     def update_district(self, instance, pk, district_name):
-        district_list = json.loads(instance.district)
+        try:
+            district_list = json.loads(instance.district)
+        except Exception as e:
+            if not instance.district:
+                district_list = []
+            else:
+                return e
         district_dict = {item['id']: item for item in district_list}
         if pk not in district_dict:
             return Exception('District %s does not exist.' % district_name)
