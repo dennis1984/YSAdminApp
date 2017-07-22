@@ -76,7 +76,7 @@ class CitySerializer(BaseModelSerializer):
             'name': district_name,
         }
         district_list.append(district_dict)
-        validated_data = {'district': district_list}
+        validated_data = {'district': json.dumps(district_list)}
         return super(CitySerializer, self).update(instance, validated_data)
 
     def delete_district(self, instance, pk):
@@ -92,7 +92,7 @@ class CitySerializer(BaseModelSerializer):
             return instance
         district_dict.pop(pk)
         district_list = sorted(district_dict.values(), key=lambda x: x['id'])
-        validated_data = {'district': district_list}
+        validated_data = {'district': json.dumps(district_list)}
         return super(CitySerializer, self).update(instance, validated_data)
 
     def update_district(self, instance, pk, district_name):
@@ -109,7 +109,7 @@ class CitySerializer(BaseModelSerializer):
 
         district_dict['id']['name'] = district_name
         district_list = sorted(district_dict.values(), key=lambda x: x['id'])
-        validated_data = {'district': district_list}
+        validated_data = {'district': json.dumps(district_list)}
         return super(CitySerializer, self).update(instance, validated_data)
 
 
