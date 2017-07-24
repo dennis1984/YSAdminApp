@@ -46,7 +46,7 @@ class FoodCourtInputForm(forms.Form):
                                       (20, 2)),
                              error_messages={'required': u'type值为 [10, 20] 中的一个'})
     city_id = forms.IntegerField(min_value=1)
-    district = forms.CharField(min_length=2, max_length=30)
+    district_id = forms.IntegerField(min_value=1)
     mall = forms.CharField(min_length=2, max_length=60)
     address = forms.CharField(min_length=2, max_length=60)
     image = forms.ImageField(required=False)
@@ -75,6 +75,19 @@ class UserListForm(forms.Form):
     food_court_id = forms.IntegerField(min_value=1, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
+
+
+class DishesInputForm(forms.Form):
+    user_id = forms.IntegerField(min_value=1)
+    title = forms.CharField(max_length=200)
+    subtitle = forms.CharField(max_length=200, required=False)
+    description = forms.CharField(max_length=500, required=False)
+    price = forms.CharField(max_length=16)
+    size = forms.IntegerField(min_value=10, max_value=20, required=False)
+    size_detail = forms.CharField(min_length=2, max_length=30, required=False)
+    image = forms.ImageField(required=False)
+    image_detail = forms.ImageField(required=False)
+    extend = forms.CharField(max_length=500, required=False)
 
 
 class DishesListForm(forms.Form):

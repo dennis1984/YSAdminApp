@@ -24,6 +24,7 @@ from business.forms import (CityInputForm,
                             FoodCourtListForm,
                             UsersInputForm,
                             UserListForm,
+                            DishesInputForm,
                             DishesListForm,
                             DishesUpdateForm,
                             AdvertPictureInputForm,
@@ -350,12 +351,27 @@ class DishesList(generics.GenericAPIView):
 
 class DishesAction(generics.GenericAPIView):
     """
-    菜品更新
+    菜品管理
     """
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_dishes_instance(self, dishes_id):
         return Dishes.get_object(**{'pk': dishes_id})
+
+    def post(self, request, *args, **kwargs):
+        form = DishesInputForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        serializer = DishesSerializer(data=cld)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.save()
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         form = DishesUpdateForm(request.data)

@@ -184,6 +184,12 @@ class UserListSerializer(BaseListSerializer):
 
 
 class DishesSerializer(BaseModelSerializer):
+    def __init__(self, instance=None, data=None, **kwargs):
+        if data:
+            super(DishesSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(DishesSerializer, self).__init__(instance, **kwargs)
+
     class Meta:
         model = Dishes
         fields = '__all__'
