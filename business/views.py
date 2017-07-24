@@ -358,12 +358,22 @@ class DishesAction(generics.GenericAPIView):
     def get_dishes_instance(self, dishes_id):
         return Dishes.get_object(**{'pk': dishes_id})
 
+    def get_user_object(self, user_id):
+        return BusinessUser.get_object(pk=user_id)
+
     def post(self, request, *args, **kwargs):
+        """
+        创建菜品
+        """
         form = DishesInputForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
+        user = self.get_user_object(cld['user_id'])
+        if isinstance(user, Exception):
+            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
+        cld['food_court_id'] = user.food_court_id
         serializer = DishesSerializer(data=cld)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -374,6 +384,9 @@ class DishesAction(generics.GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
+        """
+        更新菜品
+        """
         form = DishesUpdateForm(request.data)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)

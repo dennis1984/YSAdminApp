@@ -5,6 +5,8 @@ from rest_framework import serializers
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
+                                           DISHES_SIZE_DICT,
+                                           DISHES_SIZE_CN_MATCH,
                                            FoodCourt)
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
@@ -186,6 +188,15 @@ class UserListSerializer(BaseListSerializer):
 class DishesSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
+            size = data.get('size', 10)
+            if size != DISHES_SIZE_DICT['custom']:
+                data['size_detail'] = DISHES_SIZE_CN_MATCH[size]
+
+            # 处理管理后台上传图片图片名字没有后缀的问题
+            if 'image' in data:
+                image_names = data['image'].name.split('.')
+                if len(image_names) == 1:
+                    data['image'].name = '%s.png' % image_names[0]
             super(DishesSerializer, self).__init__(data=data, **kwargs)
         else:
             super(DishesSerializer, self).__init__(instance, **kwargs)

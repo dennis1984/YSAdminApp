@@ -11,6 +11,22 @@ from django.conf import settings
 import os
 import json
 
+DISHES_SIZE_DICT = {
+    'default': 10,
+    'small': 11,
+    'medium': 12,
+    'large': 13,
+    'custom': 20,
+}
+
+DISHES_SIZE_CN_MATCH = {
+    10: u'标准',
+    11: u'小份',
+    12: u'中份',
+    13: u'大份',
+    20: u'自定义',
+}
+
 
 class DishesManager(models.Manager):
     def get(self, *args, **kwargs):
