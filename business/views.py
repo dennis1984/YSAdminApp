@@ -145,6 +145,24 @@ class CityList(generics.GenericAPIView):
         return Response(datas, status=status.HTTP_200_OK)
 
 
+class CitySimpleList(generics.GenericAPIView):
+    """
+    城市列表（美食城创建使用）简版
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_city_list(self):
+        city_list = City.filter_objects()
+        if isinstance(city_list, Exception):
+            return []
+        city_set = set([city.city for city in city_list])
+        return sorted(list(city_set))
+
+    def post(self, request , *args, **kwargs):
+        city_list = self.get_city_list()
+        return Response(city_list, status=status.HTTP_200_OK)
+
+
 class DistrictList(generics.GenericAPIView):
     """
     城市辖区列表
@@ -165,7 +183,7 @@ class DistrictList(generics.GenericAPIView):
                       'district': item['district']}
             city_list = city_dict.get(item['city'], [])
             city_list.append(record)
-            city_list[item['city']] = city_list
+            city_dict[item['city']] = city_list
         return city_dict
 
     def post(self, request, *args, **kwargs):
