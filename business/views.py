@@ -288,7 +288,7 @@ class FoodCourtList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_object_list(self, **kwargs):
-        return FoodCourt.get_object_list(**kwargs)
+        return FoodCourt.filter_objects(**kwargs)
 
     def post(self, request, *args, **kwargs):
         """

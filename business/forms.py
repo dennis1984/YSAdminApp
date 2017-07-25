@@ -34,6 +34,7 @@ class DistrictDeleteForm(CityDeleteForm):
 
 
 class CityListForm(forms.Form):
+    city = forms.CharField(min_length=2, max_length=20)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
 

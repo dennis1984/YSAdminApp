@@ -4,7 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.timezone import now
 from django.contrib.auth.hashers import make_password
 
-from horizon.models import model_to_dict
+from horizon.models import model_to_dict, BaseManager
 
 from django.conf import settings
 import datetime
@@ -22,16 +22,6 @@ def get_perfect_filter_params(cls, **kwargs):
         if key in fields:
             _kwargs[key] = kwargs[key]
     return _kwargs
-
-
-class BaseManager(models.Manager):
-    def get(self, *args, **kwargs):
-        kwargs['status'] = 1
-        return super(BaseManager, self).get(*args, **kwargs)
-
-    def filter(self, *args, **kwargs):
-        kwargs['status'] = 1
-        return super(BaseManager, self).filter(*args, **kwargs)
 
 
 class BusinessUserManager(BaseUserManager):
@@ -213,8 +203,10 @@ class FoodCourt(models.Model):
             return e
 
     @classmethod
-    def get_object_list(cls, **kwargs):
+    def filter_objects(cls, **kwargs):
         _kwargs = get_perfect_filter_params(cls, **kwargs)
+        if 'name' in kwargs:
+            kwargs['name__contains'] = kwargs['name']
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:

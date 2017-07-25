@@ -191,19 +191,9 @@ class City(models.Model):
     @classmethod
     def filter_objects(cls, **kwargs):
         _kwargs = cls.get_perfect_filter_params(**kwargs)
+        if 'city' in kwargs:
+            kwargs['city__contains'] = kwargs['city']
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
-
-    @classmethod
-    def filter_details(cls, **kwargs):
-        instances = cls.filter_objects(**kwargs)
-        if isinstance(instances, Exception):
-            return instances
-
-        details = []
-        for ins in instances:
-            detail = model_to_dict(ins)
-            details.append(detail)
-        return details
