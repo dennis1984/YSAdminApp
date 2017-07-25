@@ -56,12 +56,13 @@ class CitySerializer(BaseModelSerializer):
             return e
         else:
             # 批量修改美食城的所属城市信息
-            instances = FoodCourt.filter_objects(city_id=validated_data['pk'])
-            for ins in instances:
-                kwargs = {'city': instance.city,
-                          'district': instance.district}
-                f_serializer = FoodCourtSerializer(ins)
-                f_serializer.update(ins, kwargs)
+            if validated_data:
+                instances = FoodCourt.filter_objects(city_id=instance.pk)
+                for ins in instances:
+                    kwargs = {'city': instance.city,
+                              'district': instance.district}
+                    f_serializer = FoodCourtSerializer(ins)
+                    f_serializer.update(ins, kwargs)
         return instance
 
     def delete(self, instance):
