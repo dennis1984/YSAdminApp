@@ -160,7 +160,7 @@ class City(models.Model):
 
     class Meta:
         db_table = 'ys_city'
-        ordering = ['-updated']
+        ordering = ['city', 'district']
         unique_together = ('city', 'district', 'status')
         app_label = 'Business_App.bz_dishes.models.City'
 
