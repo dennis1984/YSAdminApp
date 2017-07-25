@@ -69,7 +69,7 @@ class FoodCourtDeleteForm(forms.Form):
 
 
 class FoodCourtListForm(forms.Form):
-    name = forms.CharField(min_length=2, max_length=60, required=False)
+    name = forms.CharField(min_length=1, max_length=60, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
 
