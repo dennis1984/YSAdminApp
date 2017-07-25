@@ -44,7 +44,7 @@ class FoodCourtInputForm(forms.Form):
                                       (20, 2)),
                              error_messages={'required': u'type值为 [10, 20] 中的一个'})
     city_id = forms.IntegerField(min_value=1)
-    district_id = forms.IntegerField(min_value=1)
+    # district_id = forms.IntegerField(min_value=1)
     mall = forms.CharField(min_length=2, max_length=60)
     address = forms.CharField(min_length=2, max_length=60)
     image = forms.ImageField(required=False)

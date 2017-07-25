@@ -210,8 +210,8 @@ class FoodCourtAction(generics.GenericAPIView):
         return City.get_object(pk=city_id)
 
     def get_perfect_params(self, params_dict, city):
-        params_dict.pop('city_id')
         params_dict['city'] = city.city
+        params_dict['district'] = city.district
 
     def post(self, request, *args, **kwargs):
         """
