@@ -146,11 +146,11 @@ class FoodCourtSerializer(BaseModelSerializer):
         return super(FoodCourtSerializer, self).update(instance, validated_data)
 
     def delete(self, instance, validated_data):
-        validated_data.upate({'status': 2,
-                              'name': '%s-%s' %
-                                      (instance.name,
-                                       main.make_random_char_and_number_of_string(5))
-                              })
+        validated_data.update({'status': 2,
+                               'name': '%s-%s' %
+                                       (instance.name,
+                                        main.make_random_char_and_number_of_string(5))
+                               })
         return super(FoodCourtSerializer, self).update(instance, validated_data)
 
 
