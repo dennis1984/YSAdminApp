@@ -9,9 +9,10 @@ from business.serializers import (CitySerializer,
                                   FoodCourtSerializer,
                                   FoodCourtListSerializer,
                                   UserWithFoodCourtListSerializer,
+                                  DishesListSerializer,
+                                  DishesSerializer,
                                   UserInstanceSerializer,
                                   UserListSerializer,
-                                  DishesSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
@@ -34,7 +35,7 @@ from business.forms import (CityInputForm,
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
                                            FoodCourt)
-from Business_App.bz_dishes.caches import Dishes
+from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
 
@@ -357,65 +358,12 @@ class UserWithFoodCourtList(generics.GenericAPIView):
         serializer = UserWithFoodCourtListSerializer(data=details)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        datas = serializer.list_data(*cld)
-        if isinstance(datas, Exception):
-            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(datas, status=status.HTTP_200_OK)
-
-
-class UserAction(generics.GenericAPIView):
-    """
-    用户管理
-    """
-    permission_classes = (IsAdminOrReadOnly, )
-
-    def post(self, request, *args, **kwargs):
-        """
-         创建用户
-        """
-        form = UsersInputForm(request.data)
-        if not form.is_valid():
-            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        cld = form.cleaned_data
-        try:
-            user = BusinessUser.objects.create_user(**cld)
-        except Exception as e:
-            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = UserInstanceSerializer(user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class UserList(generics.GenericAPIView):
-    """
-    用户信息列表
-    """
-    permission_classes = (IsAdminOrReadOnly, )
-
-    def get_objects_list(self, **kwargs):
-        return BusinessUser.filter_users_detail(**kwargs)
-
-    def post(self, request, *args, **kwargs):
-        form = UserListForm(request.data)
-        if not form.is_valid():
-            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        cld = form.cleaned_data
-        _objects = self.get_objects_list(**cld)
-        if isinstance(_objects, Exception):
-            return Response({'Detail': _objects.args}, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = UserListSerializer(data=_objects)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
 
 
-#### 需要再完善
 class DishesList(generics.GenericAPIView):
     """
     菜品列表
@@ -423,7 +371,7 @@ class DishesList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_objects_list(self, **kwargs):
-        return Dishes.filter_users_detail(**kwargs)
+        return Dishes.filter_objects(**kwargs)
 
     def post(self, request, *args, **kwargs):
         form = DishesListForm(request.data)
@@ -431,13 +379,11 @@ class DishesList(generics.GenericAPIView):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        _objects = self.get_objects_list(**cld)
-        if isinstance(_objects, Exception):
-            return Response({'Detail': _objects.args}, status=status.HTTP_400_BAD_REQUEST)
+        instances = self.get_objects_list(**cld)
+        if isinstance(instances, Exception):
+            return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserListSerializer(data=_objects)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = DishesListSerializer(instances)
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
@@ -496,6 +442,58 @@ class DishesAction(generics.GenericAPIView):
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
+class UserAction(generics.GenericAPIView):
+    """
+    用户管理
+    """
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def post(self, request, *args, **kwargs):
+        """
+         创建用户
+        """
+        form = UsersInputForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        try:
+            user = BusinessUser.objects.create_user(**cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserInstanceSerializer(user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserList(generics.GenericAPIView):
+    """
+    用户信息列表
+    """
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_objects_list(self, **kwargs):
+        return BusinessUser.filter_users_detail(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = UserListForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        _objects = self.get_objects_list(**cld)
+        if isinstance(_objects, Exception):
+            return Response({'Detail': _objects.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserListSerializer(data=_objects)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):

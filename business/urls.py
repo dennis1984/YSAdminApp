@@ -15,12 +15,11 @@ urlpatterns = [
     url(r'^food_court_list/$', views.FoodCourtList.as_view()),
 
     url(r'^user_with_food_court_list/$', views.UserWithFoodCourtList.as_view()),
+    url(r'^dishes_list/$', views.DishesList.as_view()),
+    url(r'^dishes_action/$', views.DishesAction.as_view()),
 
     url(r'^user_action/$', views.UserAction.as_view()),
     url(r'^user_list/$', views.UserList.as_view()),
-
-    url(r'^dishes_list/$', views.DishesList.as_view()),
-    url(r'^dishes_action/$', views.DishesAction.as_view()),
 
     url(r'^advert_picture_action/$', views.AdvertPictureAction.as_view()),
 

@@ -19,8 +19,8 @@ def get_perfect_filter_params(cls, **kwargs):
 
     _kwargs = {}
     for key in kwargs:
-        key = key.split('__')[0]
-        if key in fields:
+        key_new = key.split('__')[0]
+        if key_new in fields:
             _kwargs[key] = kwargs[key]
     return _kwargs
 
@@ -138,7 +138,7 @@ class BusinessUser(AbstractBaseUser):
         if 'end_created' in kwargs:
             _kwargs['created__lte'] = kwargs['end_created']
         if 'business_name' in kwargs:
-            _kwargs['business_name__contains'] = kwargs.pop('business_name')
+            _kwargs['business_name__contains'] = _kwargs.pop('business_name')
         try:
             _instances_list = cls.objects.filter(**_kwargs)
         except Exception as e:

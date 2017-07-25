@@ -65,16 +65,33 @@ class Dishes(models.Model):
         return self.title
 
     @classmethod
+    def get_perfect_filter_params(cls, **kwargs):
+        opts = cls._meta
+        fields = ['pk']
+        for f in opts.concrete_fields:
+            fields.append(f.name)
+
+        _kwargs = {}
+        for key in kwargs:
+            if key in fields:
+                _kwargs[key] = kwargs[key]
+        return _kwargs
+
+    @classmethod
     def get_object(cls, **kwargs):
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
         try:
-            return cls.objects.get(**kwargs)
+            return cls.objects.get(**_kwargs)
         except Exception as e:
             return e
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        if 'title' in _kwargs:
+            _kwargs['title__contains'] = _kwargs.pop('title')
         try:
-            return cls.objects.filter(**kwargs)
+            return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
 
@@ -132,12 +149,6 @@ class Dishes(models.Model):
         dishes_dict['food_court_name'] = getattr(food_instance, 'name', '')
         dishes_dict['food_court_id'] = getattr(food_instance, 'id', None)
         return dishes_dict
-
-    @classmethod
-    def filter_dishes_detail_list(cls, **kwargs):
-        instances = cls.filter_objects(**kwargs)
-        if isinstance(instances, Exception):
-            return instances
 
 
 class City(models.Model):

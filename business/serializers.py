@@ -246,6 +246,10 @@ class DishesSerializer(BaseModelSerializer):
             return e
 
 
+class DishesListSerializer(BaseListSerializer):
+    child = DishesSerializer()
+
+
 class AdvertPictureSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
