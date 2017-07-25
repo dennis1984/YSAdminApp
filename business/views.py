@@ -324,6 +324,23 @@ class UserWithFoodCourtList(generics.GenericAPIView):
     def get_user_details(self, **kwargs):
         return BusinessUser.filter_users_detail(**kwargs)
 
+    def get_food_court_objects(self, **kwargs):
+        return FoodCourt.filter_objects(**kwargs)
+
+    def get_objects(self, **kwargs):
+        if 'food_court_name' in kwargs:
+            f_instances = self.get_food_court_objects(name=kwargs['food_court_name'])
+            f_ids = [f_ins.pk for f_ins in f_instances]
+            user_filter = {'food_court_id__in': f_ids}
+            if 'business_name' in kwargs:
+                user_filter['business_name'] = kwargs['business_name']
+            return self.get_user_details(**user_filter)
+        elif 'business_name' in kwargs:
+            user_filter = {'business_name': kwargs['business_name']}
+            return self.get_user_details(**user_filter)
+        else:
+            return self.get_user_details()
+
     def post(self, request, *args, **kwargs):
         """
         商户+商城列表
@@ -333,7 +350,7 @@ class UserWithFoodCourtList(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        details = self.get_user_details(**cld)
+        details = self.get_objects(**cld)
         if isinstance(details, Exception):
             return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
 
