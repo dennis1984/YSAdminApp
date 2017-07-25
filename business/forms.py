@@ -107,6 +107,10 @@ class DishesUpdateForm(forms.Form):
     is_recommend = forms.IntegerField(min_value=0, max_value=1)
 
 
+class DishesDeleteForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
 class AdvertPictureInputForm(forms.Form):
     name = forms.CharField(max_length=20)
     image = forms.ImageField()

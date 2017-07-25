@@ -29,6 +29,7 @@ from business.forms import (CityInputForm,
                             DishesInputForm,
                             DishesListForm,
                             DishesUpdateForm,
+                            DishesDeleteForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -442,6 +443,25 @@ class DishesAction(generics.GenericAPIView):
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        下架菜品 
+        """
+        form = DishesDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_dishes_instance(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = DishesSerializer(instance)
+        try:
+            serializer.delete(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserAction(generics.GenericAPIView):

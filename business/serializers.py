@@ -245,6 +245,14 @@ class DishesSerializer(BaseModelSerializer):
         except Exception as e:
             return e
 
+    def delete(self, instance):
+        validated_data = {'status': 2,
+                          'title': '%s-%s' % (
+                              instance.title,
+                              main.make_random_char_and_number_of_string(5))
+                          }
+        return super(DishesSerializer, self).update(instance, validated_data)
+
 
 class DishesListSerializer(BaseListSerializer):
     child = DishesSerializer()
