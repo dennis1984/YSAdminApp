@@ -4,14 +4,13 @@ from horizon import forms
 
 class CityInputForm(forms.Form):
     city = forms.CharField(min_length=2, max_length=20)
-    province = forms.CharField(min_length=2, max_length=20, required=False)
+    district = forms.CharField(min_length=2, max_length=20)
 
 
 class CityUpdateForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
     city = forms.CharField(min_length=2, max_length=20, required=False)
     district = forms.CharField(min_length=2, max_length=30, required=False)
-    province = forms.CharField(min_length=2, max_length=20, required=False)
 
 
 class CityDeleteForm(forms.Form):
