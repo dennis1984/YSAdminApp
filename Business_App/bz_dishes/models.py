@@ -208,3 +208,11 @@ class City(models.Model):
             return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def filter_details(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+
+        return [model_to_dict(ins) for ins in instances]

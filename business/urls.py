@@ -8,9 +8,9 @@ from business import views
 urlpatterns = [
     url(r'^city_action/$', views.CityAction.as_view()),
     url(r'^city_list/$', views.CityList.as_view()),
-    url(r'^district_action/$', views.DistrictAction.as_view()),
-    url(r'district_list/$', views.DistrictAction.as_view()),
 
+    url(r'^city_simple_list/$', views.DistrictList.as_view()),
+    url(r'^district_list/$', views.DistrictList.as_view()),
     url(r'^food_court_action/$', views.FoodCourtAction.as_view()),
     url(r'^food_court_list/$', views.FoodCourtList.as_view()),
 
@@ -22,8 +22,6 @@ urlpatterns = [
     url(r'^user_list/$', views.UserList.as_view()),
 
     url(r'^advert_picture_action/$', views.AdvertPictureAction.as_view()),
-
-
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
