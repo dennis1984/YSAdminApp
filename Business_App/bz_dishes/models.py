@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.timezone import now
 from django.conf import settings
 from Business_App.bz_users.models import BusinessUser, FoodCourt
-from horizon.models import model_to_dict
+from horizon.models import model_to_dict, BaseManager
 from django.conf import settings
 
 import os
@@ -18,7 +18,6 @@ DISHES_SIZE_DICT = {
     'large': 13,
     'custom': 20,
 }
-
 DISHES_SIZE_CN_MATCH = {
     10: u'标准',
     11: u'小份',
@@ -26,18 +25,6 @@ DISHES_SIZE_CN_MATCH = {
     13: u'大份',
     20: u'自定义',
 }
-
-
-class DishesManager(models.Manager):
-    def get(self, *args, **kwargs):
-        object_data = super(DishesManager, self).get(status=1, *args, **kwargs)
-        return object_data
-
-    def filter(self, *args, **kwargs):
-        object_data = super(DishesManager, self).filter(status=1, *args, **kwargs)
-        return object_data
-
-
 DISHES_PICTURE_DIR = settings.PICTURE_DIRS['business']['dishes']
 
 
@@ -66,7 +53,7 @@ class Dishes(models.Model):
     is_recommend = models.BooleanField('是否推荐该菜品', default=False)   # 0: 不推荐  1：推荐
     extend = models.TextField('扩展信息', default='', blank=True)
 
-    objects = DishesManager()
+    objects = BaseManager()
 
     class Meta:
         db_table = 'ys_dishes'
@@ -168,6 +155,8 @@ class City(models.Model):
     status = models.IntegerField('数据状态', default=1)
     created = models.DateTimeField(default=now)
     updated = models.DateTimeField(auto_now=True)
+
+    objects = BaseManager()
 
     class Meta:
         db_table = 'ys_city'
