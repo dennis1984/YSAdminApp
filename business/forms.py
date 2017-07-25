@@ -16,22 +16,6 @@ class CityUpdateForm(forms.Form):
 class CityDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
-#
-# class DistrictInputForm(forms.Form):
-#     city_id = forms.IntegerField(min_value=1)
-#     district = forms.CharField(min_length=2, max_length=20)
-#
-#
-# class DistrictUpdateForm(forms.Form):
-#     city_id = forms.IntegerField(min_value=1)
-#     district_id = forms.IntegerField(min_value=1)
-#     district = forms.CharField(min_length=2, max_length=20)
-#
-#
-# class DistrictDeleteForm(CityDeleteForm):
-#     city_id = forms.IntegerField(min_value=1)
-#     district_id = forms.IntegerField(min_value=1)
-
 
 class CityListForm(forms.Form):
     city = forms.CharField(min_length=1, max_length=20, required=False)
@@ -70,6 +54,12 @@ class FoodCourtDeleteForm(forms.Form):
 
 class FoodCourtListForm(forms.Form):
     name = forms.CharField(min_length=1, max_length=60, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
+class UserWithFoodCourtListForm(forms.Form):
+    user = forms.CharField(min_length=1, max_length=20, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
 

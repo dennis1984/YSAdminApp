@@ -168,6 +168,18 @@ class FoodCourtListSerializer(BaseListSerializer):
     child = FoodCourtSerializer()
 
 
+class UserWithFoodCourtSerializer(BaseSerializer):
+    user_id = serializers.IntegerField()
+    phone = serializers.CharField(max_length=20)
+    business_name = serializers.CharField(max_length=100)
+    food_court_name = serializers.CharField(max_length=200, required=False)
+    food_court_id = serializers.IntegerField()
+
+
+class UserWithFoodCourtListSerializer(BaseListSerializer):
+    child = UserWithFoodCourtSerializer()
+
+
 class UserInstanceSerializer(BaseModelSerializer):
     class Meta:
         model = BusinessUser

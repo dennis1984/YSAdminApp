@@ -8,6 +8,7 @@ from business.serializers import (CitySerializer,
                                   CityListSerializer,
                                   FoodCourtSerializer,
                                   FoodCourtListSerializer,
+                                  UserWithFoodCourtListSerializer,
                                   UserInstanceSerializer,
                                   UserListSerializer,
                                   DishesSerializer,
@@ -21,6 +22,7 @@ from business.forms import (CityInputForm,
                             FoodCourtUpdateForm,
                             FoodCourtDeleteForm,
                             FoodCourtListForm,
+                            UserWithFoodCourtListForm,
                             UsersInputForm,
                             UserListForm,
                             DishesInputForm,
@@ -311,6 +313,37 @@ class FoodCourtList(generics.GenericAPIView):
         if isinstance(results, Exception):
             return Response({'Detail': results.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(results, status=status.HTTP_200_OK)
+
+
+class UserWithFoodCourtList(generics.GenericAPIView):
+    """
+    菜品管理：商户列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_user_details(self, **kwargs):
+        return BusinessUser.filter_users_detail(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        商户+商城列表
+        """
+        form = UserWithFoodCourtListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_user_details(**cld)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserWithFoodCourtListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(*cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class UserAction(generics.GenericAPIView):
