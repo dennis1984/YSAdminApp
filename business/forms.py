@@ -50,6 +50,19 @@ class FoodCourtInputForm(forms.Form):
     image = forms.ImageField(required=False)
 
 
+class FoodCourtUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    name = forms.CharField(min_length=2, max_length=60, required=False)
+    type = forms.ChoiceField(choices=((10, 1),
+                                      (20, 2)),
+                             error_messages={'required': u'type值为 [10, 20] 中的一个'},
+                             required=False)
+    city_id = forms.IntegerField(min_value=1, required=False)
+    mall = forms.CharField(min_length=2, max_length=60, required=False)
+    address = forms.CharField(min_length=2, max_length=60, required=False)
+    image = forms.ImageField(required=False)
+
+
 class FoodCourtListForm(forms.Form):
     city = forms.CharField(min_length=2, max_length=30, required=False)
     district = forms.CharField(min_length=2, max_length=30, required=False)

@@ -21,6 +21,7 @@ from business.forms import (CityInputForm,
                             DistrictUpdateForm,
                             DistrictDeleteForm,
                             FoodCourtInputForm,
+                            FoodCourtUpdateForm,
                             FoodCourtListForm,
                             UsersInputForm,
                             UserListForm,
@@ -213,6 +214,9 @@ class FoodCourtAction(generics.GenericAPIView):
         params_dict['city'] = city.city
         params_dict['district'] = city.district
 
+    def get_food_court_object(self, pk):
+        return FoodCourt.get_object(pk=pk)
+
     def post(self, request, *args, **kwargs):
         """
         创建美食城
@@ -232,6 +236,31 @@ class FoodCourtAction(generics.GenericAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, *args, **kwargs):
+        """
+        修改美食城信息
+        """
+        form = FoodCourtUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        if 'city_id' in cld:
+            city_data = self.get_city_object(cld['city_id'])
+            if isinstance(city_data, Exception):
+                return Response({'Detail': city_data.args}, status=status.HTTP_400_BAD_REQUEST)
+            self.get_perfect_params(cld, city_data)
+
+        instance = self.get_food_court_object(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = FoodCourtSerializer(instance)
+        try:
+            serializer.update(instance, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
 class FoodCourtList(generics.GenericAPIView):

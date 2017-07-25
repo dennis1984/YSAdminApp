@@ -142,6 +142,9 @@ class FoodCourtSerializer(BaseModelSerializer):
         model = FoodCourt
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        return super(FoodCourtSerializer, self).update(instance, validated_data)
+
 
 class FoodCourtListSerializer(BaseListSerializer):
     child = FoodCourtSerializer()
