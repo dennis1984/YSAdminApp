@@ -205,8 +205,8 @@ class FoodCourt(models.Model):
     @classmethod
     def filter_objects(cls, **kwargs):
         _kwargs = get_perfect_filter_params(cls, **kwargs)
-        if 'name' in kwargs:
-            kwargs['name__contains'] = kwargs['name']
+        if 'name' in _kwargs:
+            _kwargs['name__contains'] = _kwargs['name']
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:
