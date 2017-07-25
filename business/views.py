@@ -22,6 +22,7 @@ from business.forms import (CityInputForm,
                             DistrictDeleteForm,
                             FoodCourtInputForm,
                             FoodCourtUpdateForm,
+                            FoodCourtDeleteForm,
                             FoodCourtListForm,
                             UsersInputForm,
                             UserListForm,
@@ -261,6 +262,26 @@ class FoodCourtAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        删除美食城
+        """
+        form = FoodCourtDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_food_court_object(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        serializer = FoodCourtSerializer(instance)
+        try:
+            serializer.delete(instance, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FoodCourtList(generics.GenericAPIView):

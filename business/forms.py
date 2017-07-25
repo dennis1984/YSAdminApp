@@ -63,6 +63,10 @@ class FoodCourtUpdateForm(forms.Form):
     image = forms.ImageField(required=False)
 
 
+class FoodCourtDeleteForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
 class FoodCourtListForm(forms.Form):
     city = forms.CharField(min_length=2, max_length=30, required=False)
     district = forms.CharField(min_length=2, max_length=30, required=False)
