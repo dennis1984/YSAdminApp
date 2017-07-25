@@ -51,9 +51,18 @@ class CitySerializer(BaseModelSerializer):
         if 'pk' in validated_data:
             validated_data.pop('pk')
         try:
-            return super(CitySerializer, self).update(instance, validated_data)
+            super(CitySerializer, self).update(instance, validated_data)
         except Exception as e:
             return e
+        else:
+            # 批量修改美食城的所属城市信息
+            instances = FoodCourt.filter_objects(city_id=validated_data['pk'])
+            for ins in instances:
+                kwargs = {'city': instance.city,
+                          'district': instance.district}
+                f_serializer = FoodCourtSerializer(ins)
+                f_serializer.update(ins, kwargs)
+        return instance
 
     def delete(self, instance):
         validated_data = {'status': 2,
