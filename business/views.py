@@ -177,7 +177,7 @@ class CityList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_city_list(self, request, cld):
-        return City.filter_details(**cld)
+        return City.filter_objects(**cld)
 
     def make_perfect_data(self, params_dict):
         for key in params_dict:
@@ -193,9 +193,7 @@ class CityList(generics.GenericAPIView):
         cld = form.cleaned_data
         self.make_perfect_data(cld)
         citys = self.get_city_list(request, cld)
-        serializer = CityListSerializer(data=citys)
-        if not serializer.is_valid():
-            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = CityListSerializer(citys)
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
