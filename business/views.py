@@ -201,14 +201,12 @@ class DistrictList(generics.GenericAPIView):
         if isinstance(details, Exception):
             return details
 
-        city_dict = {}
+        city_list = []
         for item in details:
             record = {'city_id': item['id'],
                       'district': item['district']}
-            city_list = city_dict.get(item['city'], [])
             city_list.append(record)
-            city_dict[item['city']] = city_list
-        return city_dict
+        return city_list
 
     def post(self, request, *args, **kwargs):
         form = DistrictDetailForm(request.data)
