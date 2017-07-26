@@ -200,18 +200,19 @@ class City(models.Model):
             return e
 
     @classmethod
-    def filter_objects(cls, **kwargs):
+    def filter_objects(cls, fuzzy=True, **kwargs):
         _kwargs = cls.get_perfect_filter_params(**kwargs)
-        if 'city' in _kwargs:
-            _kwargs['city__contains'] = _kwargs.pop('city')
+        if fuzzy:
+            if 'city' in _kwargs:
+                _kwargs['city__contains'] = _kwargs.pop('city')
         try:
             return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
 
     @classmethod
-    def filter_details(cls, **kwargs):
-        instances = cls.filter_objects(**kwargs)
+    def filter_details(cls, fuzzy=True, **kwargs):
+        instances = cls.filter_objects(fuzzy, **kwargs)
         if isinstance(instances, Exception):
             return instances
 

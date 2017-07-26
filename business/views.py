@@ -194,7 +194,7 @@ class DistrictList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_city_details(self, city_name):
-        return City.filter_details(city=city_name)
+        return City.filter_details(fuzzy=False, **{'city': city_name})
 
     def get_district_dict(self, city_name):
         details = self.get_city_details(city_name)
