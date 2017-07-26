@@ -26,6 +26,8 @@ class UserDetailSerializer(serializers.Serializer):
                                      allow_blank=True)
     city = serializers.CharField(max_length=32, allow_blank=True,
                                  allow_null=True)
+    is_active = serializers.BooleanField()
+    head_picture = serializers.CharField(allow_null=True, allow_blank=True)
 
 
 class UserListSerializer(BaseListSerializer):
