@@ -245,6 +245,11 @@ class DishesSerializer(BaseModelSerializer):
         except Exception as e:
             return e
 
+    def update(self, instance, validated_data):
+        if 'pk' in validated_data:
+            validated_data.pop('pk')
+        return super(DishesSerializer, self).update(instance, validated_data)
+
     def delete(self, instance):
         validated_data = {'status': 2,
                           'title': '%s-%s' % (

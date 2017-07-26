@@ -457,7 +457,7 @@ class DishesAction(generics.GenericAPIView):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = DishesSerializer(instance)
-        result = serializer.update_dishes_recommend_status(instance, cld)
+        result = serializer.update(instance, cld)
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)

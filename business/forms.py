@@ -98,9 +98,17 @@ class DishesInputForm(forms.Form):
     price = forms.CharField(max_length=16)
     size = forms.IntegerField(min_value=10, max_value=20, required=False)
     size_detail = forms.CharField(min_length=2, max_length=30, required=False)
+    mark = forms.ChoiceField(choices=((0, 1),
+                                      (10, 2),
+                                      (20, 3),
+                                      (30, 4)),
+                             error_messages={
+                                 'required': 'The fields mark must in '
+                                             '[0, 10, 20, 30].'
+                             },
+                             required=False)
     image = forms.ImageField(required=False)
     image_detail = forms.ImageField(required=False)
-    extend = forms.CharField(max_length=500, required=False)
 
 
 class DishesListForm(forms.Form):
@@ -112,7 +120,23 @@ class DishesListForm(forms.Form):
 
 class DishesUpdateForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
-    is_recommend = forms.IntegerField(min_value=0, max_value=1)
+    title = forms.CharField(max_length=200, required=False)
+    subtitle = forms.CharField(max_length=200, required=False)
+    description = forms.CharField(max_length=500, required=False)
+    price = forms.CharField(max_length=16, required=False)
+    size = forms.IntegerField(min_value=10, max_value=20, required=False)
+    size_detail = forms.CharField(min_length=2, max_length=30, required=False)
+    mark = forms.ChoiceField(choices=((0, 1),
+                                      (10, 2),
+                                      (20, 3),
+                                      (30, 4)),
+                             error_messages={
+                                 'required': 'The fields mark must in '
+                                             '[0, 10, 20, 30].'
+                             },
+                             required=False)
+    image = forms.ImageField(required=False)
+    image_detail = forms.ImageField(required=False)
 
 
 class DishesDeleteForm(forms.Form):
