@@ -13,7 +13,9 @@ import copy
 class UserSerializer(BaseModelSerializer):
     class Meta:
         model = ConsumerUser
-        fields = '__all__'
+        fields = ('id', 'phone', 'nickname', 'out_open_id', 'last_login',
+                  'date_joined', 'gender', 'channel', 'province', 'city',
+                  'is_active', 'head_picture')
 
     def update(self, instance, validated_data):
         if 'pk' in validated_data:
