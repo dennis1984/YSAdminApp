@@ -443,7 +443,7 @@ class DishesAction(generics.GenericAPIView):
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         """
         更新菜品
         """
@@ -457,9 +457,10 @@ class DishesAction(generics.GenericAPIView):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = DishesSerializer(instance)
-        result = serializer.update(instance, cld)
-        if isinstance(result, Exception):
-            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.update(instance, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
     def delete(self, request, *args, **kwargs):
