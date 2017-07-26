@@ -27,6 +27,10 @@ class CityListForm(forms.Form):
     page_index = forms.IntegerField(min_value=1, required=False)
 
 
+class DistrictDetailForm(forms.Form):
+    city = forms.CharField(min_length=1, max_length=20)
+
+
 class FoodCourtInputForm(forms.Form):
     name = forms.CharField(min_length=2, max_length=60)
     type = forms.ChoiceField(choices=((10, 1),

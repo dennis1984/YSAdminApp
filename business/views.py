@@ -20,6 +20,7 @@ from business.forms import (CityInputForm,
                             CityDeleteForm,
                             CityDetailForm,
                             CityListForm,
+                            DistrictDetailForm,
                             FoodCourtInputForm,
                             FoodCourtUpdateForm,
                             FoodCourtDeleteForm,
@@ -126,7 +127,7 @@ class CityDetail(generics.GenericAPIView):
         return City.get_object(pk=city_id)
 
     def post(self, request, *args, **kwargs):
-        form = CityDeleteForm(request.data)
+        form = CityDetailForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -192,11 +193,11 @@ class DistrictList(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get_city_details(self):
-        return City.filter_details()
+    def get_city_details(self, city_name):
+        return City.filter_details(city=city_name)
 
-    def get_district_dict(self):
-        details = self.get_city_details()
+    def get_district_dict(self, city_name):
+        details = self.get_city_details(city_name)
         if isinstance(details, Exception):
             return details
 
@@ -210,7 +211,12 @@ class DistrictList(generics.GenericAPIView):
         return city_dict
 
     def post(self, request, *args, **kwargs):
-        details = self.get_district_dict()
+        form = DistrictDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_district_dict(cld['city'])
         if isinstance(details, Exception):
             return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
 
