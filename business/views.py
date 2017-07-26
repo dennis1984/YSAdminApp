@@ -24,12 +24,14 @@ from business.forms import (CityInputForm,
                             FoodCourtInputForm,
                             FoodCourtUpdateForm,
                             FoodCourtDeleteForm,
+                            FoodCourtDetailForm,
                             FoodCourtListForm,
                             UserWithFoodCourtListForm,
                             UsersInputForm,
                             UserListForm,
                             DishesInputForm,
                             DishesListForm,
+                            DishesDetailForm,
                             DishesUpdateForm,
                             DishesDeleteForm,
                             AdvertPictureInputForm,
@@ -303,6 +305,25 @@ class FoodCourtAction(generics.GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class FoodCourtDetail(generics.GenericAPIView):
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_food_court_object(self, food_court_id):
+        return FoodCourt.get_object(pk=food_court_id)
+
+    def post(self, request, *args, **kwargs):
+        form = FoodCourtDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_food_court_object(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = FoodCourtSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class FoodCourtList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
@@ -407,6 +428,28 @@ class DishesList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class DishesDetail(generics.GenericAPIView):
+    """
+    菜品详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_dishes_object(self, dishes_id):
+        return Dishes.get_object(pk=dishes_id)
+
+    def post(self, request, *args, **kwargs):
+        form = DishesDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_dishes_object(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = DishesSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class DishesAction(generics.GenericAPIView):

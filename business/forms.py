@@ -60,6 +60,10 @@ class FoodCourtDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
 
+class FoodCourtDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
 class FoodCourtListForm(forms.Form):
     name = forms.CharField(min_length=1, max_length=60, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
@@ -140,6 +144,10 @@ class DishesUpdateForm(forms.Form):
 
 
 class DishesDeleteForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
+class DishesDetailForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
 
