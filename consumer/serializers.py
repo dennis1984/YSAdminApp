@@ -18,6 +18,7 @@ class UserDetailSerializer(serializers.Serializer):
     out_open_id = serializers.CharField(max_length=64, allow_null=True)
     balance = serializers.CharField(max_length=16)
     last_login = serializers.DateTimeField(allow_null=True)
+    date_joined = serializers.DateTimeField()
 
     gender = serializers.IntegerField(default=0)
     channel = serializers.CharField(default='YS')

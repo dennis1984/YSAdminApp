@@ -18,6 +18,8 @@ class UserList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_user_list(self, cld):
+        if 'user_id' in cld:
+            cld['pk'] = cld.pop('user_id')
         return ConsumerUser.filter_users_detail(fuzzy=True, **cld)
 
     def post(self, request, *args, **kwargs):
