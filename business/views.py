@@ -18,6 +18,7 @@ from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
                             CityUpdateForm,
                             CityDeleteForm,
+                            CityDetailForm,
                             CityListForm,
                             FoodCourtInputForm,
                             FoodCourtUpdateForm,
@@ -113,6 +114,28 @@ class CityAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status.HTTP_204_NO_CONTENT)
+
+
+class CityDetail(generics.GenericAPIView):
+    """
+    城市详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_city_detail(self, city_id):
+        return City.get_object(pk=city_id)
+
+    def post(self, request, *args, **kwargs):
+        form = CityDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_city_detail(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = CitySerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CityList(generics.GenericAPIView):

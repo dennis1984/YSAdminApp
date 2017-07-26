@@ -17,6 +17,10 @@ class CityDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
 
+class CityDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
 class CityListForm(forms.Form):
     city = forms.CharField(min_length=1, max_length=20, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
