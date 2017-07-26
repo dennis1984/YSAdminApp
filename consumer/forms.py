@@ -10,6 +10,15 @@ class UserListForm(forms.Form):
     page_index = forms.IntegerField(min_value=1, required=False)
 
 
+class UserDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
+class UserUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    is_active = forms.IntegerField(min_value=0, max_value=1)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)
