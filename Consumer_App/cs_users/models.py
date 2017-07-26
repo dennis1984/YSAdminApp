@@ -101,8 +101,11 @@ class ConsumerUser(AbstractBaseUser):
             return Exception(e)
 
     @classmethod
-    def filter_users_detail(cls, **kwargs):
+    def filter_users_detail(cls, fuzzy=False, **kwargs):
         kwargs = cls.get_perfect_filter_params(**kwargs)
+        if fuzzy:
+            if 'nickname' in kwargs:
+                kwargs['nickname__contains'] = kwargs.pop('nickname')
         try:
             users = cls.objects.filter(**kwargs)
         except Exception as e:
