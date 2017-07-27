@@ -180,44 +180,6 @@ class UserWithFoodCourtListSerializer(BaseListSerializer):
     child = UserWithFoodCourtSerializer()
 
 
-class UserInstanceSerializer(BaseModelSerializer):
-    class Meta:
-        model = BusinessUser
-        fields = ('id', 'phone', 'business_name', 'head_picture',
-                  'food_court_id')
-
-
-class UserDetailSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    phone = serializers.CharField(max_length=20)
-    business_name = serializers.CharField(max_length=100)
-    food_court_id = serializers.IntegerField()
-    last_login = serializers.DateTimeField()
-
-    head_picture = serializers.ImageField()
-    food_court_name = serializers.CharField(max_length=200, required=False)
-    city = serializers.CharField(max_length=100, required=False)
-    district = serializers.CharField(max_length=100, required=False)
-    mall = serializers.CharField(max_length=200, required=False)
-
-    @property
-    def data(self):
-        _data = super(UserDetailSerializer, self).data
-        if _data.get('user_id', None):
-            _data['last_login'] = timezoneStringTostring(_data['last_login'])
-            base_dir = _data['head_picture'].split('static', 1)[1]
-            if base_dir.startswith(os.path.sep):
-                base_dir = base_dir[1:]
-            _data['head_picture_url'] = os.path.join(settings.WEB_URL_FIX,
-                                                     'static',
-                                                     base_dir)
-        return _data
-
-
-class UserListSerializer(BaseListSerializer):
-    child = UserDetailSerializer()
-
-
 class DishesSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
@@ -261,6 +223,56 @@ class DishesSerializer(BaseModelSerializer):
 
 class DishesListSerializer(BaseListSerializer):
     child = DishesSerializer()
+
+
+class UserSerializer(BaseModelSerializer):
+    class Meta:
+        model = BusinessUser
+        fields = ('id', 'phone', 'business_name', 'food_court_id',
+                  'brand', 'manager', 'chinese_people_id',
+                  'is_active', 'date_joined', 'last_login', 'head_picture',)
+
+    def update(self, instance, validated_data):
+        if 'pk' in validated_data:
+            validated_data.pop('pk')
+        return super(UserSerializer, self).update(instance, validated_data)
+
+
+class UserDetailSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    phone = serializers.CharField(max_length=20)
+    business_name = serializers.CharField(max_length=100)
+    food_court_id = serializers.IntegerField()
+    brand = serializers.CharField(allow_blank=True, allow_null=True)
+    manager = serializers.CharField(max_length=20, allow_null=True, allow_blank=True)
+    chinese_people_id = serializers.CharField(max_length=25, allow_blank=True,
+                                              allow_null=True)
+
+    last_login = serializers.DateTimeField()
+    date_joined = serializers.DateTimeField()
+
+    head_picture = serializers.ImageField()
+    food_court_name = serializers.CharField(max_length=200, required=False)
+    city = serializers.CharField(max_length=100, required=False)
+    district = serializers.CharField(max_length=100, required=False)
+    mall = serializers.CharField(max_length=200, required=False)
+
+    @property
+    def data(self):
+        _data = super(UserDetailSerializer, self).data
+        if _data.get('user_id', None):
+            _data['last_login'] = timezoneStringTostring(_data['last_login'])
+            base_dir = _data['head_picture'].split('static', 1)[1]
+            if base_dir.startswith(os.path.sep):
+                base_dir = base_dir[1:]
+            _data['head_picture_url'] = os.path.join(settings.WEB_URL_FIX,
+                                                     'static',
+                                                     base_dir)
+        return _data
+
+
+class UserListSerializer(BaseListSerializer):
+    child = UserDetailSerializer()
 
 
 class AdvertPictureSerializer(BaseModelSerializer):

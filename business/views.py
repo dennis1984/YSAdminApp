@@ -11,7 +11,7 @@ from business.serializers import (CitySerializer,
                                   UserWithFoodCourtListSerializer,
                                   DishesListSerializer,
                                   DishesSerializer,
-                                  UserInstanceSerializer,
+                                  UserSerializer,
                                   UserListSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
@@ -28,6 +28,9 @@ from business.forms import (CityInputForm,
                             FoodCourtListForm,
                             UserWithFoodCourtListForm,
                             UsersInputForm,
+                            UserUpdateForm,
+                            UserResetPasswordForm,
+                            UserDetailForm,
                             UserListForm,
                             DishesInputForm,
                             DishesListForm,
@@ -526,11 +529,23 @@ class DishesAction(generics.GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+USER_INITIAL_PASSWORD = '123456'
+
+
 class UserAction(generics.GenericAPIView):
     """
     用户管理
     """
     permission_classes = (IsAdminOrReadOnly, )
+
+    def get_user_object(self, user_id):
+        return BusinessUser.get_object(pk=user_id)
+
+    def is_request_data_valid(self, cld):
+        if 'is_active' in cld:
+            if len(cld) > 2:
+                return False
+        return True
 
     def post(self, request, *args, **kwargs):
         """
@@ -541,13 +556,56 @@ class UserAction(generics.GenericAPIView):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
+        cld['password'] = USER_INITIAL_PASSWORD
         try:
             user = BusinessUser.objects.create_user(**cld)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserInstanceSerializer(user)
+        serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        """
+        修改用户信息（修改普通信息、添加/移除黑名单）
+        """
+        form = UserUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        if not self.is_request_data_valid(cld):
+            return Response({'Detail': 'The Params data is incorrect.'})
+        user = self.get_user_object(cld['pk'])
+        if isinstance(user, Exception):
+            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserSerializer(user)
+        try:
+            serializer.update(user, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+    def patch(self, request, *args, **kwargs):
+        """
+        重置密码
+        """
+        form = UserResetPasswordForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        user = self.get_user_object(cld['pk'])
+        if isinstance(user, Exception):
+            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserSerializer(user)
+        try:
+            serializer.update(user, {'password': USER_INITIAL_PASSWORD})
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT )
 
 
 class UserList(generics.GenericAPIView):
@@ -559,10 +617,13 @@ class UserList(generics.GenericAPIView):
     def get_objects_list(self, **kwargs):
         return BusinessUser.filter_users_detail(**kwargs)
 
+    def get_food_court_list(self, **kwargs):
+        return FoodCourt.filter_objects(**kwargs)
+
     def post(self, request, *args, **kwargs):
         form = UserListForm(request.data)
         if not form.is_valid():
-            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
         _objects = self.get_objects_list(**cld)
@@ -576,6 +637,29 @@ class UserList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class UserDetail(generics.GenericAPIView):
+    """
+    用户详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_user_object(self, user_id):
+        return BusinessUser.get_object(pk=user_id)
+
+    def post(self, request, *args, **kwargs):
+        form = UserDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        user = self.get_user_object(cld['pk'])
+        if isinstance(user, Exception):
+            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):

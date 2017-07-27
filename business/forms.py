@@ -81,15 +81,41 @@ class UsersInputForm(forms.Form):
     username = forms.CharField(max_length=20, min_length=11,
                                error_messages={'required': u'手机号不能为空',
                                                'min_length': u'手机号位数不够'})
-    password = forms.CharField(min_length=6, max_length=50,
-                               error_messages={'required': u'密码不能为空',
-                                               'min_length': u'密码长度不能少于6位'})
+    # password = forms.CharField(min_length=6, max_length=50,
+    #                            error_messages={'required': u'密码不能为空',
+    #                                            'min_length': u'密码长度不能少于6位'})
     business_name = forms.CharField(min_length=2, max_length=100)
     food_court_id = forms.IntegerField(min_value=1)
+    brand = forms.CharField(min_length=2, max_length=20,
+                            error_messages={'required': u'品牌不能为空'})
+    manager = forms.CharField(min_length=2, max_length=20,
+                              error_messages={'required': u'经理人不能为空'})
+    chinese_people_id = forms.CharField(min_length=18, max_length=25,
+                                        error_messages={'required': u'身份证号不能为空'})
+
+
+class UserUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    business_name = forms.CharField(min_length=2, max_length=100, required=False)
+    food_court_id = forms.IntegerField(min_value=1, required=False)
+    brand = forms.CharField(min_length=2, max_length=20, required=False)
+    manager = forms.CharField(min_length=2, max_length=20, required=False)
+    chinese_people_id = forms.CharField(min_length=18, max_length=25, required=False)
+    is_active = forms.IntegerField(min_value=0, max_value=1, required=False)
+
+
+class UserResetPasswordForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
+class UserDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
 
 
 class UserListForm(forms.Form):
-    food_court_id = forms.IntegerField(min_value=1, required=False)
+    phone = forms.CharField(min_length=11, max_length=16, required=False)
+    business_name = forms.CharField(min_length=2, max_length=20, required=False)
+    # food_court_name = forms.CharField(min_length=2, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
 
