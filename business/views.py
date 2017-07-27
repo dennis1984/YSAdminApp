@@ -528,7 +528,6 @@ class DishesAction(generics.GenericAPIView):
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 USER_INITIAL_PASSWORD = '123456'
 
 
@@ -576,7 +575,7 @@ class UserAction(generics.GenericAPIView):
         cld = form.cleaned_data
         if not self.is_request_data_valid(cld):
             return Response({'Detail': 'The Params data is incorrect.'})
-        user = self.get_user_object(cld['pk'])
+        user = self.get_user_object(cld['user_id'])
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -596,7 +595,7 @@ class UserAction(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        user = self.get_user_object(cld['pk'])
+        user = self.get_user_object(cld['user_id'])
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -646,7 +645,12 @@ class UserDetail(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_user_object(self, user_id):
-        return BusinessUser.get_object(pk=user_id)
+        user_list = BusinessUser.filter_users_detail(pk=user_id)
+        if isinstance(user_list, Exception):
+            return user_list
+        if len(user_list) != 1:
+            return Exception('Data Error.')
+        return user_list[0]
 
     def post(self, request, *args, **kwargs):
         form = UserDetailForm(request.data)
@@ -654,7 +658,7 @@ class UserDetail(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        user = self.get_user_object(cld['pk'])
+        user = self.get_user_object(cld['user_id'])
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -233,8 +233,9 @@ class UserSerializer(BaseModelSerializer):
                   'is_active', 'date_joined', 'last_login', 'head_picture',)
 
     def update(self, instance, validated_data):
-        if 'pk' in validated_data:
-            validated_data.pop('pk')
+        for key in ['pk', 'id', 'user_id']:
+            if key in validated_data:
+                validated_data.pop(key)
         return super(UserSerializer, self).update(instance, validated_data)
 
 

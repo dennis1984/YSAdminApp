@@ -95,7 +95,7 @@ class UsersInputForm(forms.Form):
 
 
 class UserUpdateForm(forms.Form):
-    pk = forms.IntegerField(min_value=1)
+    user_id = forms.IntegerField(min_value=1)
     business_name = forms.CharField(min_length=2, max_length=100, required=False)
     food_court_id = forms.IntegerField(min_value=1, required=False)
     brand = forms.CharField(min_length=2, max_length=20, required=False)
@@ -105,16 +105,16 @@ class UserUpdateForm(forms.Form):
 
 
 class UserResetPasswordForm(forms.Form):
-    pk = forms.IntegerField(min_value=1)
+    user_id = forms.IntegerField(min_value=1)
 
 
 class UserDetailForm(forms.Form):
-    pk = forms.IntegerField(min_value=1)
+    user_id = forms.IntegerField(min_value=1)
 
 
 class UserListForm(forms.Form):
     phone = forms.CharField(min_length=11, max_length=16, required=False)
-    business_name = forms.CharField(min_length=2, max_length=20, required=False)
+    business_name = forms.CharField(min_length=1, max_length=20, required=False)
     # food_court_name = forms.CharField(min_length=2, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
