@@ -12,6 +12,7 @@ from business.serializers import (CitySerializer,
                                   DishesListSerializer,
                                   DishesSerializer,
                                   UserSerializer,
+                                  UserDetailSerializer,
                                   UserListSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
@@ -662,7 +663,9 @@ class UserDetail(generics.GenericAPIView):
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserSerializer(user)
+        serializer = UserDetailSerializer(data=user)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

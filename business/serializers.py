@@ -255,6 +255,7 @@ class UserDetailSerializer(serializers.Serializer):
 
     last_login = serializers.DateTimeField()
     date_joined = serializers.DateTimeField()
+    is_active = serializers.BooleanField()
 
     head_picture = serializers.ImageField()
     food_court_name = serializers.CharField(max_length=200, required=False)
