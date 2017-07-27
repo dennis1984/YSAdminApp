@@ -12,10 +12,12 @@ from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
                             UserDetailForm,
                             UserUpdateForm,
+                            RechargeListForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
+from Consumer_App.cs_orders.models import PayOrders
 
 
 class UserList(generics.GenericAPIView):
@@ -79,6 +81,9 @@ class UserAction(generics.GenericAPIView):
         return ConsumerUser.get_object(**{'pk': user_id})
 
     def put(self, request, *args, **kwargs):
+        """
+        添加或移除黑名单
+        """
         form = UserUpdateForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -93,6 +98,25 @@ class UserAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
+class RechargeList(generics.GenericAPIView):
+    """
+    会员充值记录查询
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_recharge_orders(self, **kwargs):
+        return PayOrders.filter_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = RechargeListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+
+
 
 
 class CommentList(generics.GenericAPIView):

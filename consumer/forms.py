@@ -19,6 +19,16 @@ class UserUpdateForm(forms.Form):
     is_active = forms.IntegerField(min_value=0, max_value=1)
 
 
+class RechargeListForm(forms.Form):
+    orders_id = forms.CharField(min_length=14, max_length=32, required=False)
+    phone = forms.CharField(min_length=11, max_length=15, required=False)
+    recharge_type = forms.CharField(max_length=5, required=False)
+    start_created = forms.DateField(required=False)
+    end_created = forms.DateField(required=False)
+    min_balance = forms.CharField(min_length=1, max_length=16, required=False)
+    max_balance = forms.CharField(min_length=1, max_length=16, required=False)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)

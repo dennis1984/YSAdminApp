@@ -42,3 +42,16 @@ class BaseManager(models.Manager):
             kwargs['status'] = 1
         instances = super(BaseManager, self).filter(*args, **kwargs)
         return instances
+
+
+def get_perfect_filter_params(cls, **kwargs):
+    opts = cls._meta
+    fields = ['pk']
+    for f in opts.concrete_fields:
+        fields.append(f.name)
+
+    _kwargs = {}
+    for key in kwargs:
+        if key in fields:
+            _kwargs[key] = kwargs[key]
+    return _kwargs

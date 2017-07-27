@@ -274,6 +274,7 @@ class UserDetailSerializer(serializers.Serializer):
             _data['head_picture_url'] = os.path.join(settings.WEB_URL_FIX,
                                                      'static',
                                                      base_dir)
+            _data.pop('head_picture')
         return _data
 
 
