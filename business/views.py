@@ -601,7 +601,7 @@ class UserAction(generics.GenericAPIView):
 
         serializer = UserSerializer(user)
         try:
-            serializer.update(user, {'password': USER_INITIAL_PASSWORD})
+            serializer.reset_password(user, USER_INITIAL_PASSWORD)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT )

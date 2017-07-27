@@ -238,6 +238,10 @@ class UserSerializer(BaseModelSerializer):
                 validated_data.pop(key)
         return super(UserSerializer, self).update(instance, validated_data)
 
+    def reset_password(self, instance, password):
+        validated_data = {'password': make_password(password)}
+        return super(UserSerializer, self).update(instance, validated_data)
+
 
 class UserDetailSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
