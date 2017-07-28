@@ -28,6 +28,15 @@ ORDERS_PAYMENT_MODE = {
     'admin': 20,
 }
 
+ORDERS_PAYMENT_STATUS = {
+    'unpaid': 0,
+    'paid': 200,
+    'consuming': 201,
+    'finished': 206,
+    'expired': 400,
+    'failed': 500,
+}
+
 
 class OrdersManager(models.Manager):
     def get(self, *args, **kwargs):
@@ -136,6 +145,12 @@ class PayOrders(models.Model):
     @classmethod
     def filter_objects(cls, **kwargs):
         kwargs = get_perfect_filter_params(cls, **kwargs)
+        if 'payment_status' in kwargs:
+            if 'payment_status' == ORDERS_PAYMENT_STATUS['unpaid']:
+                kwargs['expires__gt'] = now()
+            if 'payment_status' == ORDERS_PAYMENT_STATUS['expired']:
+                kwargs['payment_status'] = ORDERS_PAYMENT_STATUS['unpaid']
+                kwargs['expires__let'] = now()
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
