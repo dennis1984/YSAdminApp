@@ -55,6 +55,7 @@ class RechargeOrdersSerializer(BaseSerializer):
     payable = serializers.CharField()
     recharge_type = serializers.CharField()
     created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
     payment_status = serializers.IntegerField()
 
 

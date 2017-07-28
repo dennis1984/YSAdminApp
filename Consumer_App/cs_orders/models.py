@@ -146,11 +146,11 @@ class PayOrders(models.Model):
     def filter_objects(cls, **kwargs):
         kwargs = get_perfect_filter_params(cls, **kwargs)
         if 'payment_status' in kwargs:
-            if 'payment_status' == ORDERS_PAYMENT_STATUS['unpaid']:
+            if int(kwargs['payment_status']) == ORDERS_PAYMENT_STATUS['unpaid']:
                 kwargs['expires__gt'] = now()
-            if 'payment_status' == ORDERS_PAYMENT_STATUS['expired']:
+            if int(kwargs['payment_status']) == ORDERS_PAYMENT_STATUS['expired']:
                 kwargs['payment_status'] = ORDERS_PAYMENT_STATUS['unpaid']
-                kwargs['expires__let'] = now()
+                kwargs['expires__lte'] = now()
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
