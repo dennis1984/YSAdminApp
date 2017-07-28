@@ -7,6 +7,7 @@ from rest_framework import status
 from consumer.serializers import (UserListSerializer,
                                   UserDetailSerializer,
                                   UserSerializer,
+                                  RechargeOrdersSerializer,
                                   RechargeOrdersListSerializer,
                                   CommentListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
@@ -14,6 +15,7 @@ from consumer.forms import (UserListForm,
                             UserDetailForm,
                             UserUpdateForm,
                             RechargeListForm,
+                            RechargeDetailForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
@@ -145,6 +147,32 @@ class RechargeList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status.HTTP_200_OK)
+
+
+class RechargeDetail(generics.GenericAPIView):
+    """
+    充值订单详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_recharge_orders_detail(self, orders_id):
+        return PayOrders.filter_orders_details(_filter='RECHARGE',
+                                               **{'orders_id': orders_id})
+
+    def post(self, request, *args, **kwargs):
+        form = RechargeDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        orders_detail = self.get_recharge_orders_detail(cld['orders_id'])
+        if isinstance(orders_detail, Exception):
+            return Response({'Detail': orders_detail.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = RechargeOrdersSerializer(data=orders_detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):

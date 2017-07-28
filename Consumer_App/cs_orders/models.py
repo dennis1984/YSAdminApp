@@ -137,10 +137,10 @@ class PayOrders(models.Model):
                 _kwargs['created__gte'] = kwargs[key]
             if key == 'end_created':
                 _kwargs['created__lte'] = kwargs[key]
-            if key == 'min_payable':
-                _kwargs['payable__gte'] = float(kwargs[key])
-            if key == 'max_payable':
-                _kwargs['payable__lte'] = float(kwargs[key])
+            # if key == 'min_payable':
+            #     _kwargs['payable__gte'] = float(kwargs[key])
+            # if key == 'max_payable':
+            #     _kwargs['payable__lte'] = float(kwargs[key])
         return _kwargs
 
     @classmethod
@@ -151,6 +151,9 @@ class PayOrders(models.Model):
         # 普通订单
         else:
             orders_instances = cls.filter_objects(**kwargs)
+        if isinstance(orders_instances, Exception):
+            return orders_instances
+
         user_ids = [item.user_id for item in orders_instances]
         users = ConsumerUser.filter_objects(**{'id__in': user_ids})
         users_dict = {user.id: user for user in users}
