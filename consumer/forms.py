@@ -54,6 +54,8 @@ class ConsumeOrdersListForm(forms.Form):
     end_created = forms.DateField(required=False)
     min_payable = forms.FloatField(min_value=0, required=False)
     max_payable = forms.FloatField(min_value=0, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
 
 
 class CommentListForm(forms.Form):

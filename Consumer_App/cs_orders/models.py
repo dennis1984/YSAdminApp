@@ -275,6 +275,7 @@ class ConsumeOrders(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        kwargs = cls.make_perfect_filter(**kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
@@ -292,8 +293,6 @@ class ConsumeOrders(models.Model):
 
     @classmethod
     def filter_orders_details(cls, **kwargs):
-        kwargs = get_perfect_filter_params(**kwargs)
-        kwargs = cls.make_perfect_filter(**kwargs)
         orders_instances = cls.filter_objects(**kwargs)
         if isinstance(orders_instances, Exception):
             return orders_instances
@@ -318,6 +317,7 @@ class ConsumeOrders(models.Model):
                 phone = ''
             orders_dict['phone'] = phone
             orders_dict['pay_orders_id'] = orders_dict['master_orders_id']
+            orders_dict['consume_orders_id'] = orders_dict['orders_id']
             orders_details.append(orders_dict)
 
         return orders_details

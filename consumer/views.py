@@ -191,7 +191,19 @@ class ConsumeOrdersList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def filter_orders_details(self, **kwargs):
-        return ConsumeOrders.filter_objects_detail(**kwargs)
+        if 'pay_orders_id' in kwargs:
+            kwargs['master_orders_id'] = kwargs['pay_orders_id']
+        if 'consume_orders_id' in kwargs:
+            kwargs['orders_id'] = kwargs['consume_orders_id']
+        if 'phone' in kwargs:
+            user = self.get_user_object(kwargs['phone'])
+            if isinstance(user, Exception):
+                return []
+            kwargs['user_id'] = user.id
+        return ConsumeOrders.filter_orders_details(**kwargs)
+
+    def get_user_object(self, phone):
+        return ConsumerUser.get_object(phone=phone)
 
     def post(self, request, *args, **kwargs):
         form = ConsumeOrdersListForm(request.data)
