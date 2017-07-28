@@ -6,6 +6,7 @@ from horizon.serializers import (BaseListSerializer,
 
 from Consumer_App.cs_comment.models import Comment
 from Consumer_App.cs_users.models import ConsumerUser
+from Consumer_App.cs_comment.models import ReplyComment
 import re
 import copy
 
@@ -75,12 +76,33 @@ class ConsumerOrdersSerializer(BaseSerializer):
     created = serializers.DateTimeField()
     updated = serializers.DateTimeField()
     is_commented = serializers.IntegerField()
-    comment_messaged = serializers.CharField()
-    reply_messaged = serializers.CharField()
+    comment_messaged = serializers.CharField(allow_blank=True, allow_null=True)
+    comment_id = serializers.IntegerField(required=False)
+    reply_messaged = serializers.CharField(allow_blank=True, allow_null=True)
 
 
 class ConsumeOrdersListSerializer(BaseListSerializer):
     child = ConsumerOrdersSerializer()
+
+
+class ReplyCommentSerializer(BaseModelSerializer):
+    def __init__(self, instance=None, data=None, request=None, **kwargs):
+        if data:
+            if request:
+                data['user_id'] = request.user.id
+            super(ReplyCommentSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(ReplyCommentSerializer, self).__init__(instance, **kwargs)
+
+    class Meta:
+        model = ReplyComment
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        return super(ReplyCommentSerializer, self).update(instance, validated_data)
+
+    def save(self, **kwargs):
+        return super(ReplyCommentSerializer, self).save(**kwargs)
 
 
 class CommentDetailSerializer(BaseSerializer):

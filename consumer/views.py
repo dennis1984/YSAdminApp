@@ -11,6 +11,7 @@ from consumer.serializers import (UserListSerializer,
                                   RechargeOrdersListSerializer,
                                   ConsumerOrdersSerializer,
                                   ConsumeOrdersListSerializer,
+                                  ReplyCommentSerializer,
                                   CommentListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
@@ -20,6 +21,7 @@ from consumer.forms import (UserListForm,
                             RechargeDetailForm,
                             ConsumeOrdersListForm,
                             ConsumeOrdersDetailForm,
+                            ReplyCommentInputForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
@@ -251,6 +253,29 @@ class ConsumeOrdersDetail(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ReplyCommentAction(generics.GenericAPIView):
+    """
+    回复消费者评论
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def post(self, request, *args, **kwargs):
+        form = ReplyCommentInputForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        serializer = ReplyCommentSerializer(data=cld, request=request)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            serializer.save()
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CommentList(generics.GenericAPIView):

@@ -62,6 +62,11 @@ class ConsumeOrdersDetailForm(forms.Form):
     consume_orders_id = forms.CharField(min_length=14, max_length=32)
 
 
+class ReplyCommentInputForm(forms.Form):
+    comment_id = forms.IntegerField(min_value=1)
+    messaged = forms.CharField(max_length=256)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)

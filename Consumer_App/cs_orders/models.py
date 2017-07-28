@@ -323,10 +323,11 @@ class ConsumeOrders(models.Model):
             comment = Comment.get_object(orders_id=orders_dict['orders_id'])
             if isinstance(comment, Exception):
                 orders_dict['comment_messaged'] = ''
-                orders_dict['reply_message'] = ''
+                orders_dict['reply_messaged'] = ''
             else:
                 orders_dict['comment_messaged'] = comment.messaged
-                orders_dict['reply_message'] = ''
+                orders_dict['comment_id'] = comment.id
+                orders_dict['reply_messaged'] = ''
             orders_details.append(orders_dict)
 
         return orders_details
