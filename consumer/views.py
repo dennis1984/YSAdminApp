@@ -116,7 +116,7 @@ class RechargeList(generics.GenericAPIView):
             kwargs.pop('phone')
             kwargs['user_id'] = user.id
         if 'recharge_type' in kwargs:
-            if kwargs['recharge_type'] == 1:
+            if int(kwargs['recharge_type']) == 1:
                 filter_payment_mode_list = [value
                                             for key, value in ORDERS_PAYMENT_MODE.items()
                                             if key != 'admin']

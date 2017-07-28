@@ -5,10 +5,11 @@ from django.db import models
 from django.utils.timezone import now
 from django.db import transaction
 from horizon.main import minutes_15_plus
-from horizon.models import model_to_dict, get_perfect_filter_params
-
+from horizon.models import (model_to_dict,
+                            get_perfect_filter_params)
 from Consumer_App.cs_users.models import ConsumerUser
 
+from decimal import Decimal
 import json
 
 ORDERS_ORDERS_TYPE = {
@@ -136,10 +137,10 @@ class PayOrders(models.Model):
                 _kwargs['created__gte'] = kwargs[key]
             if key == 'end_created':
                 _kwargs['created__lte'] = kwargs[key]
-            if key == 'min_balance':
-                _kwargs['payable__gte'] = kwargs[key]
-            if key == 'max_balance':
-                _kwargs['payable__lte'] = kwargs[key]
+            if key == 'min_payable':
+                _kwargs['payable__gte'] = float(kwargs[key])
+            if key == 'max_payable':
+                _kwargs['payable__lte'] = float(kwargs[key])
         return _kwargs
 
     @classmethod
@@ -147,6 +148,7 @@ class PayOrders(models.Model):
         # 充值订单
         if _filter.upper() == 'RECHARGE':
             orders_instances = cls.filter_recharge_objects(**kwargs)
+        # 普通订单
         else:
             orders_instances = cls.filter_objects(**kwargs)
         user_ids = [item.user_id for item in orders_instances]
@@ -156,6 +158,13 @@ class PayOrders(models.Model):
         orders_details = []
         for instance in orders_instances:
             orders_dict = model_to_dict(instance)
+            if 'min_payable' in kwargs:
+                if float(orders_dict['payable']) < float(kwargs['min_payable']):
+                    continue
+            if 'max_payable' in kwargs:
+                if float(orders_dict['payable']) > float(kwargs['max_payable']):
+                    continue
+
             user = users_dict.get(instance.user_id)
             if user:
                 phone = user.phone
