@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^recharge_orders_detail/$', views.RechargeDetail.as_view()),
 
     url(r'^consume_orders_list/$', views.ConsumeOrdersList.as_view()),
+    url(r'^consume_orders_detail/$', views.ConsumeOrdersDetail.as_view()),
 
     url(r'^comment_list/$', views.CommentList.as_view()),
 ]

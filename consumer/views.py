@@ -19,6 +19,7 @@ from consumer.forms import (UserListForm,
                             RechargeListForm,
                             RechargeDetailForm,
                             ConsumeOrdersListForm,
+                            ConsumeOrdersDetailForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
@@ -221,6 +222,35 @@ class ConsumeOrdersList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class ConsumeOrdersDetail(generics.GenericAPIView):
+    """
+    消费订单详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_orders_detail(self, **kwargs):
+        details = ConsumeOrders.filter_orders_details(orders_id=kwargs['consume_orders_id'])
+        if isinstance(details, Exception):
+            return details
+        if len(details) != 1:
+            return Exception('Data Error.')
+        return details[0]
+
+    def post(self, request, *args, **kwargs):
+        form = ConsumeOrdersDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        detail = self.get_orders_detail(**cld)
+        if isinstance(detail, Exception):
+            return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ConsumerOrdersSerializer(data=detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):

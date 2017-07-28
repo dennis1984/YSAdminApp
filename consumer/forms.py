@@ -58,6 +58,10 @@ class ConsumeOrdersListForm(forms.Form):
     page_index = forms.IntegerField(min_value=1, required=False)
 
 
+class ConsumeOrdersDetailForm(forms.Form):
+    consume_orders_id = forms.CharField(min_length=14, max_length=32)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)
