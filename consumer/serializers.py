@@ -51,7 +51,7 @@ class UserListSerializer(BaseListSerializer):
 class RechargeOrdersSerializer(BaseSerializer):
     orders_id = serializers.CharField(max_length=32)
     user_id = serializers.IntegerField()
-    phone = serializers.CharField()
+    phone = serializers.CharField(allow_null=True, allow_blank=True)
     payable = serializers.CharField()
     recharge_type = serializers.CharField()
     created = serializers.DateTimeField()

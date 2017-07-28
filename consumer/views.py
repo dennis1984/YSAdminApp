@@ -18,7 +18,8 @@ from consumer.forms import (UserListForm,
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
-from Consumer_App.cs_orders.models import PayOrders
+from Consumer_App.cs_orders.models import (PayOrders,
+                                           ORDERS_PAYMENT_MODE)
 
 
 class UserList(generics.GenericAPIView):
@@ -114,6 +115,14 @@ class RechargeList(generics.GenericAPIView):
                 return []
             kwargs.pop('phone')
             kwargs['user_id'] = user.id
+        if 'recharge_type' in kwargs:
+            if kwargs['recharge_type'] == 1:
+                filter_payment_mode_list = [value
+                                            for key, value in ORDERS_PAYMENT_MODE.items()
+                                            if key != 'admin']
+                kwargs['payment_mode__in'] = filter_payment_mode_list
+            else:
+                kwargs['payment_mode'] = ORDERS_PAYMENT_MODE['admin']
         return PayOrders.filter_orders_details(_filter='RECHARGE', **kwargs)
 
     def get_user_object(self, phone):
