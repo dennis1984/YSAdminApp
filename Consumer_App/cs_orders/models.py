@@ -19,6 +19,14 @@ ORDERS_ORDERS_TYPE = {
     'wallet_recharge': 201,
 }
 
+ORDERS_PAYMENT_MODE = {
+    'unknown': 0,
+    'wallet': 1,
+    'wxpay': 2,
+    'alipay': 3,
+    'admin': 20,
+}
+
 
 class PayOrders(models.Model):
     """
@@ -42,7 +50,7 @@ class PayOrders(models.Model):
 
     # 0:未支付 200:已支付 400: 已过期 500:支付失败
     payment_status = models.IntegerField('订单支付状态', default=0)
-    # 支付方式：0:未指定支付方式 1：钱包 2：微信支付 3：支付宝支付
+    # 支付方式：0:未指定支付方式 1：钱包 2：微信支付 3：支付宝支付 20：管理员支付
     payment_mode = models.IntegerField('订单支付方式', default=0)
     # 订单类型 0: 未指定 101: 在线订单 102：堂食订单 103：外卖订单
     #         201: 钱包充值订单  (预留：202：钱包消费订单 203: 钱包提现)
@@ -116,7 +124,7 @@ class PayOrders(models.Model):
     @classmethod
     def filter_recharge_objects(cls, **kwargs):
         kwargs.update(**{'orders_type': ORDERS_ORDERS_TYPE['wallet_recharge'],
-                         'payment_status': 200})
+                         })
         kwargs = cls.mark_perfect_filter(**kwargs)
         return cls.filter_objects(**kwargs)
 
@@ -142,13 +150,24 @@ class PayOrders(models.Model):
         else:
             orders_instances = cls.filter_objects(**kwargs)
         user_ids = [item.user_id for item in orders_instances]
-        users = ConsumerUser.filter_users_detail(**{'id__in': user_ids})
+        users = ConsumerUser.filter_objects(**{'id__in': user_ids})
         users_dict = {user.id: user for user in users}
 
         orders_details = []
         for instance in orders_instances:
             orders_dict = model_to_dict(instance)
-            orders_dict['phone'] = users_dict.get(instance.user_id, {}).get('phone', '')
+            user = users_dict.get(instance.user_id)
+            if user:
+                phone = user.phone
+            else:
+                phone = ''
+            orders_dict['phone'] = phone
+            if _filter.upper() == 'RECHARGE':
+                if orders_dict['payment_mode'] == ORDERS_PAYMENT_MODE['admin']:
+                    orders_dict['recharge_type'] = 2
+                else:
+                    orders_dict['recharge_type'] = 1
             orders_details.append(orders_dict)
+
         return orders_details
 

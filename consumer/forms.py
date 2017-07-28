@@ -25,6 +25,11 @@ class RechargeListForm(forms.Form):
     recharge_type = forms.CharField(max_length=5, required=False)
     start_created = forms.DateField(required=False)
     end_created = forms.DateField(required=False)
+    payment_status = forms.ChoiceField(choices=((0, 1),
+                                                (200, 2),
+                                                (400, 3),
+                                                (500, 4)),
+                                       error_messages={'required': u'支付状态不能为空'})
     min_balance = forms.CharField(min_length=1, max_length=16, required=False)
     max_balance = forms.CharField(min_length=1, max_length=16, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
