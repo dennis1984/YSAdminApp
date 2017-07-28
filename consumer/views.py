@@ -9,6 +9,8 @@ from consumer.serializers import (UserListSerializer,
                                   UserSerializer,
                                   RechargeOrdersSerializer,
                                   RechargeOrdersListSerializer,
+                                  ConsumerOrdersSerializer,
+                                  ConsumeOrdersListSerializer,
                                   CommentListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
@@ -16,11 +18,13 @@ from consumer.forms import (UserListForm,
                             UserUpdateForm,
                             RechargeListForm,
                             RechargeDetailForm,
+                            ConsumeOrdersListForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
 from Consumer_App.cs_orders.models import (PayOrders,
+                                           ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
 
 
@@ -178,6 +182,33 @@ class RechargeDetail(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ConsumeOrdersList(generics.GenericAPIView):
+    """
+    消费订单列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def filter_orders_details(self, **kwargs):
+        return ConsumeOrders.filter_objects_detail(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = ConsumeOrdersListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.filter_orders_details(**cld)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ConsumeOrdersListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):

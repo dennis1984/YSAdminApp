@@ -42,6 +42,20 @@ class RechargeDetailForm(forms.Form):
     orders_id = forms.CharField(min_length=14, max_length=32)
 
 
+class ConsumeOrdersListForm(forms.Form):
+    pay_orders_id = forms.CharField(min_length=14, max_length=32, required=False)
+    consume_orders_id = forms.CharField(min_length=14, max_length=32, required=False)
+    phone = forms.CharField(min_length=11, max_length=15, required=False)
+    business_name = forms.CharField(min_length=2, max_length=20, required=False)
+    payment_status = forms.ChoiceField(choices=((201, 1),
+                                                (206, 2)),
+                                       error_messages={'required': u'支付状态不能为空'})
+    start_created = forms.DateField(required=False)
+    end_created = forms.DateField(required=False)
+    min_payable = forms.FloatField(min_value=0, required=False)
+    max_payable = forms.FloatField(min_value=0, required=False)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)

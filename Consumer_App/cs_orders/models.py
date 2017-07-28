@@ -217,3 +217,107 @@ class PayOrders(models.Model):
 
         return orders_details
 
+
+class ConsumeOrders(models.Model):
+    """
+    消费订单（子订单）
+    """
+    orders_id = models.CharField('订单ID', db_index=True, unique=True, max_length=32)
+    user_id = models.IntegerField('用户ID', db_index=True)
+
+    business_name = models.CharField('商户名字', max_length=200)
+    business_id = models.IntegerField('商户ID')
+    food_court_id = models.IntegerField('美食城ID')
+    food_court_name = models.CharField('美食城名字', max_length=200)
+
+    dishes_ids = models.TextField('订购列表', default='')
+
+    total_amount = models.CharField('订单总计', max_length=16)
+    member_discount = models.CharField('会员优惠', max_length=16, default='0')
+    other_discount = models.CharField('其他优惠', max_length=16, default='0')
+    payable = models.CharField('应付金额', max_length=16)
+
+    # 0:未支付 200:已支付 201:待消费 206:已完成 400: 已过期 500:支付失败
+    payment_status = models.IntegerField('订单支付状态', default=201)
+    # 支付方式：0:未指定支付方式 1：钱包支付 2：微信支付 3：支付宝支付
+    payment_mode = models.IntegerField('订单支付方式', default=0)
+    # 订单类型 0: 未指定 101: 在线订单 102：堂食订单 103：外卖订单
+    #         201: 钱包充值订单  (预留：202：钱包消费订单 203: 钱包提现)
+    orders_type = models.IntegerField('订单类型', default=ORDERS_ORDERS_TYPE['online'])
+    # 所属主订单
+    master_orders_id = models.CharField('所属主订单订单ID', max_length=32)
+    # 是否点评过  0: 未点评过  1： 已经完成点评
+    is_commented = models.IntegerField('是否点评过', default=0)
+    # 核销码：如果已经核销，该字段不为空，如果没有核销，该字段为空
+    confirm_code = models.CharField('核销码', max_length=32, default='', blank=True)
+
+    created = models.DateTimeField('创建时间', default=now)
+    updated = models.DateTimeField('最后修改时间', auto_now=True)
+    expires = models.DateTimeField('订单过期时间', default=minutes_15_plus)
+    extend = models.TextField('扩展信息', default='', blank=True)
+
+    # objects = OrdersManager()
+
+    class Meta:
+        db_table = 'ys_consume_orders'
+        ordering = ['-orders_id']
+        app_label = 'Consumer_App.cs_orders.models.ConsumeOrders'
+
+    def __unicode__(self):
+        return self.orders_id
+
+    @classmethod
+    def get_object(cls, **kwargs):
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_objects(cls, **kwargs):
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def make_perfect_filter(cls, **kwargs):
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
+        for key in kwargs:
+            if key == 'start_created':
+                _kwargs['created__gte'] = kwargs[key]
+            if key == 'end_created':
+                _kwargs['created__lte'] = kwargs[key]
+        return _kwargs
+
+    @classmethod
+    def filter_orders_details(cls, **kwargs):
+        kwargs = get_perfect_filter_params(**kwargs)
+        kwargs = cls.make_perfect_filter(**kwargs)
+        orders_instances = cls.filter_objects(**kwargs)
+        if isinstance(orders_instances, Exception):
+            return orders_instances
+
+        user_ids = [item.user_id for item in orders_instances]
+        users = ConsumerUser.filter_objects(**{'id__in': user_ids})
+        users_dict = {user.id: user for user in users}
+
+        orders_details = []
+        for instance in orders_instances:
+            orders_dict = model_to_dict(instance)
+            if 'min_payable' in kwargs:
+                if float(orders_dict['payable']) < float(kwargs['min_payable']):
+                    continue
+            if 'max_payable' in kwargs:
+                if float(orders_dict['payable']) > float(kwargs['max_payable']):
+                    continue
+            user = users_dict.get(instance.user_id)
+            if user:
+                phone = user.phone
+            else:
+                phone = ''
+            orders_dict['phone'] = phone
+            orders_dict['pay_orders_id'] = orders_dict['master_orders_id']
+            orders_details.append(orders_dict)
+
+        return orders_details
