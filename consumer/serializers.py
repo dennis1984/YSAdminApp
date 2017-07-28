@@ -74,6 +74,9 @@ class ConsumerOrdersSerializer(BaseSerializer):
     orders_type = serializers.IntegerField()
     created = serializers.DateTimeField()
     updated = serializers.DateTimeField()
+    is_commented = serializers.IntegerField()
+    comment_messaged = serializers.CharField()
+    reply_messaged = serializers.CharField()
 
 
 class ConsumeOrdersListSerializer(BaseListSerializer):

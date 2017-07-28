@@ -8,6 +8,7 @@ from horizon.main import minutes_15_plus
 from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
 from Consumer_App.cs_users.models import ConsumerUser
+from Consumer_App.cs_comment.models import Comment
 
 from decimal import Decimal
 import json
@@ -318,6 +319,14 @@ class ConsumeOrders(models.Model):
             orders_dict['phone'] = phone
             orders_dict['pay_orders_id'] = orders_dict['master_orders_id']
             orders_dict['consume_orders_id'] = orders_dict['orders_id']
+
+            comment = Comment.get_object(orders_id=orders_dict['orders_id'])
+            if isinstance(comment, Exception):
+                orders_dict['comment_messaged'] = ''
+                orders_dict['reply_message'] = ''
+            else:
+                orders_dict['comment_messaged'] = comment.messaged
+                orders_dict['reply_message'] = ''
             orders_details.append(orders_dict)
 
         return orders_details
