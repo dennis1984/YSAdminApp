@@ -88,6 +88,14 @@ class ConsumerUser(AbstractBaseUser):
             return Exception(e)
 
     @classmethod
+    def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
     def filter_users_detail(cls, fuzzy=False, **kwargs):
         kwargs = get_perfect_filter_params(cls, **kwargs)
         if fuzzy:

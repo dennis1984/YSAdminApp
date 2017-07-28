@@ -107,7 +107,7 @@ class PayOrders(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        kwargs = get_perfect_filter_params(**kwargs)
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
@@ -142,7 +142,7 @@ class PayOrders(models.Model):
         else:
             orders_instances = cls.filter_objects(**kwargs)
         user_ids = [item.user_id for item in orders_instances]
-        users = ConsumerUser.get_object(**{'id__in': user_ids})
+        users = ConsumerUser.filter_users_detail(**{'id__in': user_ids})
         users_dict = {user.id: user for user in users}
 
         orders_details = []
