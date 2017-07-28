@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^user_detail/$', views.UserDetail.as_view()),
     url(r'^user_action/$', views.UserAction.as_view()),
 
-    url(r'^recharge_record_list/$', views.RechargeList.as_view()),
+    url(r'^recharge_orders_list/$', views.RechargeList.as_view()),
 
     url(r'^comment_list/$', views.CommentList.as_view()),
 ]

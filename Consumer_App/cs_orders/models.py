@@ -7,6 +7,8 @@ from django.db import transaction
 from horizon.main import minutes_15_plus
 from horizon.models import model_to_dict, get_perfect_filter_params
 
+from Consumer_App.cs_users.models import ConsumerUser
+
 import json
 
 ORDERS_ORDERS_TYPE = {
@@ -105,6 +107,7 @@ class PayOrders(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
@@ -130,3 +133,22 @@ class PayOrders(models.Model):
             if key == 'max_balance':
                 _kwargs['payable__lte'] = kwargs[key]
         return _kwargs
+
+    @classmethod
+    def filter_orders_details(cls, _filter='ALL', **kwargs):
+        # 充值订单
+        if _filter.upper() == 'RECHARGE':
+            orders_instances = cls.filter_recharge_objects(**kwargs)
+        else:
+            orders_instances = cls.filter_objects(**kwargs)
+        user_ids = [item.user_id for item in orders_instances]
+        users = ConsumerUser.get_object(**{'id__in': user_ids})
+        users_dict = {user.id: user for user in users}
+
+        orders_details = []
+        for instance in orders_instances:
+            orders_dict = model_to_dict(instance)
+            orders_dict['phone'] = users_dict.get(instance.user_id, {}).get('phone', '')
+            orders_details.append(orders_dict)
+        return orders_details
+

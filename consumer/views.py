@@ -114,7 +114,7 @@ class RechargeList(generics.GenericAPIView):
                 return []
             kwargs.pop('phone')
             kwargs['user_id'] = user.id
-        return PayOrders.filter_objects(**kwargs)
+        return PayOrders.filter_orders_details(_filter='RECHARGE', **kwargs)
 
     def get_user_object(self, phone):
         return ConsumerUser.get_object(phone=phone)

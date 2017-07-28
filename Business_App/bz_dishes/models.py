@@ -5,7 +5,9 @@ from django.db import models
 from django.utils.timezone import now
 from django.conf import settings
 from Business_App.bz_users.models import BusinessUser, FoodCourt
-from horizon.models import model_to_dict, BaseManager
+from horizon.models import (model_to_dict,
+                            BaseManager,
+                            get_perfect_filter_params)
 from django.conf import settings
 
 import os
@@ -68,21 +70,8 @@ class Dishes(models.Model):
         return self.title
 
     @classmethod
-    def get_perfect_filter_params(cls, **kwargs):
-        opts = cls._meta
-        fields = ['pk']
-        for f in opts.concrete_fields:
-            fields.append(f.name)
-
-        _kwargs = {}
-        for key in kwargs:
-            if key in fields:
-                _kwargs[key] = kwargs[key]
-        return _kwargs
-
-    @classmethod
     def get_object(cls, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.get(**_kwargs)
         except Exception as e:
@@ -90,7 +79,7 @@ class Dishes(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
         if 'title' in _kwargs:
             _kwargs['title__contains'] = _kwargs.pop('title')
         try:
@@ -182,21 +171,8 @@ class City(models.Model):
         return self.city
 
     @classmethod
-    def get_perfect_filter_params(cls, **kwargs):
-        opts = cls._meta
-        fields = ['pk']
-        for f in opts.concrete_fields:
-            fields.append(f.name)
-
-        _kwargs = {}
-        for key in kwargs:
-            if key in fields:
-                _kwargs[key] = kwargs[key]
-        return _kwargs
-
-    @classmethod
     def get_object(cls, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.get(**_kwargs)
         except Exception as e:
@@ -204,7 +180,7 @@ class City(models.Model):
 
     @classmethod
     def filter_objects(cls, fuzzy=True, **kwargs):
-        _kwargs = cls.get_perfect_filter_params(**kwargs)
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
         if fuzzy:
             if 'city' in _kwargs:
                 _kwargs['city__contains'] = _kwargs.pop('city')

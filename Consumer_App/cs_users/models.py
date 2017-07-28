@@ -4,7 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.timezone import now
 from django.conf import settings
 
-from horizon.models import model_to_dict
+from horizon.models import model_to_dict, get_perfect_filter_params
 from Consumer_App.cs_wallet.models import Wallet
 import datetime
 import re
@@ -80,21 +80,8 @@ class ConsumerUser(AbstractBaseUser):
         return True
 
     @classmethod
-    def get_perfect_filter_params(cls, **kwargs):
-        opts = cls._meta
-        fields = ['pk']
-        for f in opts.concrete_fields:
-            fields.append(f.name)
-
-        _kwargs = {}
-        for key in kwargs:
-            if key in fields:
-                _kwargs[key] = kwargs[key]
-        return _kwargs
-
-    @classmethod
     def get_object(cls, **kwargs):
-        kwargs = cls.get_perfect_filter_params(**kwargs)
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.get(**kwargs)
         except cls.DoesNotExist as e:
@@ -102,7 +89,7 @@ class ConsumerUser(AbstractBaseUser):
 
     @classmethod
     def filter_users_detail(cls, fuzzy=False, **kwargs):
-        kwargs = cls.get_perfect_filter_params(**kwargs)
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         if fuzzy:
             if 'nickname' in kwargs:
                 kwargs['nickname__contains'] = kwargs.pop('nickname')

@@ -52,6 +52,7 @@ def get_perfect_filter_params(cls, **kwargs):
 
     _kwargs = {}
     for key in kwargs:
-        if key in fields:
+        key_new = key.split('__')[0]
+        if key_new in fields:
             _kwargs[key] = kwargs[key]
     return _kwargs

@@ -4,25 +4,13 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.timezone import now
 from django.contrib.auth.hashers import make_password
 
-from horizon.models import model_to_dict, BaseManager
+from horizon.models import (model_to_dict,
+                            BaseManager,
+                            get_perfect_filter_params)
 
 from django.conf import settings
 import datetime
 import os
-
-
-def get_perfect_filter_params(cls, **kwargs):
-    opts = cls._meta
-    fields = ['pk']
-    for f in opts.concrete_fields:
-        fields.append(f.name)
-
-    _kwargs = {}
-    for key in kwargs:
-        key_new = key.split('__')[0]
-        if key_new in fields:
-            _kwargs[key] = kwargs[key]
-    return _kwargs
 
 
 class BusinessUserManager(BaseUserManager):
