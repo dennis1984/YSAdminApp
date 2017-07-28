@@ -29,6 +29,25 @@ ORDERS_PAYMENT_MODE = {
 }
 
 
+class OrdersManager(models.Manager):
+    def get(self, *args, **kwargs):
+        object_data = super(OrdersManager, self).get(
+            *args, **kwargs
+        )
+        if now() >= object_data.expires and object_data.payment_status == 0:
+            object_data.payment_status = 400
+        return object_data
+
+    def filter(self, *args, **kwargs):
+        object_data = super(OrdersManager, self).filter(
+            *args, **kwargs
+        )
+        for item in object_data:
+            if now() >= item.expires and item.payment_status == 0:
+                item.payment_status = 400
+        return object_data
+
+
 class PayOrders(models.Model):
     """
     支付订单（主订单）
@@ -62,7 +81,7 @@ class PayOrders(models.Model):
     expires = models.DateTimeField('订单过期时间', default=minutes_15_plus)
     extend = models.TextField('扩展信息', default='', blank=True)
 
-    # objects = OrdersManager()
+    objects = OrdersManager()
 
     class Meta:
         db_table = 'ys_pay_orders'

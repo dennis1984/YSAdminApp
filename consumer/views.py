@@ -156,8 +156,13 @@ class RechargeDetail(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_recharge_orders_detail(self, orders_id):
-        return PayOrders.filter_orders_details(_filter='RECHARGE',
+        orders_list = PayOrders.filter_orders_details(_filter='RECHARGE',
                                                **{'orders_id': orders_id})
+        if isinstance(orders_list, Exception):
+            return orders_list
+        if len(orders_list) != 1:
+            return Exception('Data Error.')
+        return orders_list[0]
 
     def post(self, request, *args, **kwargs):
         form = RechargeDetailForm(request.data)
