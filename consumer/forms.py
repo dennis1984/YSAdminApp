@@ -27,6 +27,8 @@ class RechargeListForm(forms.Form):
     end_created = forms.DateField(required=False)
     min_balance = forms.CharField(min_length=1, max_length=16, required=False)
     max_balance = forms.CharField(min_length=1, max_length=16, required=False)
+    page_size = forms.IntegerField(min_value=1)
+    page_index = forms.IntegerField(min_value=1)
 
 
 class CommentListForm(forms.Form):

@@ -48,6 +48,19 @@ class UserListSerializer(BaseListSerializer):
     child = UserDetailSerializer()
 
 
+class RechargeOrdersSerializer(BaseSerializer):
+    orders_id = serializers.CharField(max_length=32)
+    user_id = serializers.IntegerField()
+    phone = serializers.CharField()
+    balance = serializers.CharField()
+    recharge_type = serializers.CharField(required=False)
+    created = serializers.DateTimeField()
+
+
+class RechargeOrdersListSerializer(BaseListSerializer):
+    child = RechargeOrdersSerializer()
+
+
 class CommentDetailSerializer(BaseSerializer):
     user_id = serializers.IntegerField()
     orders_id = serializers.CharField(max_length=32)

@@ -7,6 +7,7 @@ from rest_framework import status
 from consumer.serializers import (UserListSerializer,
                                   UserDetailSerializer,
                                   UserSerializer,
+                                  RechargeOrdersListSerializer,
                                   CommentListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
@@ -107,7 +108,16 @@ class RechargeList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_recharge_orders(self, **kwargs):
+        if 'phone' in kwargs:
+            user = self.get_user_object(kwargs['phone'])
+            if isinstance(user, Exception):
+                return []
+            kwargs.pop('phone')
+            kwargs['user_id'] = user.id
         return PayOrders.filter_objects(**kwargs)
+
+    def get_user_object(self, phone):
+        return ConsumerUser.get_object(phone=phone)
 
     def post(self, request, *args, **kwargs):
         form = RechargeListForm(request.data)
@@ -115,7 +125,17 @@ class RechargeList(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        return Response(status.HTTP_200_OK)
+        orders = self.get_recharge_orders(**cld)
+        if isinstance(orders, Exception):
+            return Response({'Detail': orders.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = RechargeOrdersListSerializer(data=orders)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):
