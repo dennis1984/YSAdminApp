@@ -92,6 +92,8 @@ class UsersInputForm(forms.Form):
                               error_messages={'required': u'经理人不能为空'})
     chinese_people_id = forms.CharField(min_length=18, max_length=25,
                                         error_messages={'required': u'身份证号不能为空'})
+    stalls_number = forms.CharField(min_length=1, max_length=20,
+                                    error_messages={'required': u'档口编号不能为空'})
 
 
 class UserUpdateForm(forms.Form):
@@ -101,6 +103,8 @@ class UserUpdateForm(forms.Form):
     brand = forms.CharField(min_length=2, max_length=20, required=False)
     manager = forms.CharField(min_length=2, max_length=20, required=False)
     chinese_people_id = forms.CharField(min_length=18, max_length=25, required=False)
+    stalls_number = forms.CharField(min_length=1, max_length=20, required=False)
+
     is_active = forms.IntegerField(min_value=0, max_value=1, required=False)
 
 

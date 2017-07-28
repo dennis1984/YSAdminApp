@@ -229,7 +229,7 @@ class UserSerializer(BaseModelSerializer):
     class Meta:
         model = BusinessUser
         fields = ('id', 'phone', 'business_name', 'food_court_id',
-                  'brand', 'manager', 'chinese_people_id',
+                  'brand', 'manager', 'chinese_people_id', 'stalls_number',
                   'is_active', 'date_joined', 'last_login', 'head_picture',)
 
     def update(self, instance, validated_data):
@@ -252,6 +252,8 @@ class UserDetailSerializer(serializers.Serializer):
     manager = serializers.CharField(max_length=20, allow_null=True, allow_blank=True)
     chinese_people_id = serializers.CharField(max_length=25, allow_blank=True,
                                               allow_null=True)
+    stalls_number = serializers.CharField(max_length=20, allow_blank=True,
+                                          allow_null=True)
 
     last_login = serializers.DateTimeField()
     date_joined = serializers.DateTimeField()

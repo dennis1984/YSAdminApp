@@ -115,8 +115,7 @@ class RechargeList(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-
-
+        return Response(status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):
