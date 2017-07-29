@@ -33,6 +33,7 @@ from Consumer_App.cs_wallet.models import Wallet
 from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
+from horizon.models import model_to_dict
 import copy
 
 
@@ -312,10 +313,28 @@ class WalletList(generics.GenericAPIView):
                     return Exception('User does not existed.')
             else:
                 kwargs['user_id'] = user_id
-        return Wallet.filter_objects(**kwargs)
+
+        wallets = Wallet.filter_objects(**kwargs)
+        if isinstance(wallets, Exception):
+            return wallets
+        user_ids = [item.user_id for item in wallets]
+        users = self.filter_user_details(user_ids)
+        users_dict = {user.id: user for user in users}
+
+        details = []
+        for item in wallets:
+            item_dict = model_to_dict(item)
+            user = users_dict.get(item.user_id)
+            item_dict['phone'] = user.phone
+            details.append(item_dict)
+        return details
 
     def get_user_object(self, phone):
         return ConsumerUser.get_object(phone=phone)
+
+    def filter_user_details(self, user_ids):
+        kwargs = {'id__in': user_ids}
+        return ConsumerUser.filter_objects(**kwargs)
 
     def post(self, request, *args, **kwargs):
         form = WalletListForm(request.data)

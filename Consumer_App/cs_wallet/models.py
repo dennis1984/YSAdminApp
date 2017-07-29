@@ -69,7 +69,7 @@ class Wallet(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        kwargs = get_perfect_filter_params(**kwargs)
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
