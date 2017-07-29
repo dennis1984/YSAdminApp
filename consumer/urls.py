@@ -14,6 +14,7 @@ urlpatterns = [
 
     url(r'^consume_orders_list/$', views.ConsumeOrdersList.as_view()),
     url(r'^consume_orders_detail/$', views.ConsumeOrdersDetail.as_view()),
+    url(r'^reply_comment_action/$', views.ReplyCommentAction.as_view()),
 
     url(r'^comment_list/$', views.CommentList.as_view()),
 ]

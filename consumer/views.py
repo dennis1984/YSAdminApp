@@ -29,6 +29,7 @@ from Consumer_App.cs_comment.models import Comment
 from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
+import copy
 
 
 class UserList(generics.GenericAPIView):
@@ -261,16 +262,28 @@ class ReplyCommentAction(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly,)
 
+    def get_comment_object(self, comment_id):
+        return Comment.get_object(pk=comment_id)
+
+    def make_perfect_initial_data(self, cld, comment):
+        data = copy.deepcopy(cld)
+        data['orders_id'] = comment.orders_id
+        return data
+
     def post(self, request, *args, **kwargs):
         form = ReplyCommentInputForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        serializer = ReplyCommentSerializer(data=cld, request=request)
+        comment = self.get_comment_object(cld['comment_id'])
+        if isinstance(comment, Exception):
+            return Response({'Detail': comment.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        init_data = self.make_perfect_initial_data(cld, comment)
+        serializer = ReplyCommentSerializer(data=init_data, request=request)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             serializer.save()
         except Exception as e:
