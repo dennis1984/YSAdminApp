@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^recharge_orders_detail/$', views.RechargeDetail.as_view()),
 
     url(r'^wallet_list/$', views.WalletList.as_view()),
+    url(r'^wallet_trade_detail_list/$', views.WalletTradeDetailList.as_view()),
 
     url(r'^consume_orders_list/$', views.ConsumeOrdersList.as_view()),
     url(r'^consume_orders_detail/$', views.ConsumeOrdersDetail.as_view()),

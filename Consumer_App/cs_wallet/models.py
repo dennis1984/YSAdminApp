@@ -74,3 +74,49 @@ class Wallet(models.Model):
             return cls.objects.filter(**kwargs)
         except Exception as e:
             return e
+
+
+class WalletTradeDetail(models.Model):
+    """
+    交易明细
+    """
+    orders_id = models.CharField('订单ID', db_index=True, unique=True, max_length=32)
+    user_id = models.IntegerField('用户ID', db_index=True)
+
+    amount_of_money = models.CharField('金额', max_length=16)
+
+    # 交易状态：0:未完成 200:已完成 500:交易失败
+    trade_status = models.IntegerField('订单支付状态', default=200)
+    # 交易类型 0: 未指定 1: 充值 2：消费 3: 取现
+    trade_type = models.IntegerField('订单类型', default=0)
+    # 金额是否同步到了钱包 0: 未同步 1: 已同步
+    is_sync = models.IntegerField('金额是否同步', default=1)
+
+    created = models.DateTimeField('创建时间', default=now)
+    updated = models.DateTimeField('最后修改时间', auto_now=True)
+    extend = models.TextField('扩展信息', default='', blank=True)
+
+    objects = WalletManager()
+
+    class Meta:
+        db_table = 'ys_wallet_trade_detail'
+        ordering = ['-updated']
+        app_label = 'Consumer_App.cs_wallet.models.WalletTradeDetail'
+
+    def __unicode__(self):
+        return str(self.user_id)
+
+    @classmethod
+    def get_object(cls, **kwargs):
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def get_success_list(cls, **kwargs):
+        kwargs['trade_status'] = 200
+        try:
+            return cls.objects.filter(**kwargs)
+        except:
+            return []

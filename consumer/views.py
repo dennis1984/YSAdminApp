@@ -12,8 +12,8 @@ from consumer.serializers import (UserListSerializer,
                                   ConsumerOrdersSerializer,
                                   ConsumeOrdersListSerializer,
                                   ReplyCommentSerializer,
-                                  WalletDetailSerializer,
                                   WalletListSerializer,
+                                  WalletTradeDetailListSerializer,
                                   CommentListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
@@ -25,11 +25,12 @@ from consumer.forms import (UserListForm,
                             ConsumeOrdersDetailForm,
                             ReplyCommentInputForm,
                             WalletListForm,
+                            WalletTradeDetailListForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
-from Consumer_App.cs_wallet.models import Wallet
+from Consumer_App.cs_wallet.models import Wallet, WalletTradeDetail
 from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
@@ -315,21 +316,6 @@ class WalletList(generics.GenericAPIView):
                 kwargs['user_id'] = user_id
         return ConsumerUser.filter_users_detail(**kwargs)
 
-        # wallets = Wallet.filter_objects(**kwargs)
-        # if isinstance(wallets, Exception):
-        #     return wallets
-        # user_ids = [item.user_id for item in wallets]
-        # users = self.filter_user_details(user_ids)
-        # users_dict = {user.id: user for user in users}
-        #
-        # details = []
-        # for item in wallets:
-        #     item_dict = model_to_dict(item)
-        #     user = users_dict.get(item.user_id)
-        #     item_dict['phone'] = user.phone
-        #     details.append(item_dict)
-        # return details
-
     def get_user_object(self, phone):
         return ConsumerUser.get_object(phone=phone)
 
@@ -346,6 +332,32 @@ class WalletList(generics.GenericAPIView):
         serializer = WalletListSerializer(data=wallets)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
+
+
+class WalletTradeDetailList(generics.GenericAPIView):
+    """
+    交易明细详情列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_objects(self, user_id):
+        return WalletTradeDetail.get_success_list(user_id=user_id)
+
+    def post(self, request, *args, **kwargs):
+        form = WalletTradeDetailListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        wallet_trade_details = self.get_objects(cld['user_id'])
+        if isinstance(wallet_trade_details, Exception):
+            return Response({'Detail': wallet_trade_details.args},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = WalletTradeDetailListSerializer(wallet_trade_details)
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)

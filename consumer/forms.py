@@ -74,6 +74,12 @@ class WalletListForm(forms.Form):
     page_index = forms.IntegerField(min_value=1, required=False)
 
 
+class WalletTradeDetailListForm(forms.Form):
+    user_id = forms.IntegerField(min_value=1)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)

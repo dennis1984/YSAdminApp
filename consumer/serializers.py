@@ -7,6 +7,7 @@ from horizon.serializers import (BaseListSerializer,
 from Consumer_App.cs_comment.models import Comment
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import ReplyComment
+from Consumer_App.cs_wallet.models import WalletTradeDetail
 import re
 import copy
 
@@ -130,3 +131,14 @@ class WalletDetailSerializer(BaseSerializer):
 
 class WalletListSerializer(BaseListSerializer):
     child = WalletDetailSerializer()
+
+
+class WalletTradeDetailSerializer(BaseModelSerializer):
+    class Meta:
+        model = WalletTradeDetail
+        fields = ('orders_id', 'user_id', 'amount_of_money', 'trade_type'
+                  'created')
+
+
+class WalletTradeDetailListSerializer(BaseListSerializer):
+    child = WalletTradeDetailSerializer()

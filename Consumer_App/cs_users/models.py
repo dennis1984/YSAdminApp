@@ -121,6 +121,7 @@ class ConsumerUser(AbstractBaseUser):
         wallets_dict = {item.user_id: item for item in wallets}
         for user in users:
             user_dict = model_to_dict(user)
+            user_dict['user_id'] = user.id
             user_dict['head_picture_url'] = str(user.head_picture)
             if user.id in wallets_dict:
                 user_dict['balance'] = wallets_dict[user.id].balance
