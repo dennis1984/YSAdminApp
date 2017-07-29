@@ -93,6 +93,13 @@ class BusinessUser(AbstractBaseUser):
             return None
 
     @classmethod
+    def filter_objects(cls, **kwargs):
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
     def get_user_detail(cls, request):
         """
         返回数据结构：

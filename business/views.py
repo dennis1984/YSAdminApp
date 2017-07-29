@@ -38,6 +38,7 @@ from business.forms import (CityInputForm,
                             DishesDetailForm,
                             DishesUpdateForm,
                             DishesDeleteForm,
+                            WithdrawRecordListForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -47,6 +48,7 @@ from Business_App.bz_dishes.models import (City,
 from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
+from Business_App.bz_wallet.models import WithdrawRecord
 
 
 class CityAction(generics.GenericAPIView):
@@ -667,6 +669,30 @@ class UserDetail(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class WithdrawRecordList(generics.GenericAPIView):
+    """
+    提现查询
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_user_objects(self, business_name):
+        return BusinessUser.filter_objects(business_name=business_name)
+
+    def get_record_objects(self, **kwargs):
+        if 'business_name' in kwargs:
+            users = self.get_user_objects(kwargs['business_name'])
+        return WithdrawRecord.filter_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = WithdrawRecordListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        records = self.get_record_objects(**cld)
+        return Response(status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):

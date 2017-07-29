@@ -4,11 +4,12 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.timezone import now
 from django.db import transaction
-from horizon.main import minutes_15_plus
+from horizon.main import minutes_15_plus, DatetimeEncode
 from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment, ReplyComment
+from Business_App.bz_orders.models import OrdersIdGenerator
 
 from decimal import Decimal
 import json
@@ -217,6 +218,50 @@ class PayOrders(models.Model):
             orders_details.append(orders_dict)
 
         return orders_details
+
+    @classmethod
+    def make_orders_by_recharge(cls, request, orders_type, payable):
+        dishes_details = [{'orders_type': orders_type,
+                           'payable': payable},
+                          ]
+        food_court_id = 0
+        food_court_name = 'CZ'
+        total_amount = str(payable)
+
+        # 会员优惠及其他优惠
+        member_discount = 0
+        other_discount = 0
+        orders_data = cls.make_orders_base(request=request, food_court_id=food_court_id,
+                                           food_court_name=food_court_name,
+                                           dishes_details=dishes_details,
+                                           total_amount=total_amount,
+                                           member_discount=member_discount,
+                                           other_discount=other_discount,
+                                           orders_type=ORDERS_ORDERS_TYPE['wallet_recharge'])
+        return orders_data
+
+    @classmethod
+    def make_orders_base(cls, request, food_court_id, food_court_name,
+                         dishes_details, total_amount, member_discount,
+                         other_discount, orders_type):
+        try:
+            orders_data = {'user_id': request.user.id,
+                           'orders_id': OrdersIdGenerator.get_orders_id(),
+                           'food_court_id': food_court_id,
+                           'food_court_name': food_court_name,
+                           'dishes_ids': json.dumps(dishes_details,
+                                                    ensure_ascii=False, cls=DatetimeEncode),
+                           'total_amount': total_amount,
+                           'member_discount': str(member_discount),
+                           'other_discount': str(other_discount),
+                           'payable': str(Decimal(total_amount) -
+                                          Decimal(member_discount) -
+                                          Decimal(other_discount)),
+                           'orders_type': orders_type,
+                           }
+        except Exception as e:
+            return e
+        return orders_data
 
 
 class ConsumeOrders(models.Model):

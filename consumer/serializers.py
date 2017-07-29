@@ -136,7 +136,7 @@ class WalletListSerializer(BaseListSerializer):
 class WalletTradeDetailSerializer(BaseModelSerializer):
     class Meta:
         model = WalletTradeDetail
-        fields = ('orders_id', 'user_id', 'amount_of_money', 'trade_type'
+        fields = ('orders_id', 'user_id', 'amount_of_money', 'trade_type',
                   'created')
 
 

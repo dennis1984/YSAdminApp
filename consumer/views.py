@@ -26,6 +26,7 @@ from consumer.forms import (UserListForm,
                             ReplyCommentInputForm,
                             WalletListForm,
                             WalletTradeDetailListForm,
+                            RechargeActionFrom,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
@@ -362,6 +363,27 @@ class WalletTradeDetailList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class RechargeAction(generics.GenericAPIView):
+    """
+    向用户充值 (管理员操作)
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_user_object(self, user_id):
+        return ConsumerUser.get_object(user_id=user_id)
+
+    def post(self, request, *args, **kwargs):
+        form = RechargeActionFrom(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        user = self.get_user_object(cld['user_id'])
+        if isinstance(user, Exception):
+            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):

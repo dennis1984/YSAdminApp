@@ -17,6 +17,10 @@ import random
 import time
 
 
+def days_7_plus():
+    return make_time_delta(days=7)
+
+
 def minutes_5_plus():
     return now() + datetime.timedelta(minutes=5)
 

@@ -80,6 +80,11 @@ class WalletTradeDetailListForm(forms.Form):
     page_index = forms.IntegerField(min_value=1, required=False)
 
 
+class RechargeActionFrom(forms.Form):
+    user_id = forms.IntegerField(min_value=1)
+    payable = forms.FloatField(min_value=0.01)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)

@@ -181,6 +181,15 @@ class DishesDetailForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
 
+class WithdrawRecordListForm(forms.Form):
+    business_name = forms.CharField(min_length=1, max_length=30, required=False)
+    payable = forms.FloatField(min_value=0.01, required=False)
+    start_created = forms.DateField(required=False)
+    end_created = forms.DateField(required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
 class AdvertPictureInputForm(forms.Form):
     name = forms.CharField(max_length=20)
     image = forms.ImageField()
