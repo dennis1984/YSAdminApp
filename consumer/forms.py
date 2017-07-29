@@ -67,6 +67,13 @@ class ReplyCommentInputForm(forms.Form):
     messaged = forms.CharField(max_length=256)
 
 
+class WalletListForm(forms.Form):
+    user_id = forms.IntegerField(min_value=1, required=False)
+    phone = forms.CharField(min_length=11, max_length=16, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
 class CommentListForm(forms.Form):
     business_id = forms.IntegerField(min_value=1, required=False)
     user_id = forms.IntegerField(min_value=1, required=False)

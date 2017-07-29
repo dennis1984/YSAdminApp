@@ -12,6 +12,8 @@ from consumer.serializers import (UserListSerializer,
                                   ConsumerOrdersSerializer,
                                   ConsumeOrdersListSerializer,
                                   ReplyCommentSerializer,
+                                  WalletDetailSerializer,
+                                  WalletListSerializer,
                                   CommentListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
@@ -22,10 +24,12 @@ from consumer.forms import (UserListForm,
                             ConsumeOrdersListForm,
                             ConsumeOrdersDetailForm,
                             ReplyCommentInputForm,
+                            WalletListForm,
                             CommentListForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
+from Consumer_App.cs_wallet.models import Wallet
 from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
@@ -289,6 +293,47 @@ class ReplyCommentAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class WalletList(generics.GenericAPIView):
+    """
+    用户钱包详情列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_wallet_list(self, **kwargs):
+        if 'phone' in kwargs:
+            user = self.get_user_object(kwargs['phone'])
+            if isinstance(user, Exception):
+                return user
+            user_id = user.id
+            if 'user_id' in kwargs:
+                if kwargs['user_id'] != user_id:
+                    return Exception('User does not existed.')
+            else:
+                kwargs['user_id'] = user_id
+        return Wallet.filter_objects(**kwargs)
+
+    def get_user_object(self, phone):
+        return ConsumerUser.get_object(phone=phone)
+
+    def post(self, request, *args, **kwargs):
+        form = WalletListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        wallets = self.get_wallet_list(**cld)
+        if isinstance(wallets, Exception):
+            return Response({'Detail': wallets.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = WalletListSerializer(data=wallets)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):

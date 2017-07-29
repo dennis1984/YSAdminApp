@@ -7,6 +7,7 @@ from django.db import transaction
 from decimal import Decimal
 
 from horizon.models import model_to_dict
+from horizon.models import get_perfect_filter_params
 
 import json
 import datetime
@@ -68,6 +69,7 @@ class Wallet(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(**kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:

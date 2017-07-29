@@ -122,4 +122,11 @@ class CommentListSerializer(BaseListSerializer):
     child = CommentDetailSerializer()
 
 
+class WalletDetailSerializer(BaseSerializer):
+    user_id = serializers.IntegerField()
+    balance = serializers.CharField()
+    phone = serializers.CharField(allow_blank=True, allow_null=True)
 
+
+class WalletListSerializer(BaseListSerializer):
+    child = WalletDetailSerializer()
