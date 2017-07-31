@@ -13,7 +13,7 @@ class Form(forms.Form):
 
     def cleaned_data_filter(self, cld):
         for key in cld.keys():
-            if isinstance(cld[key], basestring):
+            if isinstance(cld[key], (str, unicode)):
                 if not cld[key]:
                     cld.pop(key)
             else:

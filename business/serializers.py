@@ -10,7 +10,10 @@ from Business_App.bz_dishes.models import (City,
                                            FoodCourt)
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
-from Business_App.bz_wallet.models import WithdrawRecord
+from Business_App.bz_wallet.models import (WithdrawRecord,
+                                           WalletAction,
+                                           WITHDRAW_RECORD_STATUS,
+                                           WITHDRAW_RECORD_STATUS_STEP)
 
 from horizon.serializers import (BaseListSerializer,
                                  BaseModelSerializer,
@@ -310,8 +313,36 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
         model = WithdrawRecord
         fields = '__all__'
 
-    def update_status(self, instance, validated_data):
-        super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
+    def update_status(self, request, instance, validated_data):
+        if 'status' not in validated_data:
+            raise Exception('Data Error.')
+        else:
+            if len(validated_data) != 1:
+                raise Exception('Data Error.')
+        status = validated_data['status']
+        if instance.status not in WITHDRAW_RECORD_STATUS_STEP.keys() or \
+            status not in WITHDRAW_RECORD_STATUS_STEP[instance.status]:
+            raise Exception('Can not perform this action.')
+
+        if instance.status == WITHDRAW_RECORD_STATUS['unpaid']:
+            if status == WITHDRAW_RECORD_STATUS['waiting_pay']:
+                return super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
+            elif status == WITHDRAW_RECORD_STATUS['failed']:
+                # 添加事务管理(审核未通过)
+                super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
+                # 解除冻结的金额
+                return None
+        elif instance.status == WITHDRAW_RECORD_STATUS['waiting_pay']:
+            if status == WITHDRAW_RECORD_STATUS['paid']:
+                instance = super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
+                # 添加事务管理（打款操作）
+                # 扣除打款的金额及冻结的金额
+                wallet_instance = WalletAction().withdrawals(request, instance)
+                if isinstance(wallet_instance, Exception):
+                    return wallet_instance
+                return instance
+        else:
+            return instance
 
 
 class AdvertPictureSerializer(BaseModelSerializer):
