@@ -329,9 +329,12 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
                 return super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
             elif status == WITHDRAW_RECORD_STATUS['failed']:
                 # 添加事务管理(审核未通过)
-                super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
+                instance = super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
                 # 解除冻结的金额
-                return None
+                wallet_instance = WalletAction().unblock_blocked_money(request, instance)
+                if isinstance(wallet_instance, Exception):
+                    return wallet_instance
+                return instance
         elif instance.status == WITHDRAW_RECORD_STATUS['waiting_pay']:
             if status == WITHDRAW_RECORD_STATUS['paid']:
                 instance = super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)

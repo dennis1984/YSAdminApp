@@ -223,13 +223,31 @@ class Wallet(models.Model):
         return str(self.user_id)
 
     @classmethod
+    def unblock_blocked_money(cls, user_id, amount_of_money):
+        """
+        解除冻结金额 
+        """
+        instance = None
+        # 数据库加排它锁，保证更改信息是列队操作的，防止数据混乱
+        with transaction.atomic(using='business'):
+            try:
+                _instance = cls.objects.select_for_update().get(user_id=user_id)
+            except cls.DoesNotExist:
+                raise cls.DoesNotExist
+            blocked_money = _instance.blocked_money
+            _instance.blocked_money = str(Decimal(amount_of_money) - Decimal(blocked_money))
+            _instance.save()
+            instance = _instance
+        return instance
+
+    @classmethod
     def update_withdraw_balance(cls, user_id, amount_of_money):
         """
         提现
         """
         instance = None
         # 数据库加排它锁，保证更改信息是列队操作的，防止数据混乱
-        with transaction.atomic():
+        with transaction.atomic(using='business'):
             try:
                 _instance = cls.objects.select_for_update().get(user_id=user_id)
             except cls.DoesNotExist:
@@ -308,14 +326,6 @@ class WalletTradeAction(object):
         return wallet_detail
 
 
-# class WalletActionBase(object):
-#     """
-#     钱包相关功能
-#     """
-#     def get_wallet_trade_detail(self, orders_id):
-#         return WalletTradeDetail.get_object(**{'orders_id': orders_id})
-
-
 class WalletAction(object):
     """
     钱包相关功能
@@ -340,4 +350,20 @@ class WalletAction(object):
         _trade = WalletTradeAction().create(request, withdraw_record, method='withdraw')
         if isinstance(_trade, Exception):
             return _trade
+        return instance
+
+    def unblock_blocked_money(self, request, withdraw_record):
+        """
+        解除冻结金额（适用于提现审核不通过时的情景）
+        """
+        if not request.user.is_admin:
+            return Exception('Permission denied.')
+        if not isinstance(withdraw_record, WithdrawRecord):
+            return TypeError('Params [withdraw_record] data type error.')
+        if withdraw_record.status != WITHDRAW_RECORD_STATUS['failed']:
+            return TypeError('Cannot perform this action.')
+
+        # 解除冻结金额
+        instance = Wallet.unblock_blocked_money(withdraw_record.user_id,
+                                                withdraw_record.amount_of_money)
         return instance
