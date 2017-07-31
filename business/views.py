@@ -16,6 +16,7 @@ from business.serializers import (CitySerializer,
                                   UserListSerializer,
                                   WithdrawRecordSerializer,
                                   WithdrawRecordListSerializer,
+                                  WithdrawRecordInstanceSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
@@ -42,6 +43,7 @@ from business.forms import (CityInputForm,
                             DishesDeleteForm,
                             WithdrawRecordListForm,
                             WithdrawRecordDetailForm,
+                            WithdrawRecordActionForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -51,7 +53,8 @@ from Business_App.bz_dishes.models import (City,
 from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
-from Business_App.bz_wallet.models import WithdrawRecord
+from Business_App.bz_wallet.models import (WithdrawRecord,
+                                           WITHDRAW_RECORD_STATUS_STEP)
 
 
 class CityAction(generics.GenericAPIView):
@@ -684,6 +687,9 @@ class WithdrawRecordList(generics.GenericAPIView):
         return BusinessUser.filter_objects(business_name=business_name)
 
     def get_record_objects(self, **kwargs):
+        if 'status' in kwargs:
+            if len(kwargs) != 1:
+                return Exception('Data error.')
         if 'business_name' in kwargs:
             users = self.get_user_objects(kwargs['business_name'])
             if isinstance(users, Exception):
@@ -720,6 +726,8 @@ class WithdrawRecordDetail(generics.GenericAPIView):
         records = WithdrawRecord.filter_record_details(pk=record_id)
         if isinstance(records, Exception):
             return records
+        if len(records) != 1:
+            return Exception('Data error.')
         return records[0]
 
     def post(self, request, *args, **kwargs):
@@ -736,6 +744,40 @@ class WithdrawRecordDetail(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class WithdrawRecordAction(generics.GenericAPIView):
+    """
+    提现审核及打款
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def can_perform_this_action(self, record_id, status):
+        record = WithdrawRecord.get_object(pk=record_id)
+        if isinstance(record, Exception):
+            return False, record
+        if record.status not in WITHDRAW_RECORD_STATUS_STEP:
+            return False, Exception('Can not perform this action.')
+        if status not in WITHDRAW_RECORD_STATUS_STEP[record.status]:
+            return False, Exception('Can not perform this action.')
+        return True, record
+
+    def post(self, request, *args, **kwargs):
+        form = WithdrawRecordActionForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        can_bool, record = self.can_perform_this_action(record_id=cld['pk'],
+                                                        status=cld['status'])
+        if not can_bool:
+            return Response({'Detail': record.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = WithdrawRecordInstanceSerializer(record)
+        try:
+            serializer.update_status(record, {'status': cld['status']})
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
 class AdvertPictureAction(generics.GenericAPIView):

@@ -23,6 +23,11 @@ WITHDRAW_RECORD_STATUS = {
     'failed': 500,
 }
 
+WITHDRAW_RECORD_STATUS_STEP = {
+    0: (201, 500),
+    201: (206,),
+}
+
 
 class WithdrawRecord(models.Model):
     """
@@ -83,6 +88,7 @@ class WithdrawRecord(models.Model):
                 _kwargs['amount_of_money__in'] = ['%.f' % kwargs[key],
                                                   '%.1f' % kwargs[key],
                                                   '%.2f' % kwargs[key]]
+                _kwargs.pop('amount_of_money')
         return _kwargs
 
     @classmethod

@@ -10,6 +10,7 @@ from Business_App.bz_dishes.models import (City,
                                            FoodCourt)
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
+from Business_App.bz_wallet.models import WithdrawRecord
 
 from horizon.serializers import (BaseListSerializer,
                                  BaseModelSerializer,
@@ -302,6 +303,15 @@ class WithdrawRecordSerializer(BaseSerializer):
 
 class WithdrawRecordListSerializer(BaseListSerializer):
     child = WithdrawRecordSerializer()
+
+
+class WithdrawRecordInstanceSerializer(BaseModelSerializer):
+    class Meta:
+        model = WithdrawRecord
+        fields = '__all__'
+
+    def update_status(self, instance, validated_data):
+        super(WithdrawRecordInstanceSerializer, self).update(instance, validated_data)
 
 
 class AdvertPictureSerializer(BaseModelSerializer):

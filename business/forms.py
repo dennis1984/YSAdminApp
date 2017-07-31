@@ -182,6 +182,12 @@ class DishesDetailForm(forms.Form):
 
 
 class WithdrawRecordListForm(forms.Form):
+    status = forms.ChoiceField(choices=((0, 1),
+                                        (201, 2),
+                                        (206, 3),
+                                        (400, 4),
+                                        (500, 5)),
+                               required=False)
     business_name = forms.CharField(min_length=1, max_length=30, required=False)
     amount_of_money = forms.FloatField(min_value=0.01, required=False)
     start_created = forms.DateField(required=False)
@@ -192,6 +198,15 @@ class WithdrawRecordListForm(forms.Form):
 
 class WithdrawRecordDetailForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+
+
+class WithdrawRecordActionForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    status = forms.ChoiceField(choices=((201, 1),
+                                        (206, 2),
+                                        (500, 3)),
+                               error_messages={
+                                   'required': 'status must in [201, 206, 500]'})
 
 
 class AdvertPictureInputForm(forms.Form):
