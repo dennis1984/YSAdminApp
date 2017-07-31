@@ -25,6 +25,8 @@ urlpatterns = [
     url(r'^user_list/$', views.UserList.as_view()),
     url(r'^user_detail/$', views.UserDetail.as_view()),
 
+    url(r'^withdraw_list/$', views.WithdrawRecordList.as_view()),
+
     url(r'^advert_picture_action/$', views.AdvertPictureAction.as_view()),
 ]
 

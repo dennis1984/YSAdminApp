@@ -284,6 +284,26 @@ class UserListSerializer(BaseListSerializer):
     child = UserDetailSerializer()
 
 
+class WithdrawRecordSerializer(BaseSerializer):
+    id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
+    business_name = serializers.CharField()
+    amount_of_money = serializers.CharField()
+    service_charge = serializers.CharField()
+    payment_of_money = serializers.IntegerField()
+    account_id = serializers.IntegerField()
+    bank_card_number = serializers.CharField()
+    bank_name = serializers.CharField()
+    account_name = serializers.CharField()
+    status = serializers.IntegerField()
+    created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
+
+
+class WithdrawRecordListSerializer(BaseListSerializer):
+    child = WithdrawRecordSerializer()
+
+
 class AdvertPictureSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:

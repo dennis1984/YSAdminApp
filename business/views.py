@@ -14,6 +14,8 @@ from business.serializers import (CitySerializer,
                                   UserSerializer,
                                   UserDetailSerializer,
                                   UserListSerializer,
+                                  WithdrawRecordSerializer,
+                                  WithdrawRecordListSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
@@ -683,7 +685,10 @@ class WithdrawRecordList(generics.GenericAPIView):
     def get_record_objects(self, **kwargs):
         if 'business_name' in kwargs:
             users = self.get_user_objects(kwargs['business_name'])
-        return WithdrawRecord.filter_objects(**kwargs)
+            if isinstance(users, Exception):
+                return users
+            kwargs['user_id'] = users.id
+        return WithdrawRecord.filter_record_details(**kwargs)
 
     def post(self, request, *args, **kwargs):
         form = WithdrawRecordListForm(request.data)
@@ -692,7 +697,16 @@ class WithdrawRecordList(generics.GenericAPIView):
 
         cld = form.cleaned_data
         records = self.get_record_objects(**cld)
-        return Response(status=status.HTTP_200_OK)
+        if isinstance(records, Exception):
+            return Response({'Detail': records.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = WithdrawRecordListSerializer(data=records)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):
