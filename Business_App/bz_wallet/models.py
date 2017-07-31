@@ -235,7 +235,7 @@ class Wallet(models.Model):
             except cls.DoesNotExist:
                 raise cls.DoesNotExist
             blocked_money = _instance.blocked_money
-            _instance.blocked_money = str(Decimal(amount_of_money) - Decimal(blocked_money))
+            _instance.blocked_money = str(Decimal(blocked_money) - Decimal(amount_of_money))
             _instance.save()
             instance = _instance
         return instance
