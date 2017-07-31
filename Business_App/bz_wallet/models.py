@@ -79,6 +79,10 @@ class WithdrawRecord(models.Model):
                 _kwargs['created__gte'] = kwargs[key]
             if key == 'end_created':
                 _kwargs['created__lte'] = kwargs[key]
+            if key == 'amount_of_money':
+                _kwargs['amount_of_money__in'] = ['%.f' % kwargs[key],
+                                                  '%.1f' % kwargs[key],
+                                                  '%.2f' % kwargs[key]]
         return _kwargs
 
     @classmethod
@@ -87,7 +91,7 @@ class WithdrawRecord(models.Model):
         if isinstance(records, Exception):
             return records
 
-        user_ids = [item.user_id for item in records]
+        user_ids = list(set([item.user_id for item in records]))
         users = BusinessUser.filter_objects(id__in=user_ids)
         users_dict = {user.id: user for user in users}
 
@@ -95,7 +99,7 @@ class WithdrawRecord(models.Model):
         for item in records:
             record_dict = model_to_dict(item)
             user = users_dict.get(item.user_id)
-            if not users_dict:
+            if user:
                 record_dict['business_name'] = user.business_name
             else:
                 record_dict['business_name'] = ''

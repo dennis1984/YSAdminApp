@@ -41,6 +41,7 @@ from business.forms import (CityInputForm,
                             DishesUpdateForm,
                             DishesDeleteForm,
                             WithdrawRecordListForm,
+                            WithdrawRecordDetailForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -675,7 +676,7 @@ class UserDetail(generics.GenericAPIView):
 
 class WithdrawRecordList(generics.GenericAPIView):
     """
-    提现查询
+    提现查询（列表）
     """
     permission_classes = (IsAdminOrReadOnly,)
 
@@ -687,7 +688,7 @@ class WithdrawRecordList(generics.GenericAPIView):
             users = self.get_user_objects(kwargs['business_name'])
             if isinstance(users, Exception):
                 return users
-            kwargs['user_id'] = users.id
+            kwargs['user_id__in'] = [user.id for user in users]
         return WithdrawRecord.filter_record_details(**kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -707,6 +708,34 @@ class WithdrawRecordList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class WithdrawRecordDetail(generics.GenericAPIView):
+    """
+    提现记录查询（详情）
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_record_object(self, record_id):
+        records = WithdrawRecord.filter_record_details(pk=record_id)
+        if isinstance(records, Exception):
+            return records
+        return records[0]
+
+    def post(self, request, *args, **kwargs):
+        form = WithdrawRecordDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        record = self.get_record_object(cld['pk'])
+        if isinstance(record, Exception):
+            return Response({'Detail': record.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = WithdrawRecordSerializer(data=record)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):
