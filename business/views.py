@@ -55,6 +55,7 @@ from business.forms import (CityInputForm,
                             BankCardListForm,
                             BankCardUpdateForm,
                             AdvertPictureInputForm,
+                            AdvertPictureUpdateForm,
                             AdvertPictureDeleteForm)
 
 from Business_App.bz_dishes.models import (City,
@@ -1039,6 +1040,26 @@ class AdvertPictureAction(generics.GenericAPIView):
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def put(self, request, *args, **kwargs):
+        """
+        更新图片信息
+        """
+        form = AdvertPictureUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        advert_instance = self.get_instance(pk=cld['pk'])
+        if isinstance(advert_instance, Exception):
+            return Response({'Detail': advert_instance.args},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = AdvertPictureSerializer(advert_instance)
+        try:
+            serializer.update(advert_instance, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
     def delete(self, request, *args, **kwargs):
         """
         删除广告图片
@@ -1059,3 +1080,12 @@ class AdvertPictureAction(generics.GenericAPIView):
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class AdvertPictureList(generics.GenericAPIView):
+    """
+    广告列表查询
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def post(self, request, *args, **kwargs):
+        pass

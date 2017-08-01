@@ -261,5 +261,11 @@ class AdvertPictureInputForm(forms.Form):
     image = forms.ImageField()
 
 
+class AdvertPictureUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    name = forms.CharField(max_length=20, required=False)
+    image = forms.ImageField(required=False)
+
+
 class AdvertPictureDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
