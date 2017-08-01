@@ -348,6 +348,28 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
             return instance
 
 
+class OrdersDetailSerializer(BaseSerializer):
+    pay_orders_id = serializers.CharField(required=False, allow_blank=True,
+                                          allow_null=True)
+    verify_orders_id = serializers.CharField(required=False, allow_blank=True,
+                                             allow_null=True)
+    business_name = serializers.CharField()
+    user_id = serializers.IntegerField()
+    food_court_name = serializers.CharField()
+    total_amount = serializers.CharField()
+    member_discount = serializers.CharField()
+    other_discount = serializers.CharField()
+    payable = serializers.CharField()
+    payment_status = serializers.IntegerField()
+    payment_mode = serializers.IntegerField()
+    orders_type = serializers.IntegerField()
+    created = serializers.IntegerField()
+
+
+class OrdersListSerializer(BaseListSerializer):
+    child = OrdersDetailSerializer()
+
+
 class AdvertPictureSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:

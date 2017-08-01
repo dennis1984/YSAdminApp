@@ -17,6 +17,8 @@ from business.serializers import (CitySerializer,
                                   WithdrawRecordSerializer,
                                   WithdrawRecordListSerializer,
                                   WithdrawRecordInstanceSerializer,
+                                  OrdersDetailSerializer,
+                                  OrdersListSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
@@ -44,6 +46,8 @@ from business.forms import (CityInputForm,
                             WithdrawRecordListForm,
                             WithdrawRecordDetailForm,
                             WithdrawRecordActionForm,
+                            OrdersListForm,
+                            OrdersDetailForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -55,6 +59,7 @@ from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
 from Business_App.bz_wallet.models import (WithdrawRecord,
                                            WITHDRAW_RECORD_STATUS_STEP)
+from Business_App.bz_orders.models import Orders, VerifyOrders
 
 
 class CityAction(generics.GenericAPIView):
@@ -779,6 +784,57 @@ class WithdrawRecordAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
+class OrdersList(generics.GenericAPIView):
+    """
+    订单查询
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_orders_list(self, **kwargs):
+        if 'pay_orders_id' in kwargs and 'verify_orders_id' in kwargs:
+            return Exception('Params Error.')
+        if 'phone' in kwargs:
+            user = BusinessUser.get_object(phone=kwargs['phone'])
+            if isinstance(user, Exception):
+                return user
+            kwargs['user_id__in'] = user.id
+            kwargs.pop('phone')
+
+        orders_details = []
+        if 'pay_orders_id' in kwargs:
+            orders_details = Orders.filter_orders_details(**kwargs)
+        elif 'verify_orders_id' in kwargs:
+            orders_details = VerifyOrders.filter_orders_details(**kwargs)
+        else:
+            orders_list = Orders.filter_orders_details(**kwargs)
+            verify_orders_list = VerifyOrders.filter_orders_details(**kwargs)
+            try:
+                orders_details = orders_list + verify_orders_list
+            except Exception as e:
+                return e
+
+        if isinstance(orders_details, Exception):
+            return orders_details
+        return orders_details
+
+    def post(self, request, *args, **kwargs):
+        form = OrdersListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        orders_list = self.get_orders_list(**cld)
+        if isinstance(orders_list, Exception):
+            return Response({'Detail': orders_list.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = OrdersListSerializer(data=orders_list)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):
