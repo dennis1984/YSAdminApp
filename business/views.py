@@ -763,7 +763,7 @@ class WithdrawRecordAction(generics.GenericAPIView):
             return False, Exception('Can not perform this action.')
         return True, record
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         form = WithdrawRecordActionForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)

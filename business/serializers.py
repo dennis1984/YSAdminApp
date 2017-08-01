@@ -333,7 +333,7 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
                 # 解除冻结的金额
                 wallet_instance = WalletAction().unblock_blocked_money(request, instance)
                 if isinstance(wallet_instance, Exception):
-                    return wallet_instance
+                    raise wallet_instance
                 return instance
         elif instance.status == WITHDRAW_RECORD_STATUS['waiting_pay']:
             if status == WITHDRAW_RECORD_STATUS['paid']:
@@ -342,7 +342,7 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
                 # 扣除打款的金额及冻结的金额
                 wallet_instance = WalletAction().withdrawals(request, instance)
                 if isinstance(wallet_instance, Exception):
-                    return wallet_instance
+                    raise wallet_instance
                 return instance
         else:
             return instance
