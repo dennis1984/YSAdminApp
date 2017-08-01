@@ -230,7 +230,7 @@ class OrdersListForm(forms.Form):
 
 
 class OrdersDetailForm(forms.Form):
-    orders_id = forms.IntegerField(min_value=1)
+    orders_id = forms.CharField(min_length=14, max_length=32)
 
 
 class AdvertPictureInputForm(forms.Form):

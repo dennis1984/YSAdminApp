@@ -837,6 +837,34 @@ class OrdersList(generics.GenericAPIView):
         return Response(datas, status=status.HTTP_200_OK)
 
 
+class OrdersDetail(generics.GenericAPIView):
+    """
+    订单详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_orders_detail(self, **kwargs):
+        orders_id = kwargs['orders_id']
+        if orders_id.startswith('Z'):
+            return VerifyOrders.get_object(orders_id=orders_id)
+        else:
+            return Orders.get_object(orders_id=orders_id)
+
+    def post(self, request, *args, **kwargs):
+        form = OrdersDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        orders_detail = self.get_orders_detail(**cld)
+        if isinstance(orders_detail, Exception):
+            return Response({'Detail': orders_detail.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = OrdersDetailSerializer(data=orders_detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class AdvertPictureAction(generics.GenericAPIView):
     """
     轮播广告
