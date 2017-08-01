@@ -119,6 +119,12 @@ class VerifyOrders(models.Model):
                 _kwargs['created__gte'] = kwargs[key]
             if key == 'end_created':
                 _kwargs['created__lte'] = kwargs[key]
+            if key == 'payment_status':
+                if kwargs[key] == ORDERS_PAYMENT_STATUS['unpaid']:
+                    _kwargs['expires__gt'] = now()
+                elif kwargs[key] == ORDERS_PAYMENT_STATUS['expired']:
+                    _kwargs['payment_status'] = ORDERS_PAYMENT_STATUS['unpaid']
+                    _kwargs['expires__lte'] = now()
         return _kwargs
 
     @classmethod
@@ -134,6 +140,12 @@ class VerifyOrders(models.Model):
         details = []
         for item in orders_list:
             orders_dict = model_to_dict(item)
+            if 'min_payable' in kwargs:
+                if float(orders_dict['payable']) < float(kwargs['min_payable']):
+                    continue
+            if 'max_payable' in kwargs:
+                if float(orders_dict['payable']) > float(kwargs['max_payable']):
+                    continue
             # user = users_dict.get(item.user_id)
             # if user:
             #     orders_dict['business_name'] = user.business_name
