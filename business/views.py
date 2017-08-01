@@ -894,7 +894,7 @@ class BankCardAction(generics.GenericAPIView):
         return True
 
     def get_bank_card_instance(self, pk):
-        return BankCard.get_object(pk=pk)
+        return BankCard.get_object(_filter_all=False, pk=pk)
 
     def get_perfect_card_number(self, bank_card_number):
         re_com = re.compile(r'^[0-9]+$')
@@ -985,7 +985,7 @@ class BankCardList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_bank_card_list(self, **kwargs):
-        return BankCard.filter_objects(**kwargs)
+        return BankCard.filter_objects(_filter_all=False, **kwargs)
 
     def post(self, request, *args, **kwargs):
         form = BankCardListForm(request.data)

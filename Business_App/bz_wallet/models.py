@@ -16,6 +16,8 @@ from Business_App.bz_users.models import BusinessUser
 from Business_App.bz_orders.models import ORDERS_ORDERS_TYPE
 from Consumer_App.cs_orders.models import SerialNumberGenerator
 
+from horizon.models import BaseManager
+
 import datetime
 
 WITHDRAW_RECORD_STATUS = {
@@ -182,7 +184,9 @@ class BankCard(models.Model):
         return str(self.user_id)
 
     @classmethod
-    def get_object(cls, **kwargs):
+    def get_object(cls, _filter_all=True, **kwargs):
+        if not _filter_all:
+            kwargs['status'] = 1
         try:
             return cls.objects.get(**kwargs)
         except Exception as e:
@@ -196,7 +200,9 @@ class BankCard(models.Model):
         return True
 
     @classmethod
-    def filter_objects(cls, **kwargs):
+    def filter_objects(cls, _filter_all=True, **kwargs):
+        if not _filter_all:
+            kwargs['status'] = 1
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
