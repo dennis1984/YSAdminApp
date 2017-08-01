@@ -688,8 +688,9 @@ class WithdrawRecordList(generics.GenericAPIView):
 
     def get_record_objects(self, **kwargs):
         if 'status' in kwargs:
-            if len(kwargs) != 1:
-                return Exception('Data error.')
+            for key in kwargs:
+                if key not in ['status', 'page_index', 'page_size']:
+                    return Exception('Data error.')
         if 'business_name' in kwargs:
             users = self.get_user_objects(kwargs['business_name'])
             if isinstance(users, Exception):
