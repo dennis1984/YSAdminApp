@@ -12,6 +12,7 @@ from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
 from Business_App.bz_wallet.models import (WithdrawRecord,
                                            WalletAction,
+                                           BankCard,
                                            WITHDRAW_RECORD_STATUS,
                                            WITHDRAW_RECORD_STATUS_STEP)
 
@@ -349,6 +350,7 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
 
 
 class OrdersDetailSerializer(BaseSerializer):
+    orders_id = serializers.CharField()
     pay_orders_id = serializers.CharField(allow_blank=True, allow_null=True)
     verify_orders_id = serializers.CharField(allow_blank=True, allow_null=True)
     business_name = serializers.CharField(allow_null=True, allow_blank=True)
@@ -366,6 +368,42 @@ class OrdersDetailSerializer(BaseSerializer):
 
 class OrdersListSerializer(BaseListSerializer):
     child = OrdersDetailSerializer()
+
+
+class BankCardSerializer(BaseModelSerializer):
+    def __init__(self, instance=None, data=None, **kwargs):
+        if data:
+            super(BankCardSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(BankCardSerializer, self).__init__(instance, **kwargs)
+
+    class Meta:
+        model = BankCard
+        fields = '__all__'
+
+    def save(self, request, **kwargs):
+        if not request.user.is_admin:
+            return Exception('Permission denied.')
+        try:
+            return super(BankCardSerializer, self).save(**kwargs)
+        except Exception as e:
+            return e
+
+    def delete(self, request, instance, **kwargs):
+        if not request.user.is_admin:
+            return Exception('Permission denied.')
+
+        kwargs['status'] = 2
+        kwargs['bank_card_number'] = '%s-%s' % (instance.bank_card_number,
+                                                main.make_random_char_and_number_of_string(5))
+        try:
+            return super(BankCardSerializer, self).update(instance, kwargs)
+        except Exception as e:
+            return e
+
+
+class BankCardListSerializer(BaseListSerializer):
+    child = BankCardSerializer()
 
 
 class AdvertPictureSerializer(BaseModelSerializer):

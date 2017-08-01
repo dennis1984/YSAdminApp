@@ -32,6 +32,9 @@ urlpatterns = [
     url(r'^orders_list/$', views.OrdersList.as_view()),
     url(r'^orders_detail/$', views.OrdersDetail.as_view()),
 
+    url(r'^bank_card_action/$', views.BankCardAction.as_view()),
+    url(r'^bank_card_list/$', views.BankCardList.as_view()),
+
     url(r'^advert_picture_action/$', views.AdvertPictureAction.as_view()),
 ]
 

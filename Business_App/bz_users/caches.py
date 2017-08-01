@@ -23,6 +23,9 @@ class BusinessUserCache(object):
     def get_user_detail_id_key(self, user_id):
         return 'user_detail_id:%s' % user_id
 
+    def get_user_id_key(self, user_id):
+        return 'user_instance_id:%s' % user_id
+
     def set_user_to_cache(self, key, data, expires=EXPIRES_10_HOURS):
         self.handle.set(key, data)
         self.handle.expire(key, expires)
@@ -36,3 +39,15 @@ class BusinessUserCache(object):
                 return user_detail
             self.set_user_to_cache(key, user_detail)
         return user_detail
+
+    def get_user_by_id(self, request, user_id=None):
+        if not request.user.is_admin:
+            user_id = request.user.id
+        key = self.get_user_id_key(user_id)
+        user_instance = self.handle.get(key)
+        if not user_instance:
+            user_instance = BusinessUser.get_object(**{'pk': user_id})
+            if isinstance(user_instance, Exception):
+                return user_instance
+            self.set_user_to_cache(key, user_instance)
+        return user_instance

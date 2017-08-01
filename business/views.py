@@ -19,6 +19,8 @@ from business.serializers import (CitySerializer,
                                   WithdrawRecordInstanceSerializer,
                                   OrdersDetailSerializer,
                                   OrdersListSerializer,
+                                  BankCardSerializer,
+                                  BankCardListSerializer,
                                   AdvertPictureSerializer,)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
@@ -48,6 +50,9 @@ from business.forms import (CityInputForm,
                             WithdrawRecordActionForm,
                             OrdersListForm,
                             OrdersDetailForm,
+                            BankCardAddForm,
+                            BankCardDeleteForm,
+                            BankCardListForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -58,8 +63,12 @@ from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
 from Business_App.bz_wallet.models import (WithdrawRecord,
+                                           BankCard,
                                            WITHDRAW_RECORD_STATUS_STEP)
 from Business_App.bz_orders.models import Orders, VerifyOrders
+from Business_App.bz_users.caches import BusinessUserCache
+
+import re
 
 
 class CityAction(generics.GenericAPIView):
@@ -846,9 +855,15 @@ class OrdersDetail(generics.GenericAPIView):
     def get_orders_detail(self, **kwargs):
         orders_id = kwargs['orders_id']
         if orders_id.startswith('Z'):
-            return VerifyOrders.get_object(orders_id=orders_id)
+            details = VerifyOrders.filter_orders_details(orders_id=orders_id)
+
         else:
-            return Orders.get_object(orders_id=orders_id)
+            details = Orders.filter_orders_details(orders_id=orders_id)
+        if isinstance(details, Exception):
+            return details
+        if len(details) != 1:
+            return Exception('Data Error.')
+        return details[0]
 
     def post(self, request, *args, **kwargs):
         form = OrdersDetailForm(request.data)
@@ -863,6 +878,111 @@ class OrdersDetail(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BankCardAction(generics.GenericAPIView):
+    """
+    银行卡绑定或解除绑定 (需要管理员权限)
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def does_user_exist(self, request, user_id):
+        ins = BusinessUserCache().get_user_by_id(request, user_id)
+        if isinstance(ins, Exception):
+            return False
+        return True
+
+    def get_bank_card_instance(self, pk):
+        return BankCard.get_object(pk=pk)
+
+    def get_perfect_card_number(self, bank_card_number):
+        re_com = re.compile(r'^[0-9]+$')
+        card_num_list = bank_card_number.split()
+        card_num_str = ''.join(card_num_list)
+        for item in card_num_list:
+            if not re_com.match(item):
+                return ValueError('Bank card number is incorrect.')
+        if len(card_num_str) > 20:
+            return ValueError('Bank card number is incorrect.')
+
+        perfect_list = []
+        for index in range(len(card_num_str) / 4 + 1):
+            if index * 4 < len(card_num_str):
+                perfect_list.append(card_num_str[index * 4: index * 4 + 4])
+        return ' '.join(perfect_list)
+
+    def post(self, request, *args, **kwargs):
+        """
+        绑定银行卡
+        """
+        form = BankCardAddForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        if not self.does_user_exist(request, cld['user_id']):
+            return Response({'Detail': 'The user %d does exist.' % cld['user_id']},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        bank_card_number = self.get_perfect_card_number(cld['bank_card_number'])
+        if isinstance(bank_card_number, Exception):
+            return Response({'Detail': bank_card_number.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld['bank_card_number'] = bank_card_number
+        serializer = BankCardSerializer(data=cld)
+        if serializer.is_valid():
+            result = serializer.save(request)
+            if isinstance(result, Exception):
+                return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        解除绑定银行卡
+        """
+        form = BankCardDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_bank_card_instance(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': 'The bank card %d does not exist.' % cld['pk']},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = BankCardSerializer(instance)
+        result = serializer.delete(request, instance)
+        if isinstance(request, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BankCardList(generics.GenericAPIView):
+    """
+    获取绑定银行卡信息列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_bank_card_list(self, **kwargs):
+        return BankCard.filter_objects(**kwargs)
+
+    def get(self, request, *args, **kwargs):
+        form = BankCardListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_bank_card_list(**cld)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = BankCardListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        result = serializer.list_data()
+        if isinstance(result, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):
