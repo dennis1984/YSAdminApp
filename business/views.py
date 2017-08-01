@@ -888,7 +888,7 @@ class BankCardAction(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def does_user_exist(self, request, user_id):
-        ins = BusinessUserCache().get_user_by_id(request, user_id)
+        ins = BusinessUser.get_object(pk=user_id)
         if isinstance(ins, Exception):
             return False
         return True
@@ -1013,6 +1013,9 @@ class AdvertPictureAction(generics.GenericAPIView):
     def get_instance(self, pk):
         return AdvertPicture.get_object(pk=pk)
 
+    def get_food_court_object(self, food_court_id):
+        return FoodCourt.get_object(pk=food_court_id)
+
     def post(self, request, *args, **kwargs):
         """
         添加广告图片
@@ -1022,6 +1025,11 @@ class AdvertPictureAction(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
+        food_court_instance = self.get_food_court_object(cld['food_court_id'])
+        if isinstance(food_court_instance, Exception):
+            return Response({'Detail': food_court_instance.args},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         serializer = AdvertPictureSerializer(data=cld)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

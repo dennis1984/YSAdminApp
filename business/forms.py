@@ -256,6 +256,7 @@ class BankCardListForm(forms.Form):
 
 
 class AdvertPictureInputForm(forms.Form):
+    food_court_id = forms.IntegerField(min_value=1)
     name = forms.CharField(max_length=20)
     image = forms.ImageField()
 
