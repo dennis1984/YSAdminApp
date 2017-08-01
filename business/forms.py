@@ -240,12 +240,19 @@ class BankCardAddForm(forms.Form):
     account_name = forms.CharField(min_length=2, max_length=20)
 
 
+class BankCardUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    bank_card_number = forms.CharField(min_length=16, max_length=25, required=False)
+    bank_name = forms.CharField(min_length=4, max_length=50, required=False)
+    account_name = forms.CharField(min_length=2, max_length=20, required=False)
+
+
 class BankCardDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
 
 
 class BankCardListForm(forms.Form):
-    user_id = forms.IntegerField(min_value=1, required=False)
+    user_id = forms.IntegerField(min_value=1)
 
 
 class AdvertPictureInputForm(forms.Form):

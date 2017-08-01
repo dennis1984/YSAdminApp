@@ -384,10 +384,12 @@ class BankCardSerializer(BaseModelSerializer):
     def save(self, request, **kwargs):
         if not request.user.is_admin:
             return Exception('Permission denied.')
-        try:
-            return super(BankCardSerializer, self).save(**kwargs)
-        except Exception as e:
-            return e
+        return super(BankCardSerializer, self).save(**kwargs)
+
+    def update(self, instance, validated_data):
+        if 'pk' in validated_data:
+            validated_data.pop('pk')
+        return super(BankCardSerializer, self).update(instance, validated_data)
 
     def delete(self, request, instance, **kwargs):
         if not request.user.is_admin:

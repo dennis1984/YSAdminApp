@@ -53,6 +53,7 @@ from business.forms import (CityInputForm,
                             BankCardAddForm,
                             BankCardDeleteForm,
                             BankCardListForm,
+                            BankCardUpdateForm,
                             AdvertPictureInputForm,
                             AdvertPictureDeleteForm)
 
@@ -931,11 +932,31 @@ class BankCardAction(generics.GenericAPIView):
         cld['bank_card_number'] = bank_card_number
         serializer = BankCardSerializer(data=cld)
         if serializer.is_valid():
-            result = serializer.save(request)
-            if isinstance(result, Exception):
-                return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                serializer.save(request)
+            except Exception as e:
+                return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, *args, **kwargs):
+        """
+        更改所绑定银行卡的信息
+        """
+        form = BankCardUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_bank_card_instance(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = BankCardSerializer(instance)
+        try:
+            serializer.update(instance, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -966,7 +987,7 @@ class BankCardList(generics.GenericAPIView):
     def get_bank_card_list(self, **kwargs):
         return BankCard.filter_objects(**kwargs)
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         form = BankCardListForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -976,9 +997,7 @@ class BankCardList(generics.GenericAPIView):
         if isinstance(details, Exception):
             return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = BankCardListSerializer(data=details)
-        if not serializer.is_valid():
-            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = BankCardListSerializer(details)
         result = serializer.list_data()
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
