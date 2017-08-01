@@ -134,6 +134,8 @@ class VerifyOrders(models.Model):
         details = []
         for item in orders_list:
             orders_dict = model_to_dict(item)
+            orders_dict['pay_orders_id'] = ''
+            orders_dict['verify_orders_id'] = item.orders_id
             if 'min_payable' in kwargs:
                 if float(orders_dict['payable']) < float(kwargs['min_payable']):
                     continue
@@ -274,6 +276,8 @@ class Orders(models.Model):
         details = []
         for item in orders_list:
             orders_dict = model_to_dict(item)
+            orders_dict['pay_orders_id'] = item.orders_id
+            orders_dict['verify_orders_id'] = ''
             if 'min_payable' in kwargs:
                 if float(orders_dict['payable']) < float(kwargs['min_payable']):
                     continue

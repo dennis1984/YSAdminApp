@@ -349,10 +349,8 @@ class WithdrawRecordInstanceSerializer(BaseModelSerializer):
 
 
 class OrdersDetailSerializer(BaseSerializer):
-    pay_orders_id = serializers.CharField(required=False, allow_blank=True,
-                                          allow_null=True)
-    verify_orders_id = serializers.CharField(required=False, allow_blank=True,
-                                             allow_null=True)
+    pay_orders_id = serializers.CharField(allow_blank=True, allow_null=True)
+    verify_orders_id = serializers.CharField(allow_blank=True, allow_null=True)
     business_name = serializers.CharField(allow_null=True, allow_blank=True)
     user_id = serializers.IntegerField()
     food_court_name = serializers.CharField()
