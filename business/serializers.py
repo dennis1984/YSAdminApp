@@ -353,17 +353,17 @@ class OrdersDetailSerializer(BaseSerializer):
                                           allow_null=True)
     verify_orders_id = serializers.CharField(required=False, allow_blank=True,
                                              allow_null=True)
-    business_name = serializers.CharField()
+    business_name = serializers.CharField(allow_null=True, allow_blank=True)
     user_id = serializers.IntegerField()
     food_court_name = serializers.CharField()
-    total_amount = serializers.CharField()
-    member_discount = serializers.CharField()
-    other_discount = serializers.CharField()
+    total_amount = serializers.CharField(allow_null=True, allow_blank=True)
+    member_discount = serializers.CharField(allow_null=True, allow_blank=True)
+    other_discount = serializers.CharField(allow_null=True, allow_blank=True)
     payable = serializers.CharField()
     payment_status = serializers.IntegerField()
     payment_mode = serializers.IntegerField()
     orders_type = serializers.IntegerField()
-    created = serializers.IntegerField()
+    created = serializers.DateTimeField()
 
 
 class OrdersListSerializer(BaseListSerializer):

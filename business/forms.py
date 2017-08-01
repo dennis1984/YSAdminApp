@@ -210,12 +210,12 @@ class WithdrawRecordActionForm(forms.Form):
 
 
 class OrdersListForm(forms.Form):
-    status = forms.ChoiceField(choices=((0, 1),
-                                        (201, 2),
-                                        (206, 3),
-                                        (400, 4),
-                                        (500, 5)),
-                               required=False)
+    payment_status = forms.ChoiceField(choices=((0, 1),
+                                                (201, 2),
+                                                (206, 3),
+                                                (400, 4),
+                                                (500, 5)),
+                                       )
     pay_orders_id = forms.CharField(min_length=14, max_length=32, required=False)
     verify_orders_id = forms.CharField(min_length=14, max_length=32, required=False)
     phone = forms.CharField(min_length=11, max_length=16, required=False)

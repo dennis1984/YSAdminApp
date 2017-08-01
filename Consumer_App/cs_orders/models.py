@@ -146,13 +146,7 @@ class PayOrders(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        kwargs = get_perfect_filter_params(cls, **kwargs)
-        if 'payment_status' in kwargs:
-            if int(kwargs['payment_status']) == ORDERS_PAYMENT_STATUS['unpaid']:
-                kwargs['expires__gt'] = now()
-            if int(kwargs['payment_status']) == ORDERS_PAYMENT_STATUS['expired']:
-                kwargs['payment_status'] = ORDERS_PAYMENT_STATUS['unpaid']
-                kwargs['expires__lte'] = now()
+        kwargs = cls.make_perfect_filter(**kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
@@ -162,17 +156,22 @@ class PayOrders(models.Model):
     def filter_recharge_objects(cls, **kwargs):
         kwargs.update(**{'orders_type': ORDERS_ORDERS_TYPE['wallet_recharge'],
                          })
-        kwargs = cls.mark_perfect_filter(**kwargs)
         return cls.filter_objects(**kwargs)
 
     @classmethod
-    def mark_perfect_filter(cls, **kwargs):
+    def make_perfect_filter(cls, **kwargs):
         _kwargs = get_perfect_filter_params(cls, **kwargs)
         for key in kwargs:
             if key == 'start_created':
                 _kwargs['created__gte'] = kwargs[key]
             if key == 'end_created':
                 _kwargs['created__lte'] = kwargs[key]
+            if key == 'payment_status':
+                if kwargs[key] == ORDERS_PAYMENT_STATUS['unpaid']:
+                    _kwargs['expires__gt'] = now()
+                if kwargs[key] == ORDERS_PAYMENT_STATUS['expired']:
+                    _kwargs['payment_status'] = ORDERS_PAYMENT_STATUS['unpaid']
+                    _kwargs['expires__lte'] = now()
             # if key == 'min_payable':
             #     _kwargs['payable__gte'] = float(kwargs[key])
             # if key == 'max_payable':
