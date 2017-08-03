@@ -148,6 +148,12 @@ class WalletTradeDetailListSerializer(BaseListSerializer):
     child = WalletTradeDetailSerializer()
 
 
+class WalletSerializer(BaseModelSerializer):
+    class Meta:
+        model = Wallet
+        fields = ('user_id', 'balance', 'updated')
+
+
 class PayOrdersSerializer(BaseModelSerializer):
     class Meta:
         model = PayOrders
@@ -163,5 +169,5 @@ class PayOrdersSerializer(BaseModelSerializer):
         if isinstance(wallet_instance, Exception):
             raise wallet_instance
 
-        serializer = WalletDetailSerializer(wallet_instance)
+        serializer = WalletSerializer(wallet_instance)
         return serializer.data
