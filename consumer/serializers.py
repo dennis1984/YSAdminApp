@@ -12,7 +12,6 @@ from Consumer_App.cs_wallet.models import (WalletTradeDetail,
                                            Wallet)
 from Consumer_App.cs_orders.models import PayOrders
 
-from horizon.models import model_to_dict
 import re
 import copy
 
@@ -163,5 +162,6 @@ class PayOrdersSerializer(BaseModelSerializer):
         wallet_instance = WalletAction().recharge(None, instance, gateway='admin_pay')
         if isinstance(wallet_instance, Exception):
             raise wallet_instance
-        return model_to_dict(wallet_instance)
 
+        serializer = WalletDetailSerializer(wallet_instance)
+        return serializer.data
