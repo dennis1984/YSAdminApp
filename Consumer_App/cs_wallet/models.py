@@ -11,14 +11,24 @@ from decimal import Decimal
 from horizon.models import model_to_dict
 from horizon.models import get_perfect_filter_params
 
-from Consumer_App.cs_orders.models import (PayOrders,
-                                           ORDERS_PAYMENT_MODE,
-                                           ORDERS_PAYMENT_STATUS,
-                                           ORDERS_ORDERS_TYPE)
-
 import json
 import datetime
 
+ORDERS_ORDERS_TYPE = {
+    'unknown': 0,
+    'online': 101,
+    'business': 102,
+    'take_out': 103,
+    'wallet_recharge': 201,
+}
+
+ORDERS_PAYMENT_MODE = {
+    'unknown': 0,
+    'wallet': 1,
+    'wxpay': 2,
+    'alipay': 3,
+    'admin': 20,
+}
 
 WALLET_TRADE_DETAIL_TRADE_TYPE_DICT = {
     'recharge': 1,
@@ -188,8 +198,8 @@ class WalletActionBase(object):
         return WalletTradeDetail.get_object(**{'orders_id': orders_id})
 
     def verify_action_params(self, request, orders, method=None):
-        if not isinstance(orders, PayOrders):
-            return TypeError('Params orders must be PayOrders instance')
+        # if not isinstance(orders, PayOrders):
+        #     return TypeError('Params orders must be PayOrders instance')
 
         wallet_detail = self.get_wallet_trade_detail(orders.orders_id)
         if not isinstance(wallet_detail, Exception):
@@ -251,8 +261,8 @@ class WalletTradeAction(object):
         """
         创建交易明细（包含：充值、消费和提现（暂不支持）的交易明细）
         """
-        if not isinstance(orders, PayOrders):
-            return TypeError('Orders data error')
+        # if not isinstance(orders, PayOrders):
+        #     return TypeError('Orders data error')
         if orders.orders_type not in ORDERS_ORDERS_TYPE.values():
             return ValueError('Orders data error')
         if not orders.is_success:
