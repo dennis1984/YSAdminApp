@@ -7,8 +7,12 @@ from horizon.serializers import (BaseListSerializer,
 from Consumer_App.cs_comment.models import Comment
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import ReplyComment
-from Consumer_App.cs_wallet.models import (WalletTradeDetail, WalletAction)
+from Consumer_App.cs_wallet.models import (WalletTradeDetail,
+                                           WalletAction,
+                                           Wallet)
 from Consumer_App.cs_orders.models import PayOrders
+
+from horizon.models import model_to_dict
 import re
 import copy
 
@@ -156,8 +160,8 @@ class PayOrdersSerializer(BaseModelSerializer):
             instance = self.save()
         except Exception as e:
             return e
-        result = WalletAction().recharge(None, instance, gateway='admin_pay')
-        if isinstance(result, Exception):
-            return result
-        return instance
+        wallet_instance = WalletAction().recharge(None, instance, gateway='admin_pay')
+        if isinstance(wallet_instance, Exception):
+            raise wallet_instance
+        return model_to_dict(wallet_instance)
 

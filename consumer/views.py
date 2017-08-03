@@ -378,7 +378,7 @@ class WalletAction(generics.GenericAPIView):
     def make_orders_by_recharge(self, user_id=None, payable=None, **kwargs):
         return PayOrders.make_orders_by_recharge(user_id, payable)
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         form = RechargeActionFrom(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -393,10 +393,10 @@ class WalletAction(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            serializer.go_to_recharge()
+            wallet_detail = serializer.go_to_recharge()
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(wallet_detail, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
 class CommentList(generics.GenericAPIView):
