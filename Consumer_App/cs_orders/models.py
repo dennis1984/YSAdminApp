@@ -219,8 +219,8 @@ class PayOrders(models.Model):
         return orders_details
 
     @classmethod
-    def make_orders_by_recharge(cls, request, orders_type, payable):
-        dishes_details = [{'orders_type': orders_type,
+    def make_orders_by_recharge(cls, user_id, payable):
+        dishes_details = [{'orders_type': ORDERS_ORDERS_TYPE['wallet_recharge'],
                            'payable': payable},
                           ]
         food_court_id = 0
@@ -230,21 +230,24 @@ class PayOrders(models.Model):
         # 会员优惠及其他优惠
         member_discount = 0
         other_discount = 0
-        orders_data = cls.make_orders_base(request=request, food_court_id=food_court_id,
+        kwargs = {'payment_status': ORDERS_PAYMENT_STATUS['paid'],
+                  'payment_mode': ORDERS_PAYMENT_MODE['admin']}
+        orders_data = cls.make_orders_base(user_id=user_id, food_court_id=food_court_id,
                                            food_court_name=food_court_name,
                                            dishes_details=dishes_details,
                                            total_amount=total_amount,
                                            member_discount=member_discount,
                                            other_discount=other_discount,
-                                           orders_type=ORDERS_ORDERS_TYPE['wallet_recharge'])
+                                           orders_type=ORDERS_ORDERS_TYPE['wallet_recharge'],
+                                           **kwargs)
         return orders_data
 
     @classmethod
-    def make_orders_base(cls, request, food_court_id, food_court_name,
+    def make_orders_base(cls, user_id, food_court_id, food_court_name,
                          dishes_details, total_amount, member_discount,
-                         other_discount, orders_type):
+                         other_discount, orders_type, **kwargs):
         try:
-            orders_data = {'user_id': request.user.id,
+            orders_data = {'user_id': user_id,
                            'orders_id': OrdersIdGenerator.get_orders_id(),
                            'food_court_id': food_court_id,
                            'food_court_name': food_court_name,
@@ -258,6 +261,7 @@ class PayOrders(models.Model):
                                           Decimal(other_discount)),
                            'orders_type': orders_type,
                            }
+            orders_data.update(**kwargs)
         except Exception as e:
             return e
         return orders_data

@@ -7,7 +7,8 @@ from horizon.serializers import (BaseListSerializer,
 from Consumer_App.cs_comment.models import Comment
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import ReplyComment
-from Consumer_App.cs_wallet.models import WalletTradeDetail
+from Consumer_App.cs_wallet.models import (WalletTradeDetail, WalletAction)
+from Consumer_App.cs_orders.models import PayOrders
 import re
 import copy
 
@@ -142,3 +143,21 @@ class WalletTradeDetailSerializer(BaseModelSerializer):
 
 class WalletTradeDetailListSerializer(BaseListSerializer):
     child = WalletTradeDetailSerializer()
+
+
+class PayOrdersSerializer(BaseModelSerializer):
+    class Meta:
+        model = PayOrders
+        fields = '__all__'
+
+    def go_to_recharge(self, **kwargs):
+        #  #### 添加事务操作（发生错误时要回滚）  ####
+        try:
+            instance = self.save()
+        except Exception as e:
+            return e
+        result = WalletAction().recharge(None, instance, gateway='admin_pay')
+        if isinstance(result, Exception):
+            return result
+        return instance
+

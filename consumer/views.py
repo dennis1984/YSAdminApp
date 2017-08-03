@@ -14,7 +14,8 @@ from consumer.serializers import (UserListSerializer,
                                   ReplyCommentSerializer,
                                   WalletListSerializer,
                                   WalletTradeDetailListSerializer,
-                                  CommentListSerializer)
+                                  CommentListSerializer,
+                                  PayOrdersSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
                             UserDetailForm,
@@ -365,7 +366,7 @@ class WalletTradeDetailList(generics.GenericAPIView):
         return Response(datas, status=status.HTTP_200_OK)
 
 
-class RechargeAction(generics.GenericAPIView):
+class WalletAction(generics.GenericAPIView):
     """
     向用户充值 (管理员操作)
     """
@@ -373,6 +374,9 @@ class RechargeAction(generics.GenericAPIView):
 
     def get_user_object(self, user_id):
         return ConsumerUser.get_object(user_id=user_id)
+
+    def make_orders_by_recharge(self, user_id=None, payable=None, **kwargs):
+        return PayOrders.make_orders_by_recharge(user_id, payable)
 
     def post(self, request, *args, **kwargs):
         form = RechargeActionFrom(request.data)
@@ -383,7 +387,16 @@ class RechargeAction(generics.GenericAPIView):
         user = self.get_user_object(cld['user_id'])
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
+
+        _data = self.make_orders_by_recharge(**cld)
+        serializer = PayOrdersSerializer(data=_data)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.go_to_recharge()
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):
