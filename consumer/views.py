@@ -373,7 +373,7 @@ class WalletAction(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_user_object(self, user_id):
-        return ConsumerUser.get_object(user_id=user_id)
+        return ConsumerUser.get_object(pk=user_id)
 
     def make_orders_by_recharge(self, user_id=None, payable=None, **kwargs):
         return PayOrders.make_orders_by_recharge(user_id, payable)
