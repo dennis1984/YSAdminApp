@@ -21,7 +21,8 @@ from business.serializers import (CitySerializer,
                                   OrdersListSerializer,
                                   BankCardSerializer,
                                   BankCardListSerializer,
-                                  AdvertPictureSerializer,)
+                                  AdvertPictureSerializer,
+                                  AdvertPictureListSerializer)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
                             CityUpdateForm,
@@ -57,7 +58,8 @@ from business.forms import (CityInputForm,
                             BankCardDetailForm,
                             AdvertPictureInputForm,
                             AdvertPictureUpdateForm,
-                            AdvertPictureDeleteForm)
+                            AdvertPictureDeleteForm,
+                            AdvertPictureListForm)
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
@@ -272,7 +274,7 @@ class FoodCourtAction(generics.GenericAPIView):
         """
         创建美食城
         """
-        form = FoodCourtInputForm(request.data)
+        form = FoodCourtInputForm(data=request.data, files=request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -292,7 +294,7 @@ class FoodCourtAction(generics.GenericAPIView):
         """
         修改美食城信息
         """
-        form = FoodCourtUpdateForm(request.data)
+        form = FoodCourtUpdateForm(data=request.data, files=request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -497,7 +499,7 @@ class DishesAction(generics.GenericAPIView):
         """
         创建菜品
         """
-        form = DishesInputForm(request.data)
+        form = DishesInputForm(data=request.data, files=request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -519,7 +521,7 @@ class DishesAction(generics.GenericAPIView):
         """
         更新菜品
         """
-        form = DishesUpdateForm(request.data)
+        form = DishesUpdateForm(data=request.data, files=request.FILES)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1043,7 +1045,7 @@ class AdvertPictureAction(generics.GenericAPIView):
         """
         添加广告图片
         """
-        form = AdvertPictureInputForm(request.data)
+        form = AdvertPictureInputForm(data=request.data, files=request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1066,7 +1068,7 @@ class AdvertPictureAction(generics.GenericAPIView):
         """
         更新图片信息
         """
-        form = AdvertPictureUpdateForm(request.data)
+        form = AdvertPictureUpdateForm(data=request.data, files=request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1109,5 +1111,31 @@ class AdvertPictureList(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly,)
 
+    def get_advert_picture_instances(self, food_court_name=None, name=None):
+        kwargs = {}
+        if food_court_name:
+            food_court_instances = FoodCourt.filter_objects(name=food_court_name)
+            if not food_court_instances:
+                return []
+            kwargs['food_court_id__in'] = [instance.id for instance in food_court_instances]
+        if name:
+            kwargs['name'] = name
+        return AdvertPicture.filter_details(**kwargs)
+
     def post(self, request, *args, **kwargs):
-        pass
+        form = AdvertPictureListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_advert_picture_instances(cld['food_court_name'], cld['name'])
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = AdvertPictureListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)

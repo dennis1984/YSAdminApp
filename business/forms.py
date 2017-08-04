@@ -273,3 +273,10 @@ class AdvertPictureUpdateForm(forms.Form):
 
 class AdvertPictureDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+
+
+class AdvertPictureListForm(forms.Form):
+    food_court_name = forms.IntegerField(min_value=1, required=False)
+    name = forms.CharField(min_length=1, max_length=50, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)

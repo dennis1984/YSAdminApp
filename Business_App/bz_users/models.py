@@ -250,7 +250,36 @@ class AdvertPicture(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        kwargs = cls.make_perfect_filter(**kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def make_perfect_filter(cls, **kwargs):
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
+        if 'name' in _kwargs:
+            _kwargs['name__contains'] = _kwargs.pop('name')
+        return _kwargs
+
+    @classmethod
+    def filter_details(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        food_court_id = list(set([item.food_court_id for item in instances]))
+        food_court_list = FoodCourt.filter_objects(**{'id__in': food_court_id})
+        food_court_dict = {item.id: item for item in food_court_list}
+
+        details = []
+        for item in instances:
+            item_dict = model_to_dict(item)
+            food_court = food_court_dict.get(item.food_court_id)
+            if not food_court:
+                food_court_name = ''
+            else:
+                food_court_name = food_court.name
+            item_dict['food_court_name'] = food_court_name
+            details.append(item_dict)
+        return details

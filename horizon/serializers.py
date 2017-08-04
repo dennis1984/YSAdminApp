@@ -73,10 +73,28 @@ class BaseSerializer(serializers.Serializer):
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
+    def __init__(self, instance=None, data=None, **kwargs):
+        if data:
+            self.make_perfect_initial_data(data)
+            super(BaseModelSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(BaseModelSerializer, self).__init__(instance, **kwargs)
+
+    def update(self, instance, validated_data):
+        self.make_perfect_initial_data(validated_data)
+        super(BaseModelSerializer, self).update(instance, validated_data)
+
     @property
     def data(self):
         _data = super(BaseModelSerializer, self).data
         return perfect_result(self, _data)
+
+    def make_perfect_initial_data(self, data):
+        # 处理管理后台上传图片图片名字没有后缀的问题
+        if 'image' in data:
+            image_names = data['image'].name.split('.')
+            if len(image_names) == 1:
+                data['image'].name = '%s.png' % image_names[0]
 
 
 def perfect_result(self, _data):

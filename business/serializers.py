@@ -435,3 +435,15 @@ class AdvertPictureSerializer(BaseModelSerializer):
                                              main.make_random_char_and_number_of_string(5))}
         return super(AdvertPictureSerializer, self).update(instance, validated_data)
 
+
+class AdvertPictureDetailSerializer(BaseSerializer):
+    food_court_id = serializers.IntegerField()
+    food_court_name = serializers.CharField()
+    name = serializers.CharField()
+    image = serializers.ImageField()
+    created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
+
+
+class AdvertPictureListSerializer(BaseListSerializer):
+    child = AdvertPictureDetailSerializer()
