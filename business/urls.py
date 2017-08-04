@@ -34,6 +34,7 @@ urlpatterns = [
 
     url(r'^bank_card_action/$', views.BankCardAction.as_view()),
     url(r'^bank_card_list/$', views.BankCardList.as_view()),
+    url(r'^bank_card_detail/$', views.BankCardDetail.as_view()),
 
     url(r'^advert_picture_action/$', views.AdvertPictureAction.as_view()),
 ]

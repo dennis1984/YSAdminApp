@@ -255,6 +255,10 @@ class BankCardListForm(forms.Form):
     user_id = forms.IntegerField(min_value=1)
 
 
+class BankCardDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
 class AdvertPictureInputForm(forms.Form):
     food_court_id = forms.IntegerField(min_value=1)
     name = forms.CharField(max_length=20)

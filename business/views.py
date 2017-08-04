@@ -54,6 +54,7 @@ from business.forms import (CityInputForm,
                             BankCardDeleteForm,
                             BankCardListForm,
                             BankCardUpdateForm,
+                            BankCardDetailForm,
                             AdvertPictureInputForm,
                             AdvertPictureUpdateForm,
                             AdvertPictureDeleteForm)
@@ -1003,6 +1004,27 @@ class BankCardList(generics.GenericAPIView):
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(result, status=status.HTTP_200_OK)
+
+
+class BankCardDetail(generics.GenericAPIView):
+    """
+    获取绑定银行卡详情
+    """
+    def get_bank_card_object(self, bank_card_id):
+        return BankCard.get_object(_filter_all=False, pk=bank_card_id)
+
+    def post(self, request, *args, **kwargs):
+        form = BankCardDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.erros}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_bank_card_object(cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = BankCardSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AdvertPictureAction(generics.GenericAPIView):
