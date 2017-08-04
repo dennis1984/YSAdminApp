@@ -1043,6 +1043,12 @@ class AdvertPictureAction(generics.GenericAPIView):
     def get_food_court_object(self, food_court_id):
         return FoodCourt.get_object(pk=food_court_id)
 
+    def does_food_court_exist(self, food_court_id):
+        instance = self.get_food_court_object(food_court_id)
+        if isinstance(instance, Exception):
+            return False
+        return True
+
     def post(self, request, *args, **kwargs):
         """
         添加广告图片
@@ -1075,10 +1081,12 @@ class AdvertPictureAction(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        food_court_instance = self.get_food_court_object(cld['food_court_id'])
-        if isinstance(food_court_instance, Exception):
-            return Response({'Detail': food_court_instance.args},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if 'food_court_id' in cld:
+            does_exist = self.does_food_court_exist(cld['food_court_id'])
+            if not does_exist:
+                return Response(
+                    {'Detail': 'The food court %d does not exist' % cld['food_court_id']},
+                    status=status.HTTP_400_BAD_REQUEST)
 
         advert_instance = self.get_instance(pk=cld['pk'])
         if isinstance(advert_instance, Exception):
