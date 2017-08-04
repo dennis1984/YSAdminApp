@@ -267,6 +267,7 @@ class AdvertPictureInputForm(forms.Form):
 
 class AdvertPictureUpdateForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+    food_court_id = forms.IntegerField(min_value=1)
     name = forms.CharField(max_length=20, required=False)
     image = forms.ImageField(required=False)
 

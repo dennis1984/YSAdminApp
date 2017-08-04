@@ -1075,6 +1075,11 @@ class AdvertPictureAction(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
+        food_court_instance = self.get_food_court_object(cld['food_court_id'])
+        if isinstance(food_court_instance, Exception):
+            return Response({'Detail': food_court_instance.args},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         advert_instance = self.get_instance(pk=cld['pk'])
         if isinstance(advert_instance, Exception):
             return Response({'Detail': advert_instance.args},
