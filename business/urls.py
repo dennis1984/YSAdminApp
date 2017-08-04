@@ -37,6 +37,7 @@ urlpatterns = [
     url(r'^bank_card_detail/$', views.BankCardDetail.as_view()),
 
     url(r'^advert_picture_action/$', views.AdvertPictureAction.as_view()),
+    url(r'^advert_picture_list/$', views.AdvertPictureList.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

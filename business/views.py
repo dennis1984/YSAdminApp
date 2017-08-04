@@ -1111,15 +1111,12 @@ class AdvertPictureList(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get_advert_picture_instances(self, food_court_name=None, name=None):
-        kwargs = {}
-        if food_court_name:
-            food_court_instances = FoodCourt.filter_objects(name=food_court_name)
+    def get_advert_picture_instances(self, **kwargs):
+        if 'food_court_name' in kwargs:
+            food_court_instances = FoodCourt.filter_objects(name=kwargs.pop('food_court_name'))
             if not food_court_instances:
                 return []
             kwargs['food_court_id__in'] = [instance.id for instance in food_court_instances]
-        if name:
-            kwargs['name'] = name
         return AdvertPicture.filter_details(**kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -1128,7 +1125,7 @@ class AdvertPictureList(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        details = self.get_advert_picture_instances(cld['food_court_name'], cld['name'])
+        details = self.get_advert_picture_instances(**cld)
         if isinstance(details, Exception):
             return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
 
