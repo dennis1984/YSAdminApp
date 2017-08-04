@@ -22,6 +22,7 @@ from business.serializers import (CitySerializer,
                                   BankCardSerializer,
                                   BankCardListSerializer,
                                   AdvertPictureSerializer,
+                                  AdvertPictureDetailSerializer,
                                   AdvertPictureListSerializer)
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (CityInputForm,
@@ -59,7 +60,8 @@ from business.forms import (CityInputForm,
                             AdvertPictureInputForm,
                             AdvertPictureUpdateForm,
                             AdvertPictureDeleteForm,
-                            AdvertPictureListForm)
+                            AdvertPictureListForm,
+                            AdvertPictureDetailForm)
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
@@ -1136,3 +1138,33 @@ class AdvertPictureList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class AdvertPictureDetail(generics.GenericAPIView):
+    """
+    广告图片详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_advert_picture_object(self, advert_picture_id):
+        instances = AdvertPicture.filter_details(pk=advert_picture_id)
+        if isinstance(instances, Exception):
+            return instances
+        if len(instances) != 1:
+            return Exception('Advert picture of %d does not existed.' % advert_picture_id)
+        return instances[0]
+
+    def post(self, request, *args, **kwargs):
+        form = AdvertPictureDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        detail = self.get_advert_picture_object(cld['pk'])
+        if isinstance(detail, Exception):
+            return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = AdvertPictureDetailSerializer(data=detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)

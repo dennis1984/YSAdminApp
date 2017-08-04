@@ -280,3 +280,7 @@ class AdvertPictureListForm(forms.Form):
     name = forms.CharField(min_length=1, max_length=50, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
+
+
+class AdvertPictureDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
