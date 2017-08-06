@@ -1020,7 +1020,7 @@ class BankCardDetail(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         form = BankCardDetailForm(request.data)
         if not form.is_valid():
-            return Response({'Detail': form.erros}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
         instance = self.get_bank_card_object(cld['pk'])
