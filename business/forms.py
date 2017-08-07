@@ -263,6 +263,10 @@ class BankCardDetailForm(forms.Form):
 
 class AdvertPictureInputForm(forms.Form):
     food_court_id = forms.IntegerField(min_value=1)
+    owner = forms.ChoiceField(choices=((1, 1),
+                                       (2, 2)),
+                              error_messages={
+                                  'required': 'Field "owner" must in [1, 2]'})
     name = forms.CharField(max_length=20)
     ad_position_name = forms.CharField(max_length=20)
     ad_link = forms.CharField(max_length=100)
@@ -272,6 +276,11 @@ class AdvertPictureInputForm(forms.Form):
 class AdvertPictureUpdateForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
     food_court_id = forms.IntegerField(min_value=1, required=False)
+    owner = forms.ChoiceField(choices=((1, 1),
+                                       (2, 2)),
+                              error_messages={
+                                  'required': 'Field "owner" must in [1, 2]'},
+                              required=False)
     name = forms.CharField(max_length=20, required=False)
     ad_position_name = forms.CharField(max_length=20, required=False)
     ad_link = forms.CharField(max_length=100, required=False)
@@ -284,6 +293,11 @@ class AdvertPictureDeleteForm(forms.Form):
 
 class AdvertPictureListForm(forms.Form):
     food_court_name = forms.CharField(min_length=1, required=False)
+    owner = forms.ChoiceField(choices=((1, 1),
+                                       (2, 2)),
+                              error_messages={
+                                  'required': 'Field "owner" must in [1, 2]'},
+                              required=False)
     name = forms.CharField(min_length=1, max_length=50, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
