@@ -269,7 +269,7 @@ class AdvertPictureInputForm(forms.Form):
                                   'required': 'Field "owner" must in [1, 2]'})
     name = forms.CharField(max_length=20)
     ad_position_name = forms.CharField(max_length=20)
-    ad_link = forms.CharField(max_length=100)
+    ad_link = forms.URLField(max_length=100)
     image = forms.ImageField()
 
 
@@ -283,7 +283,7 @@ class AdvertPictureUpdateForm(forms.Form):
                               required=False)
     name = forms.CharField(max_length=20, required=False)
     ad_position_name = forms.CharField(max_length=20, required=False)
-    ad_link = forms.CharField(max_length=100, required=False)
+    ad_link = forms.URLField(max_length=100, required=False)
     image = forms.ImageField(required=False)
 
 
