@@ -105,6 +105,7 @@ class UserUpdateForm(forms.Form):
     manager = forms.CharField(min_length=2, max_length=20, required=False)
     chinese_people_id = forms.CharField(min_length=18, max_length=25, required=False)
     stalls_number = forms.CharField(min_length=1, max_length=20, required=False)
+    head_picture = forms.ImageField(required=False)
 
     is_active = forms.IntegerField(min_value=0, max_value=1, required=False)
 

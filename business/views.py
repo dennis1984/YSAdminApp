@@ -580,7 +580,7 @@ class UserAction(generics.GenericAPIView):
         """
          创建用户
         """
-        form = UsersInputForm(request.data)
+        form = UsersInputForm(request.data, request.FILES)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -598,7 +598,7 @@ class UserAction(generics.GenericAPIView):
         """
         修改用户信息（修改普通信息、添加/移除黑名单）
         """
-        form = UserUpdateForm(request.data)
+        form = UserUpdateForm(request.data, request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
