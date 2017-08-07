@@ -37,6 +37,7 @@ from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
 from horizon.models import model_to_dict
+from horizon import main
 import copy
 
 
@@ -396,6 +397,8 @@ class WalletAction(generics.GenericAPIView):
             wallet_detail = serializer.go_to_recharge()
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        # 发送短信提醒用户充值成功
+        main.send_message_to_phone(cld['payable'], user.phone, template_name='recharge')
         return Response(wallet_detail, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
