@@ -440,6 +440,8 @@ class AdvertPictureDetailSerializer(BaseSerializer):
     food_court_id = serializers.IntegerField()
     food_court_name = serializers.CharField()
     name = serializers.CharField()
+    ad_position_name = serializers.CharField()
+    ad_link = serializers.CharField()
     image = serializers.ImageField()
     created = serializers.DateTimeField()
     updated = serializers.DateTimeField()

@@ -225,6 +225,8 @@ class AdvertPicture(models.Model):
     food_court_id = models.IntegerField(u'美食城ID')
     name = models.CharField(u'图片名称', max_length=60, unique=True, db_index=True)
     image = models.ImageField(u'图片', upload_to=ADVERT_PICTURE_DIR,)
+    ad_position_name = models.CharField(u'广告位名称', max_length=60)
+    ad_link = models.CharField(u'广告链接', max_length=100)
 
     # 数据状态：1：有效 2：已删除
     status = models.IntegerField(u'数据状态', default=1)

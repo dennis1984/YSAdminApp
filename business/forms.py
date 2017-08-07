@@ -94,6 +94,7 @@ class UsersInputForm(forms.Form):
                                         error_messages={'required': u'身份证号不能为空'})
     stalls_number = forms.CharField(min_length=1, max_length=20,
                                     error_messages={'required': u'档口编号不能为空'})
+    head_picture = forms.ImageField(required=False)
 
 
 class UserUpdateForm(forms.Form):
@@ -262,6 +263,8 @@ class BankCardDetailForm(forms.Form):
 class AdvertPictureInputForm(forms.Form):
     food_court_id = forms.IntegerField(min_value=1)
     name = forms.CharField(max_length=20)
+    ad_position_name = forms.CharField(max_length=20)
+    ad_link = forms.CharField(max_length=100)
     image = forms.ImageField()
 
 
@@ -269,6 +272,8 @@ class AdvertPictureUpdateForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
     food_court_id = forms.IntegerField(min_value=1, required=False)
     name = forms.CharField(max_length=20, required=False)
+    ad_position_name = forms.CharField(max_length=20, required=False)
+    ad_link = forms.CharField(max_length=100, required=False)
     image = forms.ImageField(required=False)
 
 
