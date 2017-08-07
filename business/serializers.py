@@ -437,6 +437,7 @@ class AdvertPictureSerializer(BaseModelSerializer):
 
 
 class AdvertPictureDetailSerializer(BaseSerializer):
+    id = serializers.IntegerField()
     food_court_id = serializers.IntegerField()
     food_court_name = serializers.CharField()
     name = serializers.CharField()
