@@ -90,6 +90,10 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return perfect_result(self, _data)
 
     def make_perfect_initial_data(self, data):
+        if 'price' in data:
+            data['price'] = '%.2f' % data['price']
+        if 'discount' in data:
+            data['discount'] = '%.2f' % data['discount']
         # 处理管理后台上传图片图片名字没有后缀的问题
         if 'image' in data:
             image_names = data['image'].name.split('.')

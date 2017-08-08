@@ -65,7 +65,8 @@ from business.forms import (CityInputForm,
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
-                                           FoodCourt)
+                                           FoodCourt,
+                                           DISHES_MARK_DISCOUNT_VALUES)
 from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
@@ -76,6 +77,7 @@ from Business_App.bz_orders.models import Orders, VerifyOrders
 from Business_App.bz_users.caches import BusinessUserCache
 
 import re
+from decimal import Decimal
 
 
 class CityAction(generics.GenericAPIView):
@@ -497,6 +499,20 @@ class DishesAction(generics.GenericAPIView):
     def get_user_object(self, user_id):
         return BusinessUser.get_object(pk=user_id)
 
+    def get_perfect_request_data(self, **kwargs):
+        if 'mark' in kwargs and kwargs['mark'] in DISHES_MARK_DISCOUNT_VALUES:
+            if 'discount' not in kwargs:
+                return Exception('Field [discount] not be empty when mark in'
+                                 '[10, 20, 30]')
+            if kwargs['price'] < kwargs['discount']:
+                return Exception('Field [discount] can not greater than [price]')
+
+        user = self.get_user_object(kwargs['user_id'])
+        if isinstance(user, Exception):
+            return user
+        kwargs['food_court_id'] = user.food_court_id
+        return kwargs
+
     def post(self, request, *args, **kwargs):
         """
         创建菜品
@@ -505,11 +521,10 @@ class DishesAction(generics.GenericAPIView):
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        cld = form.cleaned_data
-        user = self.get_user_object(cld['user_id'])
-        if isinstance(user, Exception):
-            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
-        cld['food_court_id'] = user.food_court_id
+        cld = self.get_perfect_request_data(**form.cleaned_data)
+        if isinstance(cld, Exception):
+            return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = DishesSerializer(data=cld)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

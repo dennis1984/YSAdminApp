@@ -131,7 +131,7 @@ class DishesInputForm(forms.Form):
     title = forms.CharField(max_length=200)
     subtitle = forms.CharField(max_length=200, required=False)
     description = forms.CharField(max_length=500, required=False)
-    price = forms.CharField(max_length=16)
+    price = forms.FloatField()
     size = forms.IntegerField(min_value=10, max_value=20, required=False)
     size_detail = forms.CharField(min_length=2, max_length=30, required=False)
     mark = forms.ChoiceField(choices=((0, 1),
@@ -143,6 +143,7 @@ class DishesInputForm(forms.Form):
                                              '[0, 10, 20, 30].'
                              },
                              required=False)
+    discount = forms.FloatField(required=False)
     image = forms.ImageField(required=False)
     image_detail = forms.ImageField(required=False)
 
@@ -159,7 +160,7 @@ class DishesUpdateForm(forms.Form):
     title = forms.CharField(max_length=200, required=False)
     subtitle = forms.CharField(max_length=200, required=False)
     description = forms.CharField(max_length=500, required=False)
-    price = forms.CharField(max_length=16, required=False)
+    price = forms.FloatField(required=False)
     size = forms.IntegerField(min_value=10, max_value=20, required=False)
     size_detail = forms.CharField(min_length=2, max_length=30, required=False)
     mark = forms.ChoiceField(choices=((0, 1),
@@ -172,6 +173,7 @@ class DishesUpdateForm(forms.Form):
                              },
                              required=False)
     image = forms.ImageField(required=False)
+    discount = forms.FloatField(required=False)
     image_detail = forms.ImageField(required=False)
 
 
