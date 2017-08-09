@@ -301,6 +301,7 @@ class AdvertPictureListForm(forms.Form):
                                   'required': 'Field "owner" must in [1, 2]'},
                               required=False)
     name = forms.CharField(min_length=1, max_length=50, required=False)
+    ad_position_name = forms.CharField(max_length=100, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
 

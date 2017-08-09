@@ -443,7 +443,7 @@ class AdvertPictureDetailSerializer(BaseSerializer):
     owner = serializers.IntegerField()
     name = serializers.CharField()
     ad_position_name = serializers.CharField()
-    ad_link = serializers.URLField()
+    ad_link = serializers.CharField()
     image = serializers.ImageField()
     created = serializers.DateTimeField()
     updated = serializers.DateTimeField()
