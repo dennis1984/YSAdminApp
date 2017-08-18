@@ -36,13 +36,5 @@ urlpatterns = [
     url(r'business/', include('business.urls', namespace='business')),
     url(r'consumer/', include('consumer.urls', namespace='consumer')),
 
-    # url(r'^orders/', include('orders.urls', namespace='orders')),
-    # url(r'^shopping_cart/', include('shopping_cart.urls', namespace='shopping_cart')),
-    # url(r'^hot_sale/', include('hot_sale.urls', namespace='hot_sale')),
-    # url(r'^collect/', include('collect.urls', namespace='collect')),
-    # url(r'^comment/', include('comment.urls', namespace='comment')),
-    #
-    # # 钱包
-    # url(r'^wallet/', include('wallet.urls', namespace='wallet')),
-
+    url(r'^coupons/', include('coupons.urls', namespace='coupons')),
 ]
