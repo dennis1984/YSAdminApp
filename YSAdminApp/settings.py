@@ -43,12 +43,7 @@ INSTALLED_APPS = [
     'users',
     'business',
     'consumer',
-    # 'orders',
-    # 'shopping_cart',
-    # 'hot_sale',
-    # 'wallet',
-    # 'collect',
-    # 'comment',
+    'coupons',
 
     # 允许跨域请求
     'corsheaders',
