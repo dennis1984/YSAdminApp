@@ -76,8 +76,7 @@ class DishesDiscountSerializer(BaseModelSerializer):
         return super(DishesDiscountSerializer, self).update(instance, validated_data)
 
     def delete(self, instance):
-        validated_data = {'status': 2,
-                          'dishes_id': '%s-%s' % (instance.dishes_id, main.make_random_char_and_number_of_string(5))}
+        validated_data = {'status': '%d' % (instance.pk + 1)}
         return self.update(instance, validated_data)
 
 

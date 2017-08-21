@@ -84,7 +84,7 @@ class DishesDiscountConfig(models.Model):
     """
     菜品优惠配置
     """
-    dishes_id = models.IntegerField(u'菜品ID', unique=True, db_index=True)
+    dishes_id = models.IntegerField(u'菜品ID', db_index=True)
     dishes_name = models.CharField(u'菜品名称', max_length=40)
     business_id = models.IntegerField(u'商户ID')
     business_name = models.CharField(u'商品名称', max_length=128)
@@ -95,7 +95,7 @@ class DishesDiscountConfig(models.Model):
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
     expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
-    # 数据状态：1：正常 2：已删除
+    # 数据状态：1：正常 其它值：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
@@ -105,6 +105,7 @@ class DishesDiscountConfig(models.Model):
     class Meta:
         db_table = 'ys_dishes_discount_config'
         unique_together = ('dishes_id', 'status')
+        index_together = (['dishes_id', 'status'])
 
     @classmethod
     def get_object(cls, **kwargs):
