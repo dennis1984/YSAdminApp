@@ -6,7 +6,12 @@ from coupons import views
 
 urlpatterns = [
     url(r'^coupons_action/$', views.CouponsAction.as_view()),
+    url(r'^coupons_list/$', views.CouponsList.as_view()),
+    url(r'^coupons_detail/$', views.CouponsDetail.as_view()),
 
+    url(r'^dishes_discount_action/$', views.DishesDiscountAction.as_view()),
+    url(r'^dishes_discount_list/$', views.DishesDiscountList.as_view()),
+    url(r'^dishes_discount_detail/$', views.DishesDiscountDetail.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

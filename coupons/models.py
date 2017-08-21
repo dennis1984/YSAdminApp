@@ -39,6 +39,8 @@ class CouponsConfig(models.Model):
     # 优惠券类别：会员优惠：10， 在线下单优惠：20，其它优惠：100，自定义：200
     type = models.IntegerField(u'优惠券类别')
     type_detail = models.CharField(u'优惠券类别详情', max_length=64)
+
+    amount_of_money = models.CharField(u'优惠金额', max_length=16)
     service_ratio = models.IntegerField(u'平台商承担（优惠）比例')
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
@@ -75,11 +77,15 @@ class CouponsConfig(models.Model):
             return e
 
 
+DISHES_DISCOUNT_FUZZY_FIELDS = ('dishes_name', 'business_name')
+
+
 class DishesDiscountConfig(models.Model):
     """
     菜品优惠配置
     """
     dishes_id = models.IntegerField(u'菜品ID', unique=True, db_index=True)
+    dishes_name = models.CharField(u'菜品名称', max_length=40)
     business_id = models.IntegerField(u'商户ID')
     business_name = models.CharField(u'商品名称', max_length=128)
     food_court_id = models.IntegerField(u'美食城ID')
@@ -98,6 +104,7 @@ class DishesDiscountConfig(models.Model):
 
     class Meta:
         db_table = 'ys_dishes_discount_config'
+        unique_together = ('dishes_id', 'status')
 
     @classmethod
     def get_object(cls, **kwargs):
@@ -108,8 +115,12 @@ class DishesDiscountConfig(models.Model):
             return e
 
     @classmethod
-    def filter_objects(cls, **kwargs):
+    def filter_objects(cls, fuzzy=False, **kwargs):
         kwargs = get_perfect_filter_params(cls, **kwargs)
+        if fuzzy:
+            for key in DISHES_DISCOUNT_FUZZY_FIELDS:
+                if key in kwargs:
+                    kwargs['%s__contains' % key] = kwargs.pop(key)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
