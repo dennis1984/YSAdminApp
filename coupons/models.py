@@ -7,6 +7,7 @@ from horizon.models import (model_to_dict,
                             BaseManager,
                             get_perfect_filter_params)
 from horizon.main import minutes_15_plus
+from horizon import main
 import datetime
 import re
 import os
@@ -38,6 +39,7 @@ class CouponsConfig(models.Model):
     service_ratio = models.IntegerField(u'平台商承担（优惠）比例')
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
+    expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
     # 数据状态：1：正常 2：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
@@ -79,6 +81,7 @@ class DishesDiscountConfig(models.Model):
     service_ratio = models.IntegerField(u'平台商承担（优惠）比例')
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
+    expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
     # 数据状态：1：正常 2：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
