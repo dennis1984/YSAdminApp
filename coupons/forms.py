@@ -37,3 +37,11 @@ class CouponsUpdateForm(forms.Form):
 
 class CouponsDeleteForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+
+
+class CouponsListForm(forms.Form):
+    name = forms.CharField(max_length=64, required=False)
+    type_detail = forms.CharField(max_length=64, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+    

@@ -4,7 +4,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 
-from coupons.serializers import (CouponsSerializer)
+from coupons.serializers import (CouponsSerializer,
+                                 CouponsListSerializer)
 from coupons.permissions import IsAdminOrReadOnly
 from coupons.models import (CouponsConfig,
                             DishesDiscountConfig,
@@ -12,7 +13,8 @@ from coupons.models import (CouponsConfig,
                             COUPONS_CONFIG_TYPE_CN_MATCH)
 from coupons.forms import (CouponsInputForm,
                            CouponsUpdateForm,
-                           CouponsDeleteForm)
+                           CouponsDeleteForm,
+                           CouponsListForm)
 
 from Business_App.bz_users.models import BusinessUser
 from django.utils.timezone import now
@@ -68,6 +70,8 @@ class CouponsAction(generics.GenericAPIView):
             return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CouponsSerializer(data=cld)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializer.save()
         except Exception as e:
@@ -112,5 +116,28 @@ class CouponsAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+
+
+class CouponsList(generics.GenericAPIView):
+    """
+    优惠券信息列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_coupons_list(self, **kwargs):
+        return CouponsConfig.filter_objects(fuzzy=True, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = CouponsListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instances = self.get_coupons_list(**cld)
+        serializer = CouponsListSerializer(instances)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 

@@ -19,12 +19,15 @@ COUPONS_CONFIG_TYPE = {
     'other': 100,       # 其它优惠
     'custom': 200,      # 自定义
 }
+
 COUPONS_CONFIG_TYPE_CN_MATCH = {
     10: u'会员优惠',
     20: u'在线下单优惠',
     100: u'其它优惠',
     200: u'自定义',
 }
+
+COUPONS_CONFIG_FUZZY_FIELDS = ('name', 'type_detail')
 
 
 class CouponsConfig(models.Model):
@@ -60,8 +63,12 @@ class CouponsConfig(models.Model):
             return e
 
     @classmethod
-    def filter_objects(cls, **kwargs):
+    def filter_objects(cls, fuzzy=False, **kwargs):
         kwargs = get_perfect_filter_params(cls, **kwargs)
+        if fuzzy:
+            for key in COUPONS_CONFIG_FUZZY_FIELDS:
+                if key in kwargs:
+                    kwargs['%s__contains' % key] = kwargs.pop(key)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:
