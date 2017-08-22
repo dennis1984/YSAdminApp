@@ -27,7 +27,7 @@ from coupons.forms import (CouponsInputForm,
 
 from Business_App.bz_users.models import BusinessUser
 from Business_App.bz_dishes.models import Dishes
-from Consumer_App.cs_orders.models import CouponsAction
+from Consumer_App.cs_orders.models import CouponsAction as CouponsConfigAction
 from django.utils.timezone import now
 
 import json
@@ -350,7 +350,7 @@ class SendCoupons(generics.GenericAPIView):
         if not is_valid:
             return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        result = CouponsAction().create_coupons(cld['consumer_ids'], cld['coupons_id'])
+        result = CouponsConfigAction().create_coupons(cld['consumer_ids'], cld['coupons_id'])
         if isinstance(result, Exception):
             return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(result, status=status.HTTP_200_OK)
+        return Response({'result': 'SUCCESS'}, status=status.HTTP_200_OK)
