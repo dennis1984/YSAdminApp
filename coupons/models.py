@@ -30,6 +30,25 @@ COUPONS_CONFIG_TYPE_CN_MATCH = {
 COUPONS_CONFIG_FUZZY_FIELDS = ('name', 'type_detail')
 
 
+class BaseCouponsManager(models.Manager):
+    def get(self, *args, **kwargs):
+        if 'status' not in kwargs:
+            kwargs['status'] = 1
+        instance = super(BaseCouponsManager, self).get(*args, **kwargs)
+        if now() >= instance.expires:
+            instance.status = 400
+        return instance
+
+    def filter(self, *args, **kwargs):
+        if 'status' not in kwargs:
+            kwargs['status'] = 1
+        instances = super(BaseCouponsManager, self).filter(*args, **kwargs)
+        for instance in instances:
+            if now() >= instance.expires:
+                instance.status = 400
+        return instances
+
+
 class CouponsConfig(models.Model):
     """
     优惠券配置
@@ -45,16 +64,16 @@ class CouponsConfig(models.Model):
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
     expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
-    # 数据状态：1：正常 2：已删除
+    # 数据状态：1：正常 400：已过期 其它值：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
 
-    objects = BaseManager()
+    objects = BaseCouponsManager()
 
     class Meta:
         db_table = 'ys_coupons_config'
-        unique_together = ('type_detail', 'name')
+        unique_together = ('type_detail', 'name', 'status')
 
     @classmethod
     def get_object(cls, **kwargs):
@@ -63,6 +82,12 @@ class CouponsConfig(models.Model):
             return cls.objects.get(**kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def get_active_object(cls, **kwargs):
+        kwargs['expires__gt'] = now()
+        return cls.get_object(**kwargs)
+
 
     @classmethod
     def filter_objects(cls, fuzzy=False, **kwargs):
@@ -95,12 +120,12 @@ class DishesDiscountConfig(models.Model):
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
     expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
-    # 数据状态：1：正常 其它值：已删除
+    # 数据状态：1：正常 400：已过期  其它值：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
 
-    objects = BaseManager()
+    objects = BaseCouponsManager()
 
     class Meta:
         db_table = 'ys_dishes_discount_config'

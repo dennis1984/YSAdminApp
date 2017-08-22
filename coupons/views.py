@@ -22,11 +22,15 @@ from coupons.forms import (CouponsInputForm,
                            DishesDiscountUpdateForm,
                            DishesDiscountDeleteForm,
                            DishesDiscountDetailForm,
-                           DishesDiscountListForm)
+                           DishesDiscountListForm,
+                           SendCouponsForm)
 
 from Business_App.bz_users.models import BusinessUser
 from Business_App.bz_dishes.models import Dishes
+from Consumer_App.cs_orders.models import CouponsAction
 from django.utils.timezone import now
+
+import json
 
 
 class CouponsAction(generics.GenericAPIView):
@@ -294,7 +298,7 @@ class DishesDiscountList(generics.GenericAPIView):
 
 class DishesDiscountDetail(generics.GenericAPIView):
     """
-    优惠券详情
+    菜品优惠券详情
     """
     permission_classes = (IsAdminOrReadOnly,)
 
@@ -313,3 +317,40 @@ class DishesDiscountDetail(generics.GenericAPIView):
 
         serializer = DishesDiscountSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SendCoupons(generics.GenericAPIView):
+    """
+    发放优惠券
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def is_request_valid(self, request):
+        form = SendCouponsForm(request.data)
+        if not form.is_valid():
+            return False, Exception(form.errors)
+
+        cld = form.cleaned_data
+        if cld['consumer_ids'] != 'all':
+            try:
+                cld['consumer_ids'] = json.loads(cld['consumer_ids'])
+            except Exception as e:
+                return False, e
+
+        coupons_instance = self.get_coupons_object(coupons_id=cld['coupons_id'])
+        if isinstance(coupons_instance, Exception):
+            return False, coupons_instance
+        return True, cld
+
+    def get_coupons_object(self, coupons_id):
+        return CouponsConfig.get_active_object(pk=coupons_id)
+
+    def post(self, request, *args, **kwargs):
+        is_valid, cld = self.is_request_valid(request)
+        if not is_valid:
+            return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = CouponsAction().create_coupons(cld['consumer_ids'], cld['coupons_id'])
+        if isinstance(result, Exception):
+            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result, status=status.HTTP_200_OK)

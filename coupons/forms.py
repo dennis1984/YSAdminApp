@@ -84,3 +84,8 @@ class DishesDiscountListForm(forms.Form):
 
 class DishesDiscountDetailForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+
+
+class SendCouponsForm(forms.Form):
+    coupons_id = forms.IntegerField(min_value=1)
+    consumer_ids = forms.CharField()
