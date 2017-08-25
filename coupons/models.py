@@ -167,7 +167,7 @@ class DishesDiscountConfig(models.Model):
 
         instances_dict = {instance.dishes_id: instance for instance in instances}
         dishes_instances = Dishes.filter_discount_details()
-        dishes_instances_dict = {ins.pk: ins for ins in dishes_instances}
+        dishes_instances_dict = {ins['id']: ins for ins in dishes_instances}
         details = []
         if kwargs:
             for instance in instances:
@@ -181,8 +181,8 @@ class DishesDiscountConfig(models.Model):
         else:
             for dishes in dishes_instances:
                 dishes_dict = model_to_dict(dishes)
-                if dishes.pk in instances_dict:
-                    discount_config = model_to_dict(instances_dict[dishes.pk])
+                if dishes['id'] in instances_dict:
+                    discount_config = model_to_dict(instances_dict[dishes['id']])
                     dishes_dict.update(discount_config)
                 else:
                     dishes_dict['service_ratio'] = 0
