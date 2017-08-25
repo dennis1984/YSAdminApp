@@ -19,6 +19,9 @@ class CouponsInputForm(forms.Form):
     business_ratio = forms.IntegerField(min_value=0, max_value=100,
                                         error_messages={'required': u'商户承担优惠比例值不能为空',
                                                         'max_value': u'business_ratio取值范围为0~100'})
+    start_amount = forms.FloatField(min_value=0,
+                                    error_messages={'required': u'满足优惠条件的起始金额不能为空'})
+    total_count = forms.IntegerField(min_value=1, required=False)
     expires = forms.DateTimeField(error_messages={'required': u'过期时间不能为空'})
 
 
@@ -34,6 +37,8 @@ class CouponsUpdateForm(forms.Form):
     amount_of_money = forms.FloatField(min_value=0.01, required=False)
     service_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
     business_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
+    start_amount = forms.FloatField(min_value=0, required=False)
+    total_count = forms.IntegerField(min_value=1, required=False)
     expires = forms.DateTimeField(required=False)
 
 

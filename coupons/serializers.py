@@ -42,6 +42,10 @@ class CouponsSerializer(BaseModelSerializer):
                 validated_data['type_detail'] = COUPONS_CONFIG_TYPE_CN_MATCH[validated_data['type']]
         return super(CouponsSerializer, self).update(instance, validated_data)
 
+    def add_send_count(self, instance, send_count):
+        validated_data = {'send_count': instance.send_count + send_count}
+        return super(CouponsSerializer, self).update(instance, validated_data)
+
     def delete(self, instance):
         validated_data = {'status': '%d' % (instance.pk + 400 + 1)}
         return self.update(instance, validated_data)

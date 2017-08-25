@@ -27,7 +27,7 @@ from coupons.forms import (CouponsInputForm,
 
 from Business_App.bz_users.models import BusinessUser
 from Business_App.bz_dishes.models import Dishes
-from Consumer_App.cs_orders.models import CouponsAction as CouponsConfigAction
+from Consumer_App.cs_coupons.models import CouponsAction as CouponsConfigAction
 from django.utils.timezone import now
 
 import json
@@ -340,6 +340,7 @@ class SendCoupons(generics.GenericAPIView):
         coupons_instance = self.get_coupons_object(coupons_id=cld['coupons_id'])
         if isinstance(coupons_instance, Exception):
             return False, coupons_instance
+        cld['coupons'] = coupons_instance
         return True, cld
 
     def get_coupons_object(self, coupons_id):
@@ -350,7 +351,15 @@ class SendCoupons(generics.GenericAPIView):
         if not is_valid:
             return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        result = CouponsConfigAction().create_coupons(cld['consumer_ids'], cld['coupons_id'])
-        if isinstance(result, Exception):
-            return Response({'Detail': result.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'result': 'SUCCESS'}, status=status.HTTP_200_OK)
+        coupons = cld['coupons']
+        send_count = CouponsConfigAction().create_coupons(cld['consumer_ids'], coupons)
+        if isinstance(send_count, Exception):
+            return Response({'Detail': send_count.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CouponsSerializer(coupons)
+        try:
+            serializer.add_send_count(coupons, send_count)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
