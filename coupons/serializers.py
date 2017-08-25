@@ -83,5 +83,23 @@ class DishesDiscountSerializer(BaseModelSerializer):
         return self.update(instance, validated_data)
 
 
+class DishesDiscountDetailSerializer(BaseSerializer):
+    dishes_id = serializers.IntegerField()
+    dishes_name = serializers.CharField()
+    business_id = serializers.IntegerField()
+    business_name = serializers.CharField()
+    food_court_id = serializers.IntegerField()
+    food_court_name = serializers.CharField()
+
+    price = serializers.CharField()
+    discount = serializers.CharField()
+
+    service_ratio = serializers.IntegerField()
+    business_ratio = serializers.IntegerField()
+
+    created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
+
+
 class DishesDiscountListSerializer(BaseListSerializer):
-    child = DishesDiscountSerializer()
+    child = DishesDiscountDetailSerializer()

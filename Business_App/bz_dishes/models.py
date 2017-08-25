@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import now
 from django.conf import settings
 from Business_App.bz_users.models import BusinessUser, FoodCourt
@@ -80,22 +81,34 @@ class Dishes(models.Model):
         return self.title
 
     @classmethod
-    def get_object(cls, **kwargs):
+    def get_object(cls, *args, **kwargs):
         _kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
-            return cls.objects.get(**_kwargs)
+            return cls.objects.get(*args, **_kwargs)
         except Exception as e:
             return e
 
     @classmethod
-    def filter_objects(cls, **kwargs):
+    def filter_objects(cls, *args, **kwargs):
         _kwargs = get_perfect_filter_params(cls, **kwargs)
         if 'title' in _kwargs:
             _kwargs['title__contains'] = _kwargs.pop('title')
         try:
-            return cls.objects.filter(**_kwargs)
+            return cls.objects.filter(*args, **_kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def filter_discount_details(cls):
+        kwargs = {'status': 1,
+                  'mark__in': [10, 20, 30]}
+        query = ~Q(discount='0')
+        instances = cls.filter_objects(query, **kwargs)
+        details = []
+        for instance in instances:
+            perfect_detail = cls.get_perfect_dishes_detail(instance)
+            details.append(perfect_detail)
+        return details
 
     @classmethod
     def get_hot_sale_object(cls, **kwargs):

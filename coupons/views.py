@@ -280,7 +280,7 @@ class DishesDiscountList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_dishes_discount_list(self, **kwargs):
-        return DishesDiscountConfig.filter_objects(fuzzy=True, **kwargs)
+        return DishesDiscountConfig.filter_discount_config_details(fuzzy=True, **kwargs)
 
     def post(self, request, *args, **kwargs):
         form = DishesDiscountListForm(request.data)
@@ -288,8 +288,11 @@ class DishesDiscountList(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instances = self.get_dishes_discount_list(**cld)
-        serializer = DishesDiscountListSerializer(instances)
+        details = self.get_dishes_discount_list(**cld)
+        serializer = DishesDiscountListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)

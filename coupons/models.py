@@ -8,6 +8,8 @@ from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
 from horizon.main import minutes_15_plus
 from horizon import main
+from Business_App.bz_dishes.models import Dishes
+
 import datetime
 import re
 import os
@@ -78,6 +80,7 @@ class CouponsConfig(models.Model):
     class Meta:
         db_table = 'ys_coupons_config'
         unique_together = ('type_detail', 'name', 'status')
+        ordering = ['-updated']
 
     @classmethod
     def get_object(cls, **kwargs):
@@ -156,4 +159,33 @@ class DishesDiscountConfig(models.Model):
         except Exception as e:
             return e
 
+    @classmethod
+    def filter_discount_config_details(cls, fuzzy=False, **kwargs):
+        instances = cls.filter_objects(fuzzy, **kwargs)
+        if isinstance(instances, Exception):
+            return instances
 
+        instances_dict = {instance.dishes_id: instance for instance in instances}
+        dishes_instances = Dishes.filter_discount_details()
+        dishes_instances_dict = {ins.pk: ins for ins in dishes_instances}
+        details = []
+        if kwargs:
+            for instance in instances:
+                ins_dict = model_to_dict(instance)
+                dishes_ins = dishes_instances_dict.get(instance.dishes_id)
+                if isinstance(dishes_ins, Exception):
+                    continue
+                ins_dict.update(model_to_dict(dishes_ins))
+                details.append(ins_dict)
+            return details
+        else:
+            for dishes in dishes_instances:
+                dishes_dict = model_to_dict(dishes)
+                if dishes.pk in instances_dict:
+                    discount_config = model_to_dict(instances_dict[dishes.pk])
+                    dishes_dict.update(discount_config)
+                else:
+                    dishes_dict['service_ratio'] = 0
+                    dishes_dict['business_ratio'] = 0
+                details.append(dishes_dict)
+            return details
