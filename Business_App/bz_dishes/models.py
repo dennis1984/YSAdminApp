@@ -99,9 +99,9 @@ class Dishes(models.Model):
             return e
 
     @classmethod
-    def filter_discount_details(cls):
-        kwargs = {'status': 1,
-                  'mark__in': [10, 20, 30]}
+    def filter_discount_details(cls, **kwargs):
+        kwargs.update(**{'status': 1,
+                         'mark__in': [10, 20, 30]})
         query = ~Q(discount='0')
         instances = cls.filter_objects(query, **kwargs)
         details = []

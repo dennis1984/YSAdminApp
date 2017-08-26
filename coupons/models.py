@@ -13,6 +13,7 @@ from Business_App.bz_dishes.models import Dishes
 import datetime
 import re
 import os
+import copy
 
 
 COUPONS_CONFIG_TYPE = {
@@ -117,17 +118,17 @@ class DishesDiscountConfig(models.Model):
     菜品优惠配置
     """
     dishes_id = models.IntegerField(u'菜品ID', db_index=True)
-    dishes_name = models.CharField(u'菜品名称', max_length=40)
-    business_id = models.IntegerField(u'商户ID')
-    business_name = models.CharField(u'商品名称', max_length=128)
-    food_court_id = models.IntegerField(u'美食城ID')
-    food_court_name = models.CharField(u'美食城名称', max_length=200)
+    # dishes_name = models.CharField(u'菜品名称', max_length=40)
+    # business_id = models.IntegerField(u'商户ID')
+    # business_name = models.CharField(u'商品名称', max_length=128)
+    # food_court_id = models.IntegerField(u'美食城ID')
+    # food_court_name = models.CharField(u'美食城名称', max_length=200)
 
     service_ratio = models.IntegerField(u'平台商承担（优惠）比例')
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
 
-    expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
-    # 数据状态：1：正常 400：已过期  其它值：已删除
+    # expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
+    # 数据状态：1：正常 其它值：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
@@ -166,26 +167,21 @@ class DishesDiscountConfig(models.Model):
             return instances
 
         instances_dict = {instance.dishes_id: instance for instance in instances}
-        dishes_instances = Dishes.filter_discount_details()
-        dishes_instances_dict = {ins['id']: ins for ins in dishes_instances}
+        dishes_details = Dishes.filter_discount_details(**kwargs)
         details = []
-        if kwargs:
-            for instance in instances:
-                ins_dict = model_to_dict(instance)
-                dishes_ins = dishes_instances_dict.get(instance.dishes_id)
-                if isinstance(dishes_ins, Exception):
-                    continue
-                ins_dict.update(model_to_dict(dishes_ins))
-                details.append(ins_dict)
-            return details
-        else:
-            for dishes in dishes_instances:
-                dishes_dict = model_to_dict(dishes)
-                if dishes['id'] in instances_dict:
-                    discount_config = model_to_dict(instances_dict[dishes['id']])
-                    dishes_dict.update(discount_config)
-                else:
-                    dishes_dict['service_ratio'] = 0
-                    dishes_dict['business_ratio'] = 0
-                details.append(dishes_dict)
-            return details
+        for detail in dishes_details:
+            detail_dict = copy.deepcopy(detail)
+            if detail['id'] in instances_dict:
+                ins = instances_dict[detail['id']]
+                ins_dict = model_to_dict(ins)
+                ins_dict.pop('id')
+                detail_dict.update(ins_dict)
+            else:
+                update_dict = {'service_ratio': 0,
+                               'business_ratio': 0,
+                               'created': None,
+                               'updated': None,
+                               'dishes_id': detail_dict['id']}
+                detail_dict.update(update_dict)
+            details.append(detail_dict)
+        return details
