@@ -94,8 +94,8 @@ class DishesDiscountDetailSerializer(BaseSerializer):
     price = serializers.CharField()
     discount = serializers.CharField()
 
-    service_ratio = serializers.IntegerField()
-    business_ratio = serializers.IntegerField()
+    service_ratio = serializers.IntegerField(allow_null=True)
+    business_ratio = serializers.IntegerField(allow_null=True)
 
     created = serializers.CharField(allow_null=True, allow_blank=True)
     updated = serializers.CharField(allow_null=True, allow_blank=True)

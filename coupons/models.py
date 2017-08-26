@@ -159,8 +159,8 @@ class DishesDiscountConfig(models.Model):
             return dishes_detail
 
         if isinstance(instance, Exception):
-            update_dict = {'service_ratio': 0,
-                           'business_ratio': 0,
+            update_dict = {'service_ratio': None,
+                           'business_ratio': None,
                            'created': None,
                            'updated': None,
                            'dishes_id': dishes_detail['id'],
@@ -190,8 +190,8 @@ class DishesDiscountConfig(models.Model):
     @classmethod
     def filter_discount_config_details(cls, fuzzy=False, **kwargs):
         instances = cls.filter_objects()
-
         instances_dict = {instance.dishes_id: instance for instance in instances}
+
         dishes_details = Dishes.filter_discount_details(**kwargs)
         details = []
         for detail in dishes_details:
@@ -205,8 +205,8 @@ class DishesDiscountConfig(models.Model):
                 ins_dict['updated'] = str(ins_dict['updated'])
                 detail_dict.update(ins_dict)
             else:
-                update_dict = {'service_ratio': 0,
-                               'business_ratio': 0,
+                update_dict = {'service_ratio': None,
+                               'business_ratio': None,
                                'created': None,
                                'updated': None,
                                'dishes_id': detail_dict['id'],

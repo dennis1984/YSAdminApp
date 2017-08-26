@@ -278,6 +278,14 @@ class DishesDiscountList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_dishes_discount_list(self, **kwargs):
+        if 'business_name' in kwargs:
+            business_users = BusinessUser.filter_objects(fuzzy=True,
+                                                         business_name=kwargs['business_name'])
+            business_ids = [user.id for user in business_users]
+            kwargs['user_id__in'] = business_ids
+            kwargs.pop('business_name')
+        if 'dishes_name' in kwargs:
+            kwargs['title'] = kwargs.pop('dishes_name')
         return DishesDiscountConfig.filter_discount_config_details(fuzzy=True, **kwargs)
 
     def post(self, request, *args, **kwargs):

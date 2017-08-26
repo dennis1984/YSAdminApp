@@ -93,9 +93,16 @@ class BusinessUser(AbstractBaseUser):
             return None
 
     @classmethod
-    def filter_objects(cls, **kwargs):
+    def filter_objects(cls, fuzzy=False, **kwargs):
+        _kwargs = get_perfect_filter_params(cls, **kwargs)
+        if 'start_created' in kwargs:
+            _kwargs['created__gte'] = kwargs['start_created']
+        if 'end_created' in kwargs:
+            _kwargs['created__lte'] = kwargs['end_created']
+        if 'business_name' in kwargs and fuzzy:
+            _kwargs['business_name__contains'] = _kwargs.pop('business_name')
         try:
-            return cls.objects.filter(**kwargs)
+            return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
 
