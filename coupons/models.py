@@ -149,6 +149,33 @@ class DishesDiscountConfig(models.Model):
             return e
 
     @classmethod
+    def get_discount_config_detail(cls, **kwargs):
+        instance = cls.get_object(**kwargs)
+
+        if 'dishes_id' in kwargs:
+            kwargs['id'] = kwargs.pop('dishes_id')
+        dishes_detail = Dishes.get_discount_details(**kwargs)
+        if isinstance(dishes_detail, Exception):
+            return dishes_detail
+
+        if isinstance(instance, Exception):
+            update_dict = {'service_ratio': 0,
+                           'business_ratio': 0,
+                           'created': None,
+                           'updated': None,
+                           'dishes_id': dishes_detail['id'],
+                           'dishes_name': dishes_detail['title']}
+            dishes_detail.update(update_dict)
+        else:
+            ins_dict = model_to_dict(instance)
+            ins_dict.pop('id')
+            ins_dict['dishes_name'] = dishes_detail['title']
+            ins_dict['created'] = str(ins_dict['created'])
+            ins_dict['updated'] = str(ins_dict['updated'])
+            dishes_detail.update(ins_dict)
+        return dishes_detail
+
+    @classmethod
     def filter_objects(cls, fuzzy=False, **kwargs):
         kwargs = get_perfect_filter_params(cls, **kwargs)
         if fuzzy:

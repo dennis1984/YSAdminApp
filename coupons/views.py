@@ -7,6 +7,7 @@ from rest_framework import status
 from coupons.serializers import (CouponsSerializer,
                                  CouponsListSerializer,
                                  DishesDiscountSerializer,
+                                 DishesDiscountDetailSerializer,
                                  DishesDiscountListSerializer)
 from coupons.permissions import IsAdminOrReadOnly
 from coupons.models import (CouponsConfig,
@@ -303,7 +304,7 @@ class DishesDiscountDetail(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_dishes_discount_object(self, dishes_id):
-        return DishesDiscountConfig.get_object(dishes_id=dishes_id)
+        return DishesDiscountConfig.get_discount_config_detail(dishes_id=dishes_id)
 
     def post(self, request, *args, **kwargs):
         form = DishesDiscountDetailForm(request.data)
@@ -311,11 +312,13 @@ class DishesDiscountDetail(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instance = self.get_dishes_discount_object(dishes_id=cld['dishes_id'])
-        if isinstance(instance, Exception):
-            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        detail = self.get_dishes_discount_object(dishes_id=cld['dishes_id'])
+        if isinstance(detail, Exception):
+            return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = DishesDiscountSerializer(instance)
+        serializer = DishesDiscountDetailSerializer(data=detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

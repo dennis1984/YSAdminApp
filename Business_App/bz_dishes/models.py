@@ -99,6 +99,17 @@ class Dishes(models.Model):
             return e
 
     @classmethod
+    def get_discount_details(cls, **kwargs):
+        kwargs.update(**{'status': 1,
+                         'mark__in': [10, 20, 30]})
+        query = ~Q(discount='0')
+        instance = cls.get_object(query, **kwargs)
+
+        if isinstance(instance, Exception):
+            return instance
+        return cls.get_perfect_dishes_detail(instance)
+
+    @classmethod
     def filter_discount_details(cls, **kwargs):
         kwargs.update(**{'status': 1,
                          'mark__in': [10, 20, 30]})
