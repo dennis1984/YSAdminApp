@@ -66,18 +66,16 @@ class DishesDiscountInputForm(forms.Form):
     business_ratio = forms.IntegerField(min_value=0, max_value=100,
                                         error_messages={'required': u'商户承担优惠比例值不能为空',
                                                         'max_value': u'business_ratio取值范围为0~100'})
-    expires = forms.DateTimeField(error_messages={'required': u'过期时间不能为空'})
 
 
 class DishesDiscountUpdateForm(forms.Form):
-    pk = forms.IntegerField(min_value=1)
+    dishes_id = forms.IntegerField(min_value=1)
     service_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
     business_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
-    expires = forms.DateTimeField(required=False)
 
 
 class DishesDiscountDeleteForm(forms.Form):
-    pk = forms.IntegerField(min_value=1)
+    dishes_id = forms.IntegerField(min_value=1)
 
 
 class DishesDiscountListForm(forms.Form):
@@ -88,7 +86,7 @@ class DishesDiscountListForm(forms.Form):
 
 
 class DishesDiscountDetailForm(forms.Form):
-    pk = forms.IntegerField(min_value=1)
+    dishes_id = forms.IntegerField(min_value=1)
 
 
 class SendCouponsForm(forms.Form):

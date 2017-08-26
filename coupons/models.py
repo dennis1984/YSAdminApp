@@ -133,7 +133,7 @@ class DishesDiscountConfig(models.Model):
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
 
-    objects = BaseCouponsManager()
+    objects = BaseManager()
 
     class Meta:
         db_table = 'ys_dishes_discount_config'
@@ -162,9 +162,7 @@ class DishesDiscountConfig(models.Model):
 
     @classmethod
     def filter_discount_config_details(cls, fuzzy=False, **kwargs):
-        instances = cls.filter_objects(fuzzy, **kwargs)
-        if isinstance(instances, Exception):
-            return instances
+        instances = cls.filter_objects()
 
         instances_dict = {instance.dishes_id: instance for instance in instances}
         dishes_details = Dishes.filter_discount_details(**kwargs)
@@ -175,13 +173,17 @@ class DishesDiscountConfig(models.Model):
                 ins = instances_dict[detail['id']]
                 ins_dict = model_to_dict(ins)
                 ins_dict.pop('id')
+                ins_dict['dishes_name'] = detail_dict['title']
+                ins_dict['created'] = str(ins_dict['created'])
+                ins_dict['updated'] = str(ins_dict['updated'])
                 detail_dict.update(ins_dict)
             else:
                 update_dict = {'service_ratio': 0,
                                'business_ratio': 0,
                                'created': None,
                                'updated': None,
-                               'dishes_id': detail_dict['id']}
+                               'dishes_id': detail_dict['id'],
+                               'dishes_name': detail_dict['title']}
                 detail_dict.update(update_dict)
             details.append(detail_dict)
         return details

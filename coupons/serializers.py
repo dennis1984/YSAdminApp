@@ -58,13 +58,13 @@ class CouponsListSerializer(BaseListSerializer):
 class DishesDiscountSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
-            if 'dishes_id' in data:
-                dishes_detail = Dishes.get_dishes_detail_dict_with_user_info(pk=data['dishes_id'])
-                data['dishes_name'] = dishes_detail['title']
-                data['business_id'] = dishes_detail['business_id']
-                data['business_name'] = dishes_detail['business_name']
-                data['food_court_id'] = dishes_detail['food_court_id']
-                data['food_court_name'] = dishes_detail['food_court_name']
+            # if 'dishes_id' in data:
+            #     dishes_detail = Dishes.get_dishes_detail_dict_with_user_info(pk=data['dishes_id'])
+            #     data['dishes_name'] = dishes_detail['title']
+            #     data['business_id'] = dishes_detail['business_id']
+            #     data['business_name'] = dishes_detail['business_name']
+            #     data['food_court_id'] = dishes_detail['food_court_id']
+            #     data['food_court_name'] = dishes_detail['food_court_name']
             super(DishesDiscountSerializer, self).__init__(data=data, **kwargs)
         else:
             super(DishesDiscountSerializer, self).__init__(instance, **kwargs)
@@ -97,8 +97,8 @@ class DishesDiscountDetailSerializer(BaseSerializer):
     service_ratio = serializers.IntegerField()
     business_ratio = serializers.IntegerField()
 
-    created = serializers.DateTimeField()
-    updated = serializers.DateTimeField()
+    created = serializers.CharField(allow_null=True, allow_blank=True)
+    updated = serializers.CharField(allow_null=True, allow_blank=True)
 
 
 class DishesDiscountListSerializer(BaseListSerializer):

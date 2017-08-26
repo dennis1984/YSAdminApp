@@ -187,8 +187,8 @@ class DishesDiscountAction(generics.GenericAPIView):
     def get_dishes_object(self, pk):
         return Dishes.get_object(pk=pk)
 
-    def get_dishes_discount_object(self, pk):
-        return DishesDiscountConfig.get_object(pk=pk)
+    def get_dishes_discount_object(self, dishes_id):
+        return DishesDiscountConfig.get_object(dishes_id=dishes_id)
 
     def is_request_valid(self, request, method='POST'):
         if method.upper() == 'POST':
@@ -210,9 +210,6 @@ class DishesDiscountAction(generics.GenericAPIView):
             business_ratio = cld.get('business_ratio', 0)
             if service_ratio + business_ratio != 100:
                 return False, Exception('The sum of fields [service_ratio, business_ratio] must be 100')
-        if 'expires' in cld:
-            if cld['expires'] < now():
-                return False, Exception('Expires can not less than now.')
         return True, cld
 
     def post(self, request, *args, **kwargs):
@@ -241,7 +238,7 @@ class DishesDiscountAction(generics.GenericAPIView):
         if not is_valid:
             return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        instance = self.get_dishes_discount_object(pk=cld['pk'])
+        instance = self.get_dishes_discount_object(dishes_id=cld['dishes_id'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
         serializer = DishesDiscountSerializer(instance)
@@ -261,7 +258,7 @@ class DishesDiscountAction(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instance = self.get_dishes_discount_object(pk=cld['pk'])
+        instance = self.get_dishes_discount_object(dishes_id=cld['dishes_id'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
         serializer = DishesDiscountSerializer(instance)
@@ -305,8 +302,8 @@ class DishesDiscountDetail(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get_dishes_discount_object(self, pk):
-        return DishesDiscountConfig.get_object(pk=pk)
+    def get_dishes_discount_object(self, dishes_id):
+        return DishesDiscountConfig.get_object(dishes_id=dishes_id)
 
     def post(self, request, *args, **kwargs):
         form = DishesDiscountDetailForm(request.data)
@@ -314,7 +311,7 @@ class DishesDiscountDetail(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instance = self.get_dishes_discount_object(pk=cld['pk'])
+        instance = self.get_dishes_discount_object(dishes_id=cld['dishes_id'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
 
