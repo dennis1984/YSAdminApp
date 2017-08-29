@@ -22,7 +22,7 @@ urlpatterns = [
 
     # 意见反馈
     url(r'^feedback_list/$', views.FeedbackList.as_view()),
-    url(r'^feedback_detail/$', views.FeedbackList.as_view()),
+    url(r'^feedback_detail/$', views.FeedbackDetail.as_view()),
 
     url(r'^comment_list/$', views.CommentList.as_view()),
 ]
