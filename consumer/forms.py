@@ -95,7 +95,7 @@ class CommentListForm(forms.Form):
 class FeedbackListForm(forms.Form):
     phone = forms.CharField(min_length=11, max_length=20, required=False)
     nickname = forms.CharField(max_length=100, required=False)
-    content = forms.CharField(min_length=120, required=False)
+    content = forms.CharField(max_length=120, required=False)
     page_size = forms.IntegerField(required=False)
     page_index = forms.IntegerField(required=False)
 
