@@ -146,6 +146,8 @@ class DishesInputForm(forms.Form):
     discount = forms.FloatField(required=False)
     image = forms.ImageField(required=False)
     image_detail = forms.ImageField(required=False)
+    tag = forms.CharField(max_length=20, required=False)
+    sort_orders = forms.IntegerField(min_value=1, required=False)
 
 
 class DishesListForm(forms.Form):
@@ -175,6 +177,8 @@ class DishesUpdateForm(forms.Form):
     image = forms.ImageField(required=False)
     discount = forms.FloatField(required=False)
     image_detail = forms.ImageField(required=False)
+    tag = forms.CharField(max_length=20, required=False)
+    sort_orders = forms.IntegerField(min_value=1, required=False)
 
 
 class DishesDeleteForm(forms.Form):
