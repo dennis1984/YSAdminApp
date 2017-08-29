@@ -11,6 +11,7 @@ from Consumer_App.cs_wallet.models import (WalletTradeDetail,
                                            WalletAction,
                                            Wallet)
 from Consumer_App.cs_orders.models import PayOrders
+from Consumer_App.cs_setup.models import Feedback
 
 import re
 import copy
@@ -171,3 +172,13 @@ class PayOrdersSerializer(BaseModelSerializer):
 
         serializer = WalletSerializer(wallet_instance)
         return serializer.data
+
+
+class FeedbackSerializer(BaseModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = '__all__'
+
+
+class FeedbackListSerializer(BaseListSerializer):
+    child = FeedbackSerializer()

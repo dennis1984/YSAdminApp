@@ -15,7 +15,9 @@ from consumer.serializers import (UserListSerializer,
                                   WalletListSerializer,
                                   WalletTradeDetailListSerializer,
                                   CommentListSerializer,
-                                  PayOrdersSerializer)
+                                  PayOrdersSerializer,
+                                  FeedbackSerializer,
+                                  FeedbackListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
                             UserDetailForm,
@@ -28,7 +30,9 @@ from consumer.forms import (UserListForm,
                             WalletListForm,
                             WalletTradeDetailListForm,
                             RechargeActionFrom,
-                            CommentListForm)
+                            CommentListForm,
+                            FeedbackListForm,
+                            FeedbackDetailForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
@@ -36,6 +40,7 @@ from Consumer_App.cs_wallet.models import Wallet, WalletTradeDetail
 from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
+from Consumer_App.cs_setup.models import Feedback
 from horizon.models import model_to_dict
 from horizon import main
 import copy
@@ -400,6 +405,55 @@ class WalletAction(generics.GenericAPIView):
         # 发送短信提醒用户充值成功
         main.send_message_to_phone(cld['payable'], user.phone, template_name='recharge')
         return Response(wallet_detail, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
+class FeedbackList(generics.GenericAPIView):
+    """
+    意见反馈详情列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_feedback_list(self, **kwargs):
+        return Feedback.filter_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = FeedbackListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instances = self.get_feedback_list(**cld)
+        if isinstance(instances, Exception):
+            return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = FeedbackListSerializer(instances)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
+
+
+class FeedbackDetail(generics.GenericAPIView):
+    """
+    意见反馈详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_feedback_object(self, **kwargs):
+        return Feedback.get_object(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = FeedbackDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_feedback_object(**cld)
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = FeedbackSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CommentList(generics.GenericAPIView):

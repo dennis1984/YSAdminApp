@@ -90,3 +90,14 @@ class CommentListForm(forms.Form):
     user_id = forms.IntegerField(min_value=1, required=False)
     page_size = forms.IntegerField(min_value=1, required=False)
     page_index = forms.IntegerField(min_value=1, required=False)
+
+
+class FeedbackListForm(forms.Form):
+    phone = forms.CharField(min_length=11, max_length=20, required=False)
+    nickname = forms.CharField(max_length=100, required=False)
+    page_size = forms.IntegerField(required=False)
+    page_index = forms.IntegerField(required=False)
+
+
+class FeedbackDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
