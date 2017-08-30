@@ -78,15 +78,21 @@ class PayOrders(models.Model):
     member_discount = models.CharField('会员优惠', max_length=16, default='0')
     online_discount = models.CharField('在线下单优惠', max_length=16, default='0')
     other_discount = models.CharField('其他优惠', max_length=16, default='0')
+    custom_discount = models.CharField('自定义优惠', max_length=16, default='0')
+    custom_discount_name = models.CharField('自定义优惠名称', max_length=64, default='',
+                                            blank=True, null=True)
+    coupons_id = models.IntegerField('优惠券ID', null=True)
     payable = models.CharField('应付金额', max_length=16)
 
     # 0:未支付 200:已支付 400: 已过期 500:支付失败
     payment_status = models.IntegerField('订单支付状态', default=0)
-    # 支付方式：0:未指定支付方式 1：钱包 2：微信支付 3：支付宝支付 20：管理员支付
+    # 支付方式：0:未指定支付方式 1：钱包 2：微信支付 3：支付宝支付
     payment_mode = models.IntegerField('订单支付方式', default=0)
     # 订单类型 0: 未指定 101: 在线订单 102：堂食订单 103：外卖订单
     #         201: 钱包充值订单  (预留：202：钱包消费订单 203: 钱包提现)
     orders_type = models.IntegerField('订单类型', default=0)
+
+    notes = models.CharField('订单备注', max_length=40, default='', blank=True, null=True)
 
     created = models.DateTimeField('创建时间', default=now)
     updated = models.DateTimeField('最后修改时间', auto_now=True)
@@ -94,6 +100,7 @@ class PayOrders(models.Model):
     extend = models.TextField('扩展信息', default='', blank=True)
 
     objects = OrdersManager()
+    objects_all = models.Manager()
 
     class Meta:
         db_table = 'ys_pay_orders'
