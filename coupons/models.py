@@ -14,6 +14,7 @@ import datetime
 import re
 import os
 import copy
+from decimal import Decimal
 
 
 COUPONS_CONFIG_TYPE = {
@@ -78,7 +79,7 @@ class CouponsConfig(models.Model):
 
     class Meta:
         db_table = 'ys_coupons_config'
-        unique_together = ('type_detail', 'name', 'status')
+        unique_together = ('name', 'status')
         ordering = ['-updated']
 
     @classmethod
@@ -99,15 +100,27 @@ class CouponsConfig(models.Model):
         if kwargs.get('status') == 400:
             kwargs['status'] = 1
             kwargs['expires__lte'] = now()
+        start_amount = None
+        if 'start_amount' in kwargs:
+            start_amount = kwargs.pop('start_amount')
+
         kwargs = get_perfect_filter_params(cls, **kwargs)
         if fuzzy:
             for key in COUPONS_CONFIG_FUZZY_FIELDS:
                 if key in kwargs:
                     kwargs['%s__contains' % key] = kwargs.pop(key)
         try:
-            return cls.objects.filter(**kwargs)
+            instances = cls.objects.filter(**kwargs)
         except Exception as e:
             return e
+
+        if not start_amount:
+            return instances
+        filter_instances = []
+        for ins in instances:
+            if Decimal(ins.start_amount) >= Decimal(start_amount):
+                filter_instances.append(ins)
+        return filter_instances
 
 
 DISHES_DISCOUNT_FUZZY_FIELDS = ('dishes_name', 'business_name')

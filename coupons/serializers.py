@@ -24,7 +24,7 @@ import copy
 class CouponsSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
-            data['expires'] = main.make_time_delta(days=data.pop('expires_in'))
+            data['expires'] = main.make_time_delta(days=data.pop('expire_in'))
             super(CouponsSerializer, self).__init__(data=data, **kwargs)
         else:
             super(CouponsSerializer, self).__init__(instance, **kwargs)
