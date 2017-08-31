@@ -21,6 +21,7 @@ class CouponsInputForm(forms.Form):
                                     error_messages={'required': u'满足优惠条件的起始金额不能为空'})
     total_count = forms.IntegerField(min_value=1, required=False)
     expire_in = forms.IntegerField(min_value=1, error_messages={'required': u'过期时间不能为空'})
+    description = forms.CharField(max_length=85, required=False)
 
 
 class CouponsUpdateForm(forms.Form):
@@ -36,6 +37,7 @@ class CouponsUpdateForm(forms.Form):
     start_amount = forms.FloatField(min_value=0, required=False)
     total_count = forms.IntegerField(min_value=1, required=False)
     expires = forms.IntegerField(min_value=1, required=False)
+    description = forms.CharField(max_length=85, required=False)
 
 
 class CouponsDeleteForm(forms.Form):
