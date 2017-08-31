@@ -17,20 +17,16 @@ import copy
 
 
 COUPONS_CONFIG_TYPE = {
-    'member': 10,       # 会员优惠
-    'online': 20,       # 在线下单优惠
-    'other': 100,       # 其它优惠
-    'custom': 200,      # 自定义
+    'cash': 1,           # 代金券
+    'discount': 2,       # 折扣券
 }
 
 COUPONS_CONFIG_TYPE_CN_MATCH = {
-    10: u'会员优惠',
-    20: u'在线下单优惠',
-    100: u'其它优惠',
-    200: u'自定义',
+    1: u'代金券',
+    2: u'折扣券',
 }
 
-COUPONS_CONFIG_FUZZY_FIELDS = ('name', 'type_detail')
+COUPONS_CONFIG_FUZZY_FIELDS = ('name',)
 
 
 class BaseCouponsManager(models.Manager):
@@ -58,17 +54,19 @@ class CouponsConfig(models.Model):
     """
     name = models.CharField(u'优惠券名称', max_length=64)
 
-    # 优惠券类别：会员优惠：10， 在线下单优惠：20，其它优惠：100，自定义：200
+    # 优惠券类别：1：代金券， 2：折扣券
     type = models.IntegerField(u'优惠券类别')
-    type_detail = models.CharField(u'优惠券类别详情', max_length=64)
 
-    amount_of_money = models.CharField(u'优惠金额', max_length=16)
+    amount_of_money = models.CharField(u'优惠金额', max_length=16, null=True)
+    discount_percent = models.IntegerField(u'折扣率', null=True)
     service_ratio = models.IntegerField(u'平台商承担（优惠）比例')
     business_ratio = models.IntegerField(u'商户承担（优惠）比例')
     start_amount = models.CharField(u'满足优惠条件的起始金额', max_length=16, default='0')
 
     total_count = models.IntegerField(u'优惠券总数量', null=True)
     send_count = models.IntegerField(u'优惠券发放数量', default=0)
+    description = models.CharField(u'优惠券描述', max_length=256, default='',
+                                   blank=True, null=True)
 
     expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
     # 数据状态：1：正常 400：已过期 其它值：已删除
@@ -96,9 +94,11 @@ class CouponsConfig(models.Model):
         kwargs['expires__gt'] = now()
         return cls.get_object(**kwargs)
 
-
     @classmethod
     def filter_objects(cls, fuzzy=False, **kwargs):
+        if kwargs.get('status') == 400:
+            kwargs['status'] = 1
+            kwargs['expires__lte'] = now()
         kwargs = get_perfect_filter_params(cls, **kwargs)
         if fuzzy:
             for key in COUPONS_CONFIG_FUZZY_FIELDS:

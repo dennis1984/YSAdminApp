@@ -24,8 +24,7 @@ import copy
 class CouponsSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
-            if data['type'] != COUPONS_CONFIG_TYPE['custom']:
-                data['type_detail'] = COUPONS_CONFIG_TYPE_CN_MATCH[data['type']]
+            data['expires'] = main.make_time_delta(days=data.pop('expires_in'))
             super(CouponsSerializer, self).__init__(data=data, **kwargs)
         else:
             super(CouponsSerializer, self).__init__(instance, **kwargs)
@@ -37,9 +36,6 @@ class CouponsSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         if 'pk' in validated_data:
             validated_data.pop('pk')
-        if 'type' in validated_data:
-            if validated_data['type'] != COUPONS_CONFIG_TYPE['custom']:
-                validated_data['type_detail'] = COUPONS_CONFIG_TYPE_CN_MATCH[validated_data['type']]
         return super(CouponsSerializer, self).update(instance, validated_data)
 
     def add_send_count(self, instance, send_count):
@@ -58,13 +54,6 @@ class CouponsListSerializer(BaseListSerializer):
 class DishesDiscountSerializer(BaseModelSerializer):
     def __init__(self, instance=None, data=None, **kwargs):
         if data:
-            # if 'dishes_id' in data:
-            #     dishes_detail = Dishes.get_dishes_detail_dict_with_user_info(pk=data['dishes_id'])
-            #     data['dishes_name'] = dishes_detail['title']
-            #     data['business_id'] = dishes_detail['business_id']
-            #     data['business_name'] = dishes_detail['business_name']
-            #     data['food_court_id'] = dishes_detail['food_court_id']
-            #     data['food_court_name'] = dishes_detail['food_court_name']
             super(DishesDiscountSerializer, self).__init__(data=data, **kwargs)
         else:
             super(DishesDiscountSerializer, self).__init__(instance, **kwargs)

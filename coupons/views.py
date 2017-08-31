@@ -54,24 +54,24 @@ class CouponsAction(generics.GenericAPIView):
             return False, Exception(form.errors)
 
         cld = form.cleaned_data
-        if cld.get('type') == COUPONS_CONFIG_TYPE['custom']:
-            if 'type_detail' not in cld:
-                return False, Exception('When type is 200, type_detail must not be empty.')
+        if cld.get('type') == COUPONS_CONFIG_TYPE['cash']:
+            if 'amount_of_money' not in cld:
+                return False, Exception('Amount Of Money is required.')
+        elif cld.get('type') == COUPONS_CONFIG_TYPE['discount']:
+            if 'discount_percent' not in cld:
+                return False, Exception('Discount Percent is required.')
 
         if method.upper() == 'POST':
             if cld['service_ratio'] + cld['business_ratio'] != 100:
-                return False, Exception('The sum of fields [service_ratio, business_ratio] must be 100')
-            if cld['expires'] < now():
-                return False, Exception('Expires can not less than now.')
+                return False, Exception('The sum of fields [service_ratio, business_ratio]'
+                                        ' must be 100')
         else:
-            if 'expires' in cld:
-                if cld['expires'] < now():
-                    return False, Exception('Expires can not less than now.')
             if 'service_ratio' in cld or 'business_ratio' in cld:
                 service_ratio = cld.get('service_ratio', 0)
                 business_ratio = cld.get('business_ratio', 0)
                 if service_ratio + business_ratio != 100:
-                    return False, Exception('The sum of fields [service_ratio, business_ratio] must be 100')
+                    return False, Exception('The sum of fields [service_ratio, business_ratio] '
+                                            'must be 100')
 
         return True, cld
 
