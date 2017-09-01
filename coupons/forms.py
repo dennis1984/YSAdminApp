@@ -36,7 +36,7 @@ class CouponsUpdateForm(forms.Form):
     business_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
     start_amount = forms.FloatField(min_value=0, required=False)
     total_count = forms.IntegerField(min_value=1, required=False)
-    expires = forms.IntegerField(min_value=1, required=False)
+    expire_in = forms.IntegerField(min_value=1, required=False)
     description = forms.CharField(max_length=85, required=False)
 
 

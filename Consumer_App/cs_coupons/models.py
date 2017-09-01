@@ -9,9 +9,11 @@ from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
 from Consumer_App.cs_users.models import ConsumerUser
 from coupons.models import CouponsConfig
+from horizon.main import make_perfect_time_delta
 
 from decimal import Decimal
 import json
+import datetime
 
 
 class Coupons(models.Model):
@@ -24,6 +26,7 @@ class Coupons(models.Model):
     # 优惠券状态：1：未使用  2：已使用  400：已过期
     status = models.IntegerField(u'优惠券状态', default=1)
 
+    expires = models.DateTimeField(u'优惠券过期时间', default=now)
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'更新时间', auto_now=True)
 
@@ -79,7 +82,11 @@ class CouponsAction(object):
             else:
                 user_id = item
             initial_data = {'coupons_id': coupons.pk,
-                            'user_id': user_id}
+                            'user_id': user_id,
+                            'expires': make_perfect_time_delta(days=coupons.expire_in,
+                                                               hours=23,
+                                                               minutes=59,
+                                                               seconds=59)}
             instance = Coupons(**initial_data)
             try:
                 instance.save()

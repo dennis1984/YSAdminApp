@@ -69,7 +69,7 @@ class CouponsConfig(models.Model):
     description = models.CharField(u'优惠券描述', max_length=256, default='',
                                    blank=True, null=True)
 
-    expires = models.DateTimeField(u'优惠券失效日期', default=main.days_7_plus)
+    expire_in = models.IntegerField(u'过期天数', default=main.days_7_plus)
     # 数据状态：1：正常 400：已过期 其它值：已删除
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
