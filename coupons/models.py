@@ -35,17 +35,12 @@ class BaseCouponsManager(models.Manager):
         if 'status' not in kwargs:
             kwargs['status'] = 1
         instance = super(BaseCouponsManager, self).get(*args, **kwargs)
-        if now() >= instance.expires:
-            instance.status = 400
         return instance
 
     def filter(self, *args, **kwargs):
         if 'status' not in kwargs:
             kwargs['status'] = 1
         instances = super(BaseCouponsManager, self).filter(*args, **kwargs)
-        for instance in instances:
-            if now() >= instance.expires:
-                instance.status = 400
         return instances
 
 
@@ -92,14 +87,10 @@ class CouponsConfig(models.Model):
 
     @classmethod
     def get_active_object(cls, **kwargs):
-        kwargs['expires__gt'] = now()
         return cls.get_object(**kwargs)
 
     @classmethod
     def filter_objects(cls, fuzzy=False, **kwargs):
-        if kwargs.get('status') == 400:
-            kwargs['status'] = 1
-            kwargs['expires__lte'] = now()
         start_amount = None
         if 'start_amount' in kwargs:
             start_amount = kwargs.pop('start_amount')

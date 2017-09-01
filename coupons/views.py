@@ -149,6 +149,8 @@ class CouponsList(generics.GenericAPIView):
 
         cld = form.cleaned_data
         instances = self.get_coupons_list(**cld)
+        if isinstance(instances, Exception):
+            return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
         serializer = CouponsListSerializer(instances)
         datas = serializer.list_data(**cld)
         if isinstance(datas, Exception):
