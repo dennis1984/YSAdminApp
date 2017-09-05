@@ -224,7 +224,7 @@ class OrdersListForm(forms.Form):
                                                 (206, 4),
                                                 (400, 5),
                                                 (500, 6)),
-                                       )
+                                       required=False)
     pay_orders_id = forms.CharField(min_length=14, max_length=32, required=False)
     verify_orders_id = forms.CharField(min_length=14, max_length=32, required=False)
     phone = forms.CharField(min_length=11, max_length=16, required=False)

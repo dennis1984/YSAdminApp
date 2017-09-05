@@ -49,7 +49,8 @@ class ConsumeOrdersListForm(forms.Form):
     business_name = forms.CharField(min_length=2, max_length=20, required=False)
     payment_status = forms.ChoiceField(choices=((201, 1),
                                                 (206, 2)),
-                                       error_messages={'required': u'支付状态不能为空'})
+                                       error_messages={'required': u'支付状态不能为空'},
+                                       required=False)
     start_created = forms.DateField(required=False)
     end_created = forms.DateField(required=False)
     min_payable = forms.FloatField(min_value=0, required=False)
