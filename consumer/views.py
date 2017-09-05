@@ -147,6 +147,9 @@ class RechargeList(generics.GenericAPIView):
                 kwargs['payment_mode__in'] = filter_payment_mode_list
             else:
                 kwargs['payment_mode'] = ORDERS_PAYMENT_MODE['admin']
+        if 'end_created' in kwargs:
+            kwargs['end_created'] = main.make_time_delta_for_custom(kwargs['end_created'],
+                                                                    days=1)
         return PayOrders.filter_orders_details(_filter='RECHARGE', **kwargs)
 
     def get_user_object(self, phone):
@@ -218,6 +221,9 @@ class ConsumeOrdersList(generics.GenericAPIView):
             if isinstance(user, Exception):
                 return []
             kwargs['user_id'] = user.id
+        if 'end_created' in kwargs:
+            kwargs['end_created'] = main.make_time_delta_for_custom(kwargs['end_created'],
+                                                                    days=1)
         return ConsumeOrders.filter_orders_details(**kwargs)
 
     def get_user_object(self, phone):

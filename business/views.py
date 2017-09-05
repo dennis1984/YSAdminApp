@@ -75,6 +75,7 @@ from Business_App.bz_wallet.models import (WithdrawRecord,
                                            WITHDRAW_RECORD_STATUS_STEP)
 from Business_App.bz_orders.models import Orders, VerifyOrders
 from Business_App.bz_users.caches import BusinessUserCache
+from horizon import main
 
 import re
 from decimal import Decimal
@@ -732,6 +733,9 @@ class WithdrawRecordList(generics.GenericAPIView):
             if isinstance(users, Exception):
                 return users
             kwargs['user_id__in'] = [user.id for user in users]
+        if 'end_created' in kwargs:
+            kwargs['end_created'] = main.make_time_delta_for_custom(kwargs['end_created'],
+                                                                    days=1)
         return WithdrawRecord.filter_record_details(**kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -832,6 +836,9 @@ class OrdersList(generics.GenericAPIView):
                 return user
             kwargs['user_id__in'] = user.id
             kwargs.pop('phone')
+        if 'end_created' in kwargs:
+            kwargs['end_created'] = main.make_time_delta_for_custom(kwargs['end_created'],
+                                                                    days=1)
 
         orders_details = []
         if 'pay_orders_id' in kwargs:

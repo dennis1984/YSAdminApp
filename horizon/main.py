@@ -42,6 +42,16 @@ def make_time_delta(days=0, minutes=0, seconds=0):
                                       seconds=seconds)
 
 
+def make_time_delta_for_custom(date_time, days=0, hours=0, minutes=0, seconds=0):
+    """
+    设置时间增量
+    """
+    return date_time + datetime.timedelta(days=days,
+                                          hours=hours,
+                                          minutes=minutes,
+                                          seconds=seconds)
+
+
 def make_perfect_time_delta(days=0, hours=0, minutes=0, seconds=0):
     """
     设置时间增量
