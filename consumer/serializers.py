@@ -129,7 +129,7 @@ class CommentListSerializer(BaseListSerializer):
 
 
 class WalletDetailSerializer(BaseSerializer):
-    user_id = serializers.IntegerField()
+    user_id = serializers.CharField()
     balance = serializers.CharField()
     phone = serializers.CharField(allow_blank=True, allow_null=True)
 
