@@ -97,11 +97,11 @@ class CouponsSendRecordSerializer(BaseSerializer):
     id = serializers.IntegerField()
     coupons_id = serializers.IntegerField()
     user_id = serializers.IntegerField()
-    phone = serializers.CharField()
+    phone = serializers.CharField(allow_null=True, allow_blank=True)
     count = serializers.IntegerField()
     coupons_name = serializers.CharField()
     coupons_type = serializers.IntegerField()
-    created = serializers.CharField()
+    created = serializers.DateTimeField()
 
 
 class CouponsSendRecordListSerializer(BaseListSerializer):
@@ -112,11 +112,11 @@ class CouponsUsedRecordSerializer(BaseSerializer):
     id = serializers.IntegerField()
     coupons_id = serializers.IntegerField()
     user_id = serializers.IntegerField()
-    phone = serializers.CharField()
+    phone = serializers.CharField(allow_null=True, allow_blank=True)
     count = serializers.IntegerField()
     coupons_name = serializers.CharField()
     coupons_type = serializers.IntegerField()
-    created = serializers.CharField()
+    created = serializers.DateTimeField()
 
 
 class CouponsUsedRecordListSerializer(BaseListSerializer):
