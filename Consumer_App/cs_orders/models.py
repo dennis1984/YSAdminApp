@@ -379,6 +379,7 @@ class ConsumeOrders(models.Model):
             if isinstance(comment, Exception):
                 orders_dict['comment_messaged'] = ''
                 orders_dict['reply_messaged'] = ''
+                orders_dict['comment_id'] = None
             else:
                 reply_comment = ReplyComment.get_object(comment_id=comment.id)
                 orders_dict['comment_messaged'] = comment.messaged

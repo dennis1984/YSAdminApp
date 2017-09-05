@@ -83,7 +83,7 @@ class ConsumerOrdersSerializer(BaseSerializer):
     updated = serializers.DateTimeField()
     is_commented = serializers.IntegerField()
     comment_messaged = serializers.CharField(allow_blank=True, allow_null=True)
-    comment_id = serializers.IntegerField(required=False)
+    comment_id = serializers.IntegerField(allow_null=True)
     reply_messaged = serializers.CharField(allow_blank=True, allow_null=True)
 
 
