@@ -392,7 +392,7 @@ class CouponsSendRecordList(generics.GenericAPIView):
 
     def get_send_record_details(self, **kwargs):
         if 'coupons_name' in kwargs:
-            instances = CouponsConfig.filter_objects(name=kwargs.pop('coupons_name'))
+            instances = CouponsConfig.filter_objects(fuzzy=True, name=kwargs.pop('coupons_name'))
             coupons_ids = [ins.id for ins in instances]
             kwargs['coupons_id__in'] = coupons_ids
         return CouponsSendRecord.filter_perfect_objects(**kwargs)
@@ -424,7 +424,7 @@ class CouponsUsedRecordList(generics.GenericAPIView):
 
     def get_used_record_details(self, **kwargs):
         if 'coupons_name' in kwargs:
-            instances = CouponsConfig.filter_objects(name=kwargs.pop('coupons_name'))
+            instances = CouponsConfig.filter_objects(fuzzy=True, name=kwargs.pop('coupons_name'))
             coupons_ids = [ins.id for ins in instances]
             kwargs['coupons_id__in'] = coupons_ids
         return CouponsUsedRecord.filter_perfect_objects(**kwargs)
