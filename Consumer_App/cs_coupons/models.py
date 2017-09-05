@@ -8,7 +8,7 @@ from horizon.main import minutes_15_plus, DatetimeEncode
 from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
 from Consumer_App.cs_users.models import ConsumerUser
-from coupons.models import CouponsConfig
+from coupons.models import CouponsConfig, CouponsSendRecord
 from horizon.main import make_perfect_time_delta
 
 from decimal import Decimal
@@ -61,7 +61,7 @@ class CouponsAction(object):
     def create_coupons(self, user_ids, coupons):
         """
         发放优惠券到用户手中
-        返回：成功：方法数量,
+        返回：成功：发放数量,
              失败：Exception
         """
         if isinstance(user_ids, (str, unicode)):
@@ -79,8 +79,11 @@ class CouponsAction(object):
         for item in user_ids:
             if hasattr(item, 'pk'):
                 user_id = item.pk
+                phone = item.phone
             else:
                 user_id = item
+                user = ConsumerUser.get_object(pk=user_id)
+                phone = user.phone
             initial_data = {'coupons_id': coupons.pk,
                             'user_id': user_id,
                             'expires': make_perfect_time_delta(days=coupons.expire_in,
@@ -92,5 +95,14 @@ class CouponsAction(object):
                 instance.save()
             except Exception as e:
                 return e
+
             send_count += 1
+            send_record_data = {'coupons_id': coupons.pk,
+                                'user_id': user_id,
+                                'phone': phone}
+            try:
+                CouponsSendRecord(**send_record_data).save()
+            except Exception as e:
+                pass
+
         return send_count

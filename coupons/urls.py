@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^dishes_discount_detail/$', views.DishesDiscountDetail.as_view()),
 
     url(r'^send_coupons/$', views.SendCoupons.as_view()),
+    url(r'^coupons_send_record_list/$', views.CouponsSendRecordList.as_view()),
+    url(r'^coupons_used_record_list/$', views.CouponsUsedRecordList.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

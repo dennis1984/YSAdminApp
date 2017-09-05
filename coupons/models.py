@@ -218,3 +218,113 @@ class DishesDiscountConfig(models.Model):
                 detail_dict.update(update_dict)
             details.append(detail_dict)
         return details
+
+
+class CouponsSendRecord(models.Model):
+    """
+    优惠券派发记录
+    """
+    coupons_id = models.IntegerField(u'优惠券ID', db_index=True)
+    user_id = models.IntegerField(u'用户ID')
+    phone = models.CharField(u'用户手机号', max_length=20, null=True, blank=True)
+    count = models.IntegerField(u'发放数量', default=1)
+
+    created = models.DateTimeField(u'创建时间', default=now)
+
+    class Meta:
+        db_table = 'ys_coupons_send_record'
+        ordering = ['-coupons_id']
+
+    def __unicode__(self):
+        return '%s-%s' % (self.coupons_id, self.user_id)
+
+    @classmethod
+    def get_object(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_perfect_objects(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        coupons_dict = {}
+        for ins in instances:
+            coupons = coupons_dict.get(ins.coupons_id)
+            if not coupons:
+                coupons = CouponsConfig.get_object(pk=ins.coupons_id)
+                coupons_dict[ins.coupons_id] = coupons
+            detail = model_to_dict(ins)
+            update_dict = {'coupons_name': coupons.name,
+                           'coupons_type': coupons.type,
+                           }
+            detail.update(update_dict)
+            details.append(detail)
+        return details
+
+
+class CouponsUsedRecord(models.Model):
+    """
+    优惠券使用记录
+    """
+    coupons_id = models.IntegerField(u'优惠券ID', db_index=True)
+    user_id = models.IntegerField(u'用户ID')
+    phone = models.CharField(u'用户手机号', max_length=20, null=True, blank=True)
+    count = models.IntegerField(u'使用数量', default=1)
+
+    created = models.DateTimeField(u'创建时间', default=now)
+
+    class Meta:
+        db_table = 'ys_coupons_used_record'
+        ordering = ['-coupons_id']
+
+    def __unicode__(self):
+        return '%s-%s' % (self.coupons_id, self.user_id)
+
+    @classmethod
+    def get_object(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_perfect_objects(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        coupons_dict = {}
+        for ins in instances:
+            coupons = coupons_dict.get(ins.coupons_id)
+            if not coupons:
+                coupons = CouponsConfig.get_object(pk=ins.coupons_id)
+                coupons_dict[ins.coupons_id] = coupons
+            detail = model_to_dict(ins)
+            update_dict = {'coupons_name': coupons.name,
+                           'coupons_type': coupons.type,
+                           }
+            detail.update(update_dict)
+            details.append(detail)
+        return details

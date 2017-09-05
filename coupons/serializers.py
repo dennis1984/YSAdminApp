@@ -91,3 +91,33 @@ class DishesDiscountDetailSerializer(BaseSerializer):
 
 class DishesDiscountListSerializer(BaseListSerializer):
     child = DishesDiscountDetailSerializer()
+
+
+class CouponsSendRecordSerializer(BaseSerializer):
+    id = serializers.IntegerField()
+    coupons_id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
+    phone = serializers.CharField()
+    count = serializers.IntegerField()
+    coupons_name = serializers.CharField()
+    coupons_type = serializers.IntegerField()
+    created = serializers.CharField()
+
+
+class CouponsSendRecordListSerializer(BaseListSerializer):
+    child = CouponsSendRecordSerializer()
+
+
+class CouponsUsedRecordSerializer(BaseSerializer):
+    id = serializers.IntegerField()
+    coupons_id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
+    phone = serializers.CharField()
+    count = serializers.IntegerField()
+    coupons_name = serializers.CharField()
+    coupons_type = serializers.IntegerField()
+    created = serializers.CharField()
+
+
+class CouponsUsedRecordListSerializer(BaseListSerializer):
+    child = CouponsUsedRecordSerializer()

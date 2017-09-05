@@ -8,10 +8,14 @@ from coupons.serializers import (CouponsSerializer,
                                  CouponsListSerializer,
                                  DishesDiscountSerializer,
                                  DishesDiscountDetailSerializer,
-                                 DishesDiscountListSerializer)
+                                 DishesDiscountListSerializer,
+                                 CouponsSendRecordListSerializer,
+                                 CouponsUsedRecordListSerializer)
 from coupons.permissions import IsAdminOrReadOnly
 from coupons.models import (CouponsConfig,
                             DishesDiscountConfig,
+                            CouponsSendRecord,
+                            CouponsUsedRecord,
                             COUPONS_CONFIG_TYPE,
                             COUPONS_CONFIG_TYPE_CN_MATCH)
 from coupons.forms import (CouponsInputForm,
@@ -24,7 +28,9 @@ from coupons.forms import (CouponsInputForm,
                            DishesDiscountDeleteForm,
                            DishesDiscountDetailForm,
                            DishesDiscountListForm,
-                           SendCouponsForm)
+                           SendCouponsForm,
+                           CouponsSendRecordForm,
+                           CouponsUsedRecordForm)
 
 from Business_App.bz_users.models import BusinessUser
 from Business_App.bz_dishes.models import Dishes
@@ -376,3 +382,67 @@ class SendCoupons(generics.GenericAPIView):
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CouponsSendRecordList(generics.GenericAPIView):
+    """
+    优惠券派发记录
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_send_record_details(self, **kwargs):
+        if 'coupons_name' in kwargs:
+            instances = CouponsConfig.filter_objects(name=kwargs.pop('coupons_name'))
+            coupons_ids = [ins.id for ins in instances]
+            kwargs['coupons_id__in'] = coupons_ids
+        return CouponsSendRecord.filter_perfect_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = CouponsSendRecordForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_send_record_details(**cld)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CouponsSendRecordListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
+
+
+class CouponsUsedRecordList(generics.GenericAPIView):
+    """
+    优惠券使用记录
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_used_record_details(self, **kwargs):
+        if 'coupons_name' in kwargs:
+            instances = CouponsConfig.filter_objects(name=kwargs.pop('coupons_name'))
+            coupons_ids = [ins.id for ins in instances]
+            kwargs['coupons_id__in'] = coupons_ids
+        return CouponsUsedRecord.filter_perfect_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = CouponsUsedRecordForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_used_record_details(**cld)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CouponsUsedRecordListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)

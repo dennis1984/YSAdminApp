@@ -96,3 +96,17 @@ class DishesDiscountDetailForm(forms.Form):
 class SendCouponsForm(forms.Form):
     coupons_id = forms.IntegerField(min_value=1)
     consumer_ids = forms.CharField()
+
+
+class CouponsSendRecordForm(forms.Form):
+    coupons_name = forms.CharField(max_length=20, required=False)
+    phone = forms.CharField(max_length=20, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
+class CouponsUsedRecordForm(forms.Form):
+    coupons_name = forms.CharField(max_length=20, required=False)
+    phone = forms.CharField(max_length=20, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
