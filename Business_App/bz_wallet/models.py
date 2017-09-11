@@ -28,7 +28,7 @@ WITHDRAW_RECORD_STATUS = {
     'failed': 500,
 }
 
-WALLET_BALANCE = '0.00'
+WALLET_BLOCK_BALANCE = '0.00'
 WALLET_SERVICE_RATE = '0.000'
 
 WITHDRAW_RECORD_STATUS_STEP = {
@@ -215,7 +215,7 @@ class Wallet(models.Model):
     """
     user_id = models.IntegerField('用户ID', db_index=True, unique=True)
     balance = models.CharField('余额', max_length=16, default='0')
-    blocked_money = models.CharField('冻结金额', max_length=16, default='500.00')
+    blocked_money = models.CharField('冻结金额', max_length=16, default=WALLET_BLOCK_BALANCE)
     password = models.CharField('支付密码', max_length=560, null=True)
     created = models.DateTimeField('创建时间', default=now)
     updated = models.DateTimeField('最后修改时间', auto_now=True)
@@ -259,8 +259,8 @@ class Wallet(models.Model):
             except cls.DoesNotExist:
                 raise cls.DoesNotExist
 
-            if Decimal(_instance.blocked_money) - Decimal(WALLET_BALANCE) < Decimal(amount_of_money) or \
-                                    Decimal(_instance.balance) - Decimal(WALLET_BALANCE) < Decimal(amount_of_money):
+            if Decimal(_instance.blocked_money) - Decimal(WALLET_BLOCK_BALANCE) < Decimal(amount_of_money) or \
+                    Decimal(_instance.balance) - Decimal(WALLET_BLOCK_BALANCE) < Decimal(amount_of_money):
                 return Exception('Your balance is not enough.')
             _instance.blocked_money = str(Decimal(_instance.blocked_money) - Decimal(amount_of_money))
             _instance.balance = str(Decimal(_instance.balance) - Decimal(amount_of_money))
