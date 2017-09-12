@@ -12,6 +12,35 @@ import re
 import os
 
 
+PERMISSION_LIST = {
+    u'管理平台': (
+        {'name': u'城市管理', 'url': '/city/'},
+        {'name': u'商城查询', 'url': '/foodcourt/'},
+        {'name': u'商户管理', 'url': '/tenants/'},
+        {'name': u'菜单管理', 'url': '/business/'},
+        {'name': u'补贴配置', 'url': '/discount/'},
+        {'name': u'商户订单', 'url': '/businessorder/'},
+        {'name': u'用户订单', 'url': '/order/'},
+        {'name': u'用户管理', 'url': '/user/'},
+        {'name': u'充值查询', 'url': '/recharge/'},
+        {'name': u'用户钱包', 'url': '/wallet/'},
+        {'name': u'打款操作', 'url': '/withdraw/operation/'},
+        {'name': u'提现查询', 'url': '/withdraw/'},
+        {'name': u'广告管理', 'url': '/banner/'},
+        {'name': u'意见反馈', 'url': '/feedback/'},
+        {'name': u'版本控制', 'url': '/version/'},
+    ),
+    u'优惠券': (
+        {'name': u'优惠券管理', 'url': '/coupons/'},
+        {'name': u'优惠券派发', 'url': '/coupons/sender/'},
+        {'name': u'优惠券使用', 'url': '/coupons/used/'},
+    ),
+    u'数据统计': (
+        {'name': u'销售统计', 'url': '/order/sale/'},
+    ),
+}
+
+
 class AdminUserManager(BaseUserManager):
     def create_user(self, username, password, **kwargs):
         """
@@ -26,6 +55,8 @@ class AdminUserManager(BaseUserManager):
 
         user = self.model(phone=username)
         user.set_password(password)
+        for name, value in kwargs.items():
+            setattr(user, name, value)
         user.save(using=self._db)
         return user
 
@@ -43,31 +74,32 @@ HEAD_PICTURE_PATH = settings.PICTURE_DIRS['consumer']['head_picture']
 
 class AdminUser(AbstractBaseUser):
     phone = models.CharField(u'手机号', max_length=20, unique=True, db_index=True, null=True)
-    out_open_id = models.CharField(u'第三方唯一标识', max_length=64, unique=True,
-                                   db_index=True, null=True)
+    # out_open_id = models.CharField(u'第三方唯一标识', max_length=64, unique=True,
+    #                                db_index=True, null=True)
     nickname = models.CharField(u'昵称', max_length=100, null=True, blank=True)
 
     # 性别，0：未设定，1：男，2：女
-    gender = models.IntegerField(u'性别', default=0)
-    birthday = models.DateField(u'生日', null=True)
-    province = models.CharField(u'所在省份或直辖市', max_length=16, null=True, blank=True)
-    city = models.CharField(u'所在城市', max_length=32, null=True, blank=True)
-    head_picture = models.ImageField(u'头像', max_length=200,
-                                     upload_to=HEAD_PICTURE_PATH,
-                                     default=os.path.join(HEAD_PICTURE_PATH, 'noImage.png'))
+    # gender = models.IntegerField(u'性别', default=0)
+    # birthday = models.DateField(u'生日', null=True)
+    # province = models.CharField(u'所在省份或直辖市', max_length=16, null=True, blank=True)
+    # city = models.CharField(u'所在城市', max_length=32, null=True, blank=True)
+    # head_picture = models.ImageField(u'头像', max_length=200,
+    #                                  upload_to=HEAD_PICTURE_PATH,
+    #                                  default=os.path.join(HEAD_PICTURE_PATH, 'noImage.png'))
 
     # 注册渠道：客户端：YS，微信第三方：WX，QQ第三方：QQ，淘宝：TB
     #          新浪微博：SINA_WB
-    channel = models.CharField(u'注册渠道', max_length=20, default='YS')
+    # channel = models.CharField(u'注册渠道', max_length=20, default='YS')
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    permission_list = models.TextField(u'权限列表', default='')
     date_joined = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
 
     objects = AdminUserManager()
 
     USERNAME_FIELD = 'phone'
-    REQUIRED_FIELDS = ['channel']
+    REQUIRED_FIELDS = ['nickname']
 
     class Meta:
         db_table = 'ys_auth_user'
@@ -75,14 +107,6 @@ class AdminUser(AbstractBaseUser):
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
-
-    @property
-    def is_binding(self):
-        re_com = re.compile(r'^1[0-9]{10}$')
-        result = re_com.match(self.phone)
-        if result is None:
-            return False
-        return True
 
     @classmethod
     def get_object(cls, **kwargs):
@@ -98,26 +122,6 @@ class AdminUser(AbstractBaseUser):
         """
         try:
             return cls.objects.get(pk=request.user.id)
-        except Exception as e:
-            return e
-
-    @classmethod
-    def get_objects_list(cls, request, **kwargs):
-        """
-        获取用户列表
-        权限控制：只有管理员可以访问这些数据
-        """
-        if not request.user.is_admin:
-            return Exception('Permission denied, Cannot access the method')
-
-        _kwargs = {}
-        if 'start_created' in kwargs:
-            _kwargs['created__gte'] = kwargs['start_created']
-        if 'end_created' in kwargs:
-            _kwargs['created__lte'] = kwargs['end_created']
-        _kwargs['is_admin'] = False
-        try:
-            return cls.objects.filter(**_kwargs)
         except Exception as e:
             return e
 

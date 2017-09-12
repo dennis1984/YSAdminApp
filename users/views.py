@@ -6,22 +6,18 @@ from rest_framework import status
 
 from users.serializers import (UserSerializer,
                                UserInstanceSerializer,
-                               UserDetailSerializer,
-                               UserListSerializer,
                                IdentifyingCodeSerializer)
 from users.permissions import IsAdminOrReadOnly
 from users.models import (AdminUser,
                           make_token_expire,
-                          IdentifyingCode)
+                          IdentifyingCode,
+                          PERMISSION_LIST)
 from users.forms import (CreateUserForm,
                          SendIdentifyingCodeForm,
                          VerifyIdentifyingCodeForm,
-                         UpdateUserInfoForm,
-                         UsersInputForm,
-                         SetPasswordForm,
-                         WXAuthCreateUserForm)
-
-from Business_App.bz_users.models import BusinessUser
+                         UpdateUserForm,
+                         SetPasswordForm,)
+import json
 
 
 class UserAction(generics.GenericAPIView):
@@ -30,31 +26,43 @@ class UserAction(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly, )
 
+    def is_request_data_valid(self, request):
+        form = CreateUserForm(request.data)
+        if not form.is_valid():
+            return False, form.errors
+
+        cld = form.cleaned_data
+        if 'permission_list' in cld:
+            try:
+                json.loads(cld['permission_list'])
+            except Exception as e:
+                return False, e.args
+        return True, cld
+
+    def get_object_of_user(self, request):
+        return AdminUser.get_object(**{'pk': request.user.id})
+
     def post(self, request, *args, **kwargs):
         """
          创建用户
         """
-        form = UsersInputForm(request.data)
-        if not form.is_valid():
-            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+        is_valid, cld = self.is_request_data_valid(request)
+        if not is_valid:
+            return Response({'Detail': cld}, status=status.HTTP_400_BAD_REQUEST)
 
-        cld = form.cleaned_data
         try:
-            user = BusinessUser.objects.create_user(**cld)
+            user = AdminUser.objects.create_superuser(**cld)
         except Exception as e:
-            return Response({'Error': e.args}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = UserInstanceSerializer(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def get_object_of_user(self, request):
-        return AdminUser.get_object(**{'pk': request.user.id})
 
     def put(self, request, *args, **kwargs):
         """
         更新用户信息
         """
-        form = UpdateUserInfoForm(request.data)
+        form = UpdateUserForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,15 +83,24 @@ class UserAction(generics.GenericAPIView):
 class UserDetail(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
-    def post(self, request, *args, **kwargs):
-        user = AdminUser.get_user_detail(request)
-        if isinstance(user, Exception):
-            return Response({'Error': user.args}, status=status.HTTP_400_BAD_REQUEST)
+    def get_object_of_user(self, request):
+        return AdminUser.get_object(**{'pk': request.user.id})
 
-        serializer = UserDetailSerializer(user)
-        # if serializer.is_valid():
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        user = self.get_object_of_user(request)
+        if isinstance(user, Exception):
+            return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserInstanceSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PermissionList(generics.GenericAPIView):
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def post(self, request, *args, **kwargs):
+        permission_list = PERMISSION_LIST
+        return Response(permission_list, status=status.HTTP_200_OK)
 
 
 class AuthLogout(generics.GenericAPIView):

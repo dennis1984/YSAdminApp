@@ -19,15 +19,33 @@ class PasswordForm(forms.Form):
                                })
 
 
-class UsersInputForm(forms.Form):
+class CreateUserForm(forms.Form):
+    """
+    创建用户
+    """
     username = forms.CharField(max_length=20, min_length=11,
                                error_messages={'required': u'手机号不能为空',
                                                'min_length': u'手机号位数不够'})
     password = forms.CharField(min_length=6, max_length=50,
                                error_messages={'required': u'密码不能为空',
                                                'min_length': u'密码长度不能少于6位'})
-    business_name = forms.CharField(min_length=2, max_length=100)
-    food_court_id = forms.IntegerField(min_value=1)
+    nickname = forms.CharField(min_length=1, max_length=100, required=False)
+    # permission_list为JSON字符串，形如：
+    # {'管理平台'： (
+    #       {'name': u'城市管理', 'url': '/city/'},
+    #  ),
+    #   '优惠券': (
+    #        {'name': u'优惠券管理', 'url': '/coupons/'},
+    # ), ...}
+    permission_list = forms.CharField(required=False)
+
+
+class UpdateUserForm(forms.Form):
+    """
+    更改用户信息
+    """
+    password = forms.CharField(min_length=6, max_length=50, required=False)
+    nickname = forms.CharField(max_length=100, required=False)
 
 
 class SendIdentifyingCodeForm(PhoneForm):
@@ -48,34 +66,7 @@ class VerifyIdentifyingCodeForm(PhoneForm):
                                        error_messages={'required': u'验证码不能为空'})
 
 
-class UpdateUserInfoForm(forms.Form):
-    """
-    更改用户信息
-    """
-    password = forms.CharField(min_length=6, max_length=50, required=False)
-    nickname = forms.CharField(max_length=100, required=False)
-    gender = forms.IntegerField(min_value=1, max_value=2, required=False)
-    birthday = forms.DateField(required=False)
-    province = forms.CharField(max_length=16, required=False)
-    city = forms.CharField(max_length=32, required=False)
-    head_picture = forms.ImageField(required=False)
-
-
-class CreateUserForm(VerifyIdentifyingCodeForm, PasswordForm):
-    """
-    用户注册
-    """
-
-
 class SetPasswordForm(CreateUserForm):
     """
     忘记密码
     """
-
-
-class WXAuthCreateUserForm(VerifyIdentifyingCodeForm):
-    """
-    微信授权登录后绑定用户手机号
-    """
-    # out_open_id = forms.CharField(max_length=64)
-
