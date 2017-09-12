@@ -5,6 +5,7 @@ from rest_framework import serializers
 from users.models import AdminUser, IdentifyingCode
 from horizon.serializers import (BaseListSerializer,
                                  BaseModelSerializer,
+                                 BaseSerializer,
                                  timezoneStringTostring)
 from django.conf import settings
 from horizon.models import model_to_dict
@@ -38,10 +39,11 @@ class UserSerializer(BaseModelSerializer):
         return super(UserSerializer, self).update(instance, _validated_data)
 
 
-class UserInstanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdminUser
-        fields = ('id', 'phone', 'nickname',)
+class UserDetailSerializer(BaseSerializer):
+    id = serializers.IntegerField()
+    phone = serializers.CharField()
+    nickname = serializers.CharField()
+    permission_list = serializers.ListField()
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):

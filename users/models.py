@@ -125,6 +125,10 @@ class AdminUser(AbstractBaseUser):
         except Exception as e:
             return e
 
+    @property
+    def to_dict(self):
+        return model_to_dict(self)
+
 
 def make_token_expire(request):
     """
