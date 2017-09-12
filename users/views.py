@@ -55,7 +55,7 @@ class UserAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserDetailSerializer(user.to_dict)
+        serializer = UserDetailSerializer(data=user.to_dict)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -78,7 +78,7 @@ class UserAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer_response = UserDetailSerializer(obj.to_dict)
+        serializer_response = UserDetailSerializer(data=obj.to_dict)
         if not serializer_response.is_valid():
             return Response({'Detail': serializer_response.errors},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -96,7 +96,7 @@ class UserDetail(generics.GenericAPIView):
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserDetailSerializer(user.to_dict)
+        serializer = UserDetailSerializer(data=user.to_dict)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
