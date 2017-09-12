@@ -10,6 +10,7 @@ from horizon.main import minutes_15_plus
 import datetime
 import re
 import os
+import json
 
 
 PERMISSION_LIST = {
@@ -127,7 +128,9 @@ class AdminUser(AbstractBaseUser):
 
     @property
     def to_dict(self):
-        return model_to_dict(self)
+        detail = model_to_dict(self)
+        detail['permission_list'] = json.loads(detail['permission_list'])
+        return detail
 
 
 def make_token_expire(request):
