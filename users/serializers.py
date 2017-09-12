@@ -42,8 +42,8 @@ class UserSerializer(BaseModelSerializer):
 class UserDetailSerializer(BaseSerializer):
     id = serializers.IntegerField()
     phone = serializers.CharField()
-    nickname = serializers.CharField()
-    permission_list = serializers.ListField()
+    nickname = serializers.CharField(allow_null=True, allow_blank=True)
+    permission_list = serializers.ListField(allow_null=True)
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
