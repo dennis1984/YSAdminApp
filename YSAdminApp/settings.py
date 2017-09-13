@@ -223,6 +223,9 @@ BUSINESS_PICTURE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'busin
 CONSUMER_PICTURE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'consumer', 'picture')
 ADMIN_PICTURE_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'admin', 'picture')
 
+# 静态文件根目录
+BUSINESS_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'business')
+
 PICTURE_DIRS = {
     'consumer': {
         'head_picture': os.path.join(CONSUMER_PICTURE_ROOT, 'head_picture'),   # 用户头像图片目录
@@ -234,6 +237,7 @@ PICTURE_DIRS = {
         'qrcode': os.path.join(BUSINESS_PICTURE_ROOT, 'qrcode'),               # 二维码图片目录
         'advert': os.path.join(BUSINESS_PICTURE_ROOT, 'advert'),               # 轮播广告图片目录
         'food_court': os.path.join(BUSINESS_PICTURE_ROOT, 'food_court'),       # 美食城图片目录
+        'app_package': os.path.join(BUSINESS_ROOT, 'app_package'),             # APP安装包目录
     },
     'admin': {
         'head_picture': os.path.join(ADMIN_PICTURE_ROOT, 'head_picture'),   # 用户头像图片目录

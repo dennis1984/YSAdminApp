@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.timezone import now
 from django.conf import settings
+from horizon.models import get_perfect_filter_params, BaseManager
 import os
 import json
 
@@ -27,6 +28,8 @@ class AppVersion(models.Model):
     created = models.DateTimeField('创建时间', default=now)
     updated = models.DateTimeField('最后修改时间', auto_now=True)
 
+    objects = BaseManager()
+
     class Meta:
         db_table = 'ys_app_version'
         ordering = ['-updated']
@@ -38,6 +41,7 @@ class AppVersion(models.Model):
 
     @classmethod
     def get_object(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.get(**kwargs)
         except Exception as e:
@@ -54,6 +58,7 @@ class AppVersion(models.Model):
 
     @classmethod
     def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             return cls.objects.filter(**kwargs)
         except Exception as e:

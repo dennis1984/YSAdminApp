@@ -57,7 +57,8 @@ class BaseListSerializer(serializers.ListSerializer):
             for key in item.keys():
                 if isinstance(dict_format[key], datetime.datetime):
                     item[key] = timezoneStringTostring(item[key])
-                if isinstance(dict_format[key], models.fields.files.ImageFieldFile):
+                if isinstance(dict_format[key], (models.fields.files.ImageFieldFile,
+                                                 models.fields.files.FieldFile)):
                     item['%s_url' % key] = os.path.join(settings.WEB_URL_FIX,
                                                         'static',
                                                         item[key].split('static/', 1)[1])
@@ -110,10 +111,11 @@ def perfect_result(self, _data):
     for key in _data.keys():
         if isinstance(_fields[key], Fields.DateTimeField):
             _data[key] = timezoneStringTostring(_data[key])
-        if isinstance(_fields[key], Fields.ImageField):
-            image_str = urllib.unquote(_data[key])
+        if isinstance(_fields[key], (Fields.ImageField,
+                                     Fields.FileField)):
+            image_str = _data[key]
             if image_str.startswith('http://') or image_str.startswith('https://'):
-                _data['%s_url' % key] = image_str
+                _data['%s_url' % key] = urllib.unquote(image_str)
             else:
                 _data['%s_url' % key] = os.path.join(settings.WEB_URL_FIX,
                                                      'static',

@@ -455,6 +455,14 @@ class AdvertPictureListSerializer(BaseListSerializer):
 
 
 class AppVersionSerializer(BaseModelSerializer):
+    def __init__(self, instance=None, data=None, **kwargs):
+        if data:
+            if 'app_file' in data:
+                data['package_path'] = data.pop('app_file')
+            super(AppVersionSerializer, self).__init__(data=data, **kwargs)
+        else:
+            super(AppVersionSerializer, self).__init__(instance, **kwargs)
+
     class Meta:
         model = AppVersion
         fields = '__all__'
@@ -462,6 +470,8 @@ class AppVersionSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         if 'pk' in validated_data:
             validated_data.pop('pk')
+        if 'app_file' in validated_data:
+            validated_data['package_path'] = validated_data.pop('app_file')
         return super(AppVersionSerializer, self).update(instance, validated_data)
 
     def delete(self, instance):

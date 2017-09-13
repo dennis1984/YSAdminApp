@@ -111,7 +111,7 @@ class AdminUser(AbstractBaseUser):
 
     @classmethod
     def get_object(cls, **kwargs):
-        kwargs = get_perfect_filter_params(**kwargs)
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             instance = cls.objects.get(**kwargs)
         except cls.DoesNotExist as e:
@@ -144,7 +144,7 @@ class AdminUser(AbstractBaseUser):
 
     @classmethod
     def filter_objects(cls, **kwargs):
-        kwargs = get_perfect_filter_params(**kwargs)
+        kwargs = get_perfect_filter_params(cls, **kwargs)
         try:
             instances = cls.objects.filter(**kwargs)
         except Exception as e:

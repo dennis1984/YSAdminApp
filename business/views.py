@@ -1194,6 +1194,8 @@ class AppVersionAction(generics.GenericAPIView):
 
         cld = form.cleaned_data
         serializer = AppVersionSerializer(data=cld)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         try:
             serializer.save()
         except Exception as e:
@@ -1215,7 +1217,7 @@ class AppVersionAction(generics.GenericAPIView):
 
         serializer = AppVersionSerializer(instance)
         try:
-            serializer.update(instance, **cld)
+            serializer.update(instance, cld)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
@@ -1237,7 +1239,7 @@ class AppVersionAction(generics.GenericAPIView):
             serializer.delete(instance)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AppVersionDetail(generics.GenericAPIView):
