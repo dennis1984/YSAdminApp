@@ -48,6 +48,11 @@ class UpdateUserForm(forms.Form):
     nickname = forms.CharField(max_length=100, required=False)
 
 
+class UserListForm(forms.Form):
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
 class SendIdentifyingCodeForm(PhoneForm):
     """
     发送手机验证码

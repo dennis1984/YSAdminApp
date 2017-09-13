@@ -46,6 +46,10 @@ class UserDetailSerializer(BaseSerializer):
     permission_list = serializers.DictField(allow_null=True)
 
 
+class UserListSerializer(BaseListSerializer):
+    child = UserDetailSerializer()
+
+
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group

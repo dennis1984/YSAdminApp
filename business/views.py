@@ -4,64 +4,33 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 
-from business.serializers import (CitySerializer,
-                                  CityListSerializer,
-                                  FoodCourtSerializer,
-                                  FoodCourtListSerializer,
-                                  UserWithFoodCourtListSerializer,
-                                  DishesListSerializer,
-                                  DishesSerializer,
-                                  UserSerializer,
-                                  UserDetailSerializer,
-                                  UserListSerializer,
-                                  WithdrawRecordSerializer,
-                                  WithdrawRecordListSerializer,
-                                  WithdrawRecordInstanceSerializer,
-                                  OrdersDetailSerializer,
-                                  OrdersListSerializer,
-                                  BankCardSerializer,
-                                  BankCardListSerializer,
-                                  AdvertPictureSerializer,
-                                  AdvertPictureDetailSerializer,
-                                  AdvertPictureListSerializer)
+from business.serializers import (
+    CitySerializer, CityListSerializer, FoodCourtSerializer,
+    FoodCourtListSerializer, UserWithFoodCourtListSerializer,
+    DishesListSerializer, DishesSerializer, UserSerializer,
+    UserDetailSerializer, UserListSerializer, WithdrawRecordSerializer,
+    WithdrawRecordListSerializer, WithdrawRecordInstanceSerializer,
+    OrdersDetailSerializer, OrdersListSerializer, BankCardSerializer,
+    BankCardListSerializer, AdvertPictureSerializer, AdvertPictureDetailSerializer,
+    AdvertPictureListSerializer, AppVersionSerializer, AppVersionListSerializer
+)
 from business.permissions import IsAdminOrReadOnly
-from business.forms import (CityInputForm,
-                            CityUpdateForm,
-                            CityDeleteForm,
-                            CityDetailForm,
-                            CityListForm,
-                            DistrictDetailForm,
-                            FoodCourtInputForm,
-                            FoodCourtUpdateForm,
-                            FoodCourtDeleteForm,
-                            FoodCourtDetailForm,
-                            FoodCourtListForm,
-                            UserWithFoodCourtListForm,
-                            UsersInputForm,
-                            UserUpdateForm,
-                            UserResetPasswordForm,
-                            UserDetailForm,
-                            UserListForm,
-                            DishesInputForm,
-                            DishesListForm,
-                            DishesDetailForm,
-                            DishesUpdateForm,
-                            DishesDeleteForm,
-                            WithdrawRecordListForm,
-                            WithdrawRecordDetailForm,
-                            WithdrawRecordActionForm,
-                            OrdersListForm,
-                            OrdersDetailForm,
-                            BankCardAddForm,
-                            BankCardDeleteForm,
-                            BankCardListForm,
-                            BankCardUpdateForm,
-                            BankCardDetailForm,
-                            AdvertPictureInputForm,
-                            AdvertPictureUpdateForm,
-                            AdvertPictureDeleteForm,
-                            AdvertPictureListForm,
-                            AdvertPictureDetailForm)
+from business.forms import (
+    CityInputForm, CityUpdateForm, CityDeleteForm, CityDetailForm,
+    CityListForm, DistrictDetailForm, FoodCourtInputForm,
+    FoodCourtUpdateForm, FoodCourtDeleteForm, FoodCourtDetailForm,
+    FoodCourtListForm, UserWithFoodCourtListForm, UsersInputForm,
+    UserUpdateForm, UserResetPasswordForm, UserDetailForm,
+    UserListForm, DishesInputForm, DishesListForm, DishesDetailForm,
+    DishesUpdateForm, DishesDeleteForm, WithdrawRecordListForm,
+    WithdrawRecordDetailForm, WithdrawRecordActionForm,
+    OrdersListForm, OrdersDetailForm, BankCardAddForm,
+    BankCardDeleteForm, BankCardListForm, BankCardUpdateForm,
+    BankCardDetailForm, AdvertPictureInputForm, AdvertPictureUpdateForm,
+    AdvertPictureDeleteForm, AdvertPictureListForm, AdvertPictureDetailForm,
+    AppVersionCreateForm, AppVersionUpdateForm, AppVersionDeleteForm,
+    AppVersionDetailForm, AppVersionListForm
+)
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
@@ -74,6 +43,7 @@ from Business_App.bz_wallet.models import (WithdrawRecord,
                                            BankCard,
                                            WITHDRAW_RECORD_STATUS_STEP)
 from Business_App.bz_orders.models import Orders, VerifyOrders
+from Business_App.bz_setup.models import AppVersion
 from Business_App.bz_users.caches import BusinessUserCache
 from horizon import main
 
@@ -1203,3 +1173,117 @@ class AdvertPictureDetail(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AppVersionAction(generics.GenericAPIView):
+    """
+    版本管理
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_app_version_object(self, pk):
+        return AppVersion.get_object(pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        """
+        创建安装包版本数据
+        """
+        form = AppVersionCreateForm(data=request.data, files=request.FILES)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        serializer = AppVersionSerializer(data=cld)
+        try:
+            serializer.save()
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        """
+        更新安装包信息
+        """
+        form = AppVersionUpdateForm(data=request.data, files=request.FILES)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_app_version_object(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = AppVersionSerializer(instance)
+        try:
+            serializer.update(instance, **cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        删除安装包
+        """
+        form = AppVersionDeleteForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors},status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_app_version_object(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AppVersionSerializer(instance)
+        try:
+            serializer.delete(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_204_NO_CONTENT)
+
+
+class AppVersionDetail(generics.GenericAPIView):
+    """
+    安装包详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_app_version_object(self, pk):
+        return AppVersion.get_object(pk=pk)
+
+    def post(self, request, *args, **kwargs):
+        form = AppVersionDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_app_version_object(pk=cld['pk'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AppVersionSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AppVersionList(generics.GenericAPIView):
+    """
+    安装包详情列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_object_list(self, **kwargs):
+        return AppVersion.filter_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = AppVersionListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instances = self.get_object_list(**cld)
+        if isinstance(instances, Exception):
+            return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = AppVersionListSerializer(instances)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
+

@@ -15,6 +15,7 @@ from Business_App.bz_wallet.models import (WithdrawRecord,
                                            BankCard,
                                            WITHDRAW_RECORD_STATUS,
                                            WITHDRAW_RECORD_STATUS_STEP)
+from Business_App.bz_setup.models import AppVersion
 
 from horizon.serializers import (BaseListSerializer,
                                  BaseModelSerializer,
@@ -451,3 +452,23 @@ class AdvertPictureDetailSerializer(BaseSerializer):
 
 class AdvertPictureListSerializer(BaseListSerializer):
     child = AdvertPictureDetailSerializer()
+
+
+class AppVersionSerializer(BaseModelSerializer):
+    class Meta:
+        model = AppVersion
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        if 'pk' in validated_data:
+            validated_data.pop('pk')
+        return super(AppVersionSerializer, self).update(instance, validated_data)
+
+    def delete(self, instance):
+        validated_data = {'status': instance.status + 1}
+        return super(AppVersionSerializer, self).update(instance, validated_data)
+
+
+class AppVersionListSerializer(BaseListSerializer):
+    child = AppVersionSerializer()
+

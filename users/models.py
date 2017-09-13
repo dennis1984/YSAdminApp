@@ -5,7 +5,7 @@ from django.utils.timezone import now
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from oauth2_provider.models import AccessToken
-from horizon.models import model_to_dict
+from horizon.models import model_to_dict, get_perfect_filter_params
 from horizon.main import minutes_15_plus
 import datetime
 import re
@@ -111,10 +111,17 @@ class AdminUser(AbstractBaseUser):
 
     @classmethod
     def get_object(cls, **kwargs):
+        kwargs = get_perfect_filter_params(**kwargs)
         try:
-            return cls.objects.get(**kwargs)
+            instance = cls.objects.get(**kwargs)
         except cls.DoesNotExist as e:
-            return Exception(e)
+            return e
+
+        if instance.permission_list:
+            instance.permission_list = json.loads(instance.permission_list)
+        else:
+            instance.permission_list = {}
+        return instance
 
     @classmethod
     def get_user_detail(cls, request):
@@ -129,8 +136,26 @@ class AdminUser(AbstractBaseUser):
     @property
     def to_dict(self):
         detail = model_to_dict(self)
-        detail['permission_list'] = json.loads(detail['permission_list'])
+        if detail['permission_list']:
+            detail['permission_list'] = json.loads(detail['permission_list'])
+        else:
+            detail['permission_list'] = {}
         return detail
+
+    @classmethod
+    def filter_objects(cls, **kwargs):
+        kwargs = get_perfect_filter_params(**kwargs)
+        try:
+            instances = cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+        for ins in instances:
+            if ins.permission_list:
+                ins.permission_list = json.loads(ins.permission_list)
+            else:
+                ins.permission_list = {}
+        return instances
 
 
 def make_token_expire(request):

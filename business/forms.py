@@ -312,3 +312,35 @@ class AdvertPictureListForm(forms.Form):
 
 class AdvertPictureDetailForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+
+
+class AppVersionCreateForm(forms.Form):
+    version_name = forms.CharField(min_length=3, max_length=16)
+    version_code = forms.IntegerField(min_value=1)
+    message = forms.CharField(min_length=1, max_length=256)
+    is_force_update = forms.IntegerField(min_value=0, max_value=1)
+    app_file = forms.FileField()
+
+
+class AppVersionUpdateForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+    version_name = forms.CharField(min_length=3, max_length=16, required=False)
+    version_code = forms.IntegerField(min_value=1, required=False)
+    message = forms.CharField(min_length=1, max_length=256, required=False)
+    is_force_update = forms.IntegerField(min_value=0, max_value=1, required=False)
+    app_file = forms.FileField(required=False)
+
+
+class AppVersionDeleteForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
+class AppVersionDetailForm(forms.Form):
+    pk = forms.IntegerField(min_value=1)
+
+
+class AppVersionListForm(forms.Form):
+    version_name = forms.CharField(min_length=1, max_length=16, required=False)
+    version_code = forms.IntegerField(min_value=1, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)

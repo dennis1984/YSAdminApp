@@ -6,7 +6,8 @@ from rest_framework import status
 
 from users.serializers import (UserSerializer,
                                UserDetailSerializer,
-                               IdentifyingCodeSerializer)
+                               IdentifyingCodeSerializer,
+                               UserListSerializer)
 from users.permissions import IsAdminOrReadOnly
 from users.models import (AdminUser,
                           make_token_expire,
@@ -16,7 +17,8 @@ from users.forms import (CreateUserForm,
                          SendIdentifyingCodeForm,
                          VerifyIdentifyingCodeForm,
                          UpdateUserForm,
-                         SetPasswordForm,)
+                         SetPasswordForm,
+                         UserListForm)
 import json
 
 
@@ -55,9 +57,7 @@ class UserAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserDetailSerializer(data=user.to_dict)
-        if not serializer.is_valid():
-            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = UserDetailSerializer(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self, request, *args, **kwargs):
@@ -78,10 +78,7 @@ class UserAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer_response = UserDetailSerializer(data=obj.to_dict)
-        if not serializer_response.is_valid():
-            return Response({'Detail': serializer_response.errors},
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer_response = UserDetailSerializer(obj)
         return Response(serializer_response.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
@@ -96,10 +93,30 @@ class UserDetail(generics.GenericAPIView):
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = UserDetailSerializer(data=user.to_dict)
-        if not serializer.is_valid():
-            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = UserDetailSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserList(generics.GenericAPIView):
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_object_list(self, **kwargs):
+        return AdminUser.filter_objects(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = UserListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instances = self.get_object_list(**cld)
+        if isinstance(instances, Exception):
+            return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = UserListSerializer(instances)
+        datas = serializer.list_data(**cld)
+        if isinstance(datas, Exception):
+            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(datas, status=status.HTTP_200_OK)
 
 
 class PermissionList(generics.GenericAPIView):
