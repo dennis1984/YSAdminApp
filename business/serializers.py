@@ -475,7 +475,7 @@ class AppVersionSerializer(BaseModelSerializer):
         return super(AppVersionSerializer, self).update(instance, validated_data)
 
     def delete(self, instance):
-        validated_data = {'status': instance.status + 1}
+        validated_data = {'status': instance.id + 1}
         return super(AppVersionSerializer, self).update(instance, validated_data)
 
 
