@@ -459,6 +459,9 @@ class AppVersionSerializer(BaseModelSerializer):
         if data:
             if 'app_file' in data:
                 data['package_path'] = data.pop('app_file')
+                app_file_names = data['package_path'].name.split('.')
+                if len(app_file_names) == 1:
+                    data['package_path'].name = '%s.apk' % app_file_names[0]
             super(AppVersionSerializer, self).__init__(data=data, **kwargs)
         else:
             super(AppVersionSerializer, self).__init__(instance, **kwargs)
