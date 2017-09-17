@@ -45,6 +45,19 @@ class BusinessUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def get(self, *args, **kwargs):
+        if 'is_admin' not in kwargs:
+            kwargs['is_admin'] = 0
+        instance = super(BusinessUserManager, self).get(*args, **kwargs)
+        return instance
+
+    def filter(self, *args, **kwargs):
+        if 'is_admin' not in kwargs:
+            kwargs['is_admin'] = 0
+        instances = super(BusinessUserManager, self).filter(*args, **kwargs)
+        return instances
+
+
 USER_PICTURE_DIR = settings.PICTURE_DIRS['business']['head_picture']
 
 
