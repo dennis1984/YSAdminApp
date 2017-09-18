@@ -52,6 +52,8 @@ class CouponsConfig(models.Model):
 
     # 优惠券类别：1：代金券， 2：折扣券
     type = models.IntegerField(u'优惠券类别')
+    # 优惠券类别详情：0：未设置 10：首单优惠券 20：节日券 30：促销券 100：其他优惠券
+    type_detail = models.IntegerField(u'优惠券类别详情', default=0)
 
     amount_of_money = models.CharField(u'优惠金额', max_length=16, null=True)
     discount_percent = models.IntegerField(u'折扣率', null=True)
@@ -69,6 +71,8 @@ class CouponsConfig(models.Model):
     status = models.IntegerField(u'数据状态', default=1)
     created = models.DateTimeField(u'创建时间', default=now)
     updated = models.DateTimeField(u'最后更新时间', auto_now=True)
+
+    note = models.TextField(u'优惠券备注', default='', null=True, blank=True)
 
     objects = BaseCouponsManager()
 

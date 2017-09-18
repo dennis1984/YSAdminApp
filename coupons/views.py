@@ -103,10 +103,11 @@ class CouponsAction(generics.GenericAPIView):
         """
         更新优惠券信息
         """
-        is_valid, cld = self.is_request_valid(request, method='PUT')
-        if not is_valid:
-            return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
+        form = CouponsUpdateForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+        cld = form.cleaned_data
         instance = self.get_coupons_object(pk=cld['pk'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
@@ -118,25 +119,25 @@ class CouponsAction(generics.GenericAPIView):
 
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
 
-    def delete(self, request, *args, **kwargs):
-        """
-        删除优惠券信息
-        """
-        form = CouponsDeleteForm(request.data)
-        if not form.is_valid():
-            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-        cld = form.cleaned_data
-        instance = self.get_coupons_object(pk=cld['pk'])
-        if isinstance(instance, Exception):
-            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = CouponsSerializer(instance)
-        try:
-            serializer.delete(instance)
-        except Exception as e:
-            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+    # def delete(self, request, *args, **kwargs):
+    #     """
+    #     删除优惠券信息
+    #     """
+    #     form = CouponsDeleteForm(request.data)
+    #     if not form.is_valid():
+    #         return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     cld = form.cleaned_data
+    #     instance = self.get_coupons_object(pk=cld['pk'])
+    #     if isinstance(instance, Exception):
+    #         return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer = CouponsSerializer(instance)
+    #     try:
+    #         serializer.delete(instance)
+    #     except Exception as e:
+    #         return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 class CouponsList(generics.GenericAPIView):

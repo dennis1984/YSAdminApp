@@ -26,18 +26,19 @@ class CouponsInputForm(forms.Form):
 
 class CouponsUpdateForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
-    name = forms.CharField(max_length=64, required=False)
-    type = forms.ChoiceField(choices=((1, 1),
-                                      (2, 2),),
-                             required=False)
-    amount_of_money = forms.FloatField(min_value=0.01, required=False)
-    discount_percent = forms.IntegerField(min_value=1, max_value=100, required=False)
-    service_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
-    business_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
-    start_amount = forms.FloatField(min_value=0, required=False)
-    total_count = forms.IntegerField(min_value=1, required=False)
-    expire_in = forms.IntegerField(min_value=1, required=False)
-    description = forms.CharField(max_length=85, required=False)
+    # name = forms.CharField(max_length=64, required=False)
+    # type = forms.ChoiceField(choices=((1, 1),
+    #                                   (2, 2),),
+    #                          required=False)
+    # amount_of_money = forms.FloatField(min_value=0.01, required=False)
+    # discount_percent = forms.IntegerField(min_value=1, max_value=100, required=False)
+    # service_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
+    # business_ratio = forms.IntegerField(min_value=0, max_value=100, required=False)
+    # start_amount = forms.FloatField(min_value=0, required=False)
+    # total_count = forms.IntegerField(min_value=1, required=False)
+    # expire_in = forms.IntegerField(min_value=1, required=False)
+    # description = forms.CharField(max_length=85, required=False)
+    note = forms.CharField(min_length=1, max_length=256)
 
 
 class CouponsDeleteForm(forms.Form):
