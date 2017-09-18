@@ -9,6 +9,12 @@ class CouponsInputForm(forms.Form):
                                       (2, 2),),
                              error_messages={'required': u'优惠券类别值只能在以下列表中，'
                                                          u'[1, 2]'})
+    type_detail = forms.ChoiceField(choices=((0, 1),
+                                             (10, 2),
+                                             (20, 3),
+                                             (30, 4),
+                                             (100, 11),),
+                                    required=False)
     amount_of_money = forms.FloatField(min_value=0.01, required=False)
     discount_percent = forms.IntegerField(min_value=1, max_value=100, required=False)
     service_ratio = forms.IntegerField(min_value=0, max_value=100,
@@ -22,6 +28,7 @@ class CouponsInputForm(forms.Form):
     total_count = forms.IntegerField(min_value=1, required=False)
     expire_in = forms.IntegerField(min_value=1, error_messages={'required': u'过期时间不能为空'})
     description = forms.CharField(max_length=85, required=False)
+    note = forms.CharField(max_length=256, required=False)
 
 
 class CouponsUpdateForm(forms.Form):
