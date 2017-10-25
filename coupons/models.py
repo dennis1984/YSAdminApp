@@ -237,7 +237,7 @@ class CouponsSendRecord(models.Model):
 
     class Meta:
         db_table = 'ys_coupons_send_record'
-        ordering = ['-coupons_id']
+        ordering = ['-created']
 
     def __unicode__(self):
         return '%s-%s' % (self.coupons_id, self.user_id)
@@ -292,7 +292,7 @@ class CouponsUsedRecord(models.Model):
 
     class Meta:
         db_table = 'ys_coupons_used_record'
-        ordering = ['-coupons_id']
+        ordering = ['-created']
 
     def __unicode__(self):
         return '%s-%s' % (self.coupons_id, self.user_id)
