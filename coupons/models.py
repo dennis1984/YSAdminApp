@@ -52,7 +52,7 @@ class CouponsConfig(models.Model):
 
     # 优惠券类别：1：代金券， 2：折扣券
     type = models.IntegerField(u'优惠券类别')
-    # 优惠券类别详情：0：未设置 10：首单优惠券 20：节日券 30：促销券 100：其他优惠券
+    # 优惠券类别详情：0：未设置 10：新用户优惠券 20：节日券 30：促销券 100：其他优惠券
     type_detail = models.IntegerField(u'优惠券类别详情', default=0)
 
     amount_of_money = models.CharField(u'优惠金额', max_length=16, null=True)

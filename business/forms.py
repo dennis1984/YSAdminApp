@@ -134,13 +134,16 @@ class DishesInputForm(forms.Form):
     price = forms.FloatField()
     size = forms.IntegerField(min_value=10, max_value=20, required=False)
     size_detail = forms.CharField(min_length=2, max_length=30, required=False)
+    # 运营标记： 0：无标记  10：新品  20：特惠  30：招牌  40: 新商户专区  50: 晚市特惠
     mark = forms.ChoiceField(choices=((0, 1),
                                       (10, 2),
                                       (20, 3),
-                                      (30, 4)),
+                                      (30, 4),
+                                      (40, 5),
+                                      (50, 5)),
                              error_messages={
-                                 'required': 'The fields mark must in '
-                                             '[0, 10, 20, 30].'
+                                 'required': 'The field [mark] must in '
+                                             '[0, 10, 20, 30, 40, 50].'
                              },
                              required=False)
     discount = forms.FloatField(required=False)
@@ -165,13 +168,16 @@ class DishesUpdateForm(forms.Form):
     price = forms.FloatField(required=False)
     size = forms.IntegerField(min_value=10, max_value=20, required=False)
     size_detail = forms.CharField(min_length=2, max_length=30, required=False)
+    # 运营标记： 0：无标记  10：新品  20：特惠  30：招牌  40: 新商户专区  50: 晚市特惠
     mark = forms.ChoiceField(choices=((0, 1),
                                       (10, 2),
                                       (20, 3),
-                                      (30, 4)),
+                                      (30, 4),
+                                      (40, 5),
+                                      (50, 5)),
                              error_messages={
-                                 'required': 'The fields mark must in '
-                                             '[0, 10, 20, 30].'
+                                 'required': 'The field [mark] must in '
+                                             '[0, 10, 20, 30, 40, 50].'
                              },
                              required=False)
     image = forms.ImageField(required=False)

@@ -35,7 +35,8 @@ from business.forms import (
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
                                            FoodCourt,
-                                           DISHES_MARK_DISCOUNT_VALUES)
+                                           DISHES_MARK_DISCOUNT_VALUES,
+                                           DISHES_MARK)
 from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
@@ -474,14 +475,20 @@ class DishesAction(generics.GenericAPIView):
         if 'mark' in kwargs and kwargs['mark'] in DISHES_MARK_DISCOUNT_VALUES:
             if 'discount' not in kwargs:
                 return Exception('Field [discount] not be empty when mark in'
-                                 '[10, 20, 30]')
+                                 '%s' % DISHES_MARK_DISCOUNT_VALUES)
             if kwargs['price'] < kwargs['discount']:
                 return Exception('Field [discount] can not greater than [price]')
 
-        user = self.get_user_object(kwargs['user_id'])
-        if isinstance(user, Exception):
-            return user
-        kwargs['food_court_id'] = user.food_court_id
+            if kwargs['mark'] == DISHES_MARK['night_discount']:
+                # 写成固定值，后期有需求再改（晚市特惠时间端为：17：30~19：30）
+                kwargs['discount_time_slot_start'] = '17:30'
+                kwargs['discount_time_slot_end'] = '19:30'
+
+        if 'user_id' in kwargs:
+            user = self.get_user_object(kwargs['user_id'])
+            if isinstance(user, Exception):
+                return user
+            kwargs['food_court_id'] = user.food_court_id
         return kwargs
 
     def post(self, request, *args, **kwargs):
@@ -513,7 +520,10 @@ class DishesAction(generics.GenericAPIView):
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        cld = form.cleaned_data
+        cld = self.get_perfect_request_data(**form.cleaned_data)
+        if isinstance(cld, Exception):
+            return Response({'Detail': cld.args}, status=status.HTTP_400_BAD_REQUEST)
+
         instance = self.get_dishes_instance(cld['pk'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)

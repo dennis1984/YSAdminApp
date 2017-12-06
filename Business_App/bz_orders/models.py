@@ -82,6 +82,10 @@ class VerifyOrders(models.Model):
     # 订单类型 0: 未指定 101: 在线订单 102：堂食订单 103：外卖订单
     orders_type = models.IntegerField('订单类型', default=101)
 
+    notes = models.CharField('订单备注', max_length=40, default='')
+    # 核销时段：例如：17:30~20:30
+    consumer_time_slot = models.CharField('订单核销时间段', max_length=32, null=True, blank=True)
+
     created = models.DateTimeField('创建时间', default=now)
     updated = models.DateTimeField('最后修改时间', auto_now=True)
     expires = models.DateTimeField('订单过期时间', default=minutes_15_plus)
