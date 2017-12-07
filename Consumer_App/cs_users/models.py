@@ -5,7 +5,7 @@ from django.utils.timezone import now
 from django.conf import settings
 
 from horizon.models import model_to_dict, get_perfect_filter_params
-from Consumer_App.cs_wallet.models import Wallet
+from Consumer_App.cs_common.models import Wallet
 import datetime
 import re
 import os

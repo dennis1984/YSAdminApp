@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.timezone import now
 from django.db import transaction
-from horizon.main import minutes_15_plus, DatetimeEncode
 from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
+
 from Consumer_App.cs_users.models import ConsumerUser
 from coupons.models import CouponsConfig, CouponsSendRecord
 from horizon.main import make_perfect_time_delta
