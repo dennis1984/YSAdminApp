@@ -8,6 +8,10 @@ from django.db import transaction
 from rest_framework.request import Request
 from decimal import Decimal
 
+from Consumer_App.cs_coupons.models import Coupons, CouponsAction
+from coupons.models import (CouponsConfig,
+                            COUPONS_CONFIG_TYPE_DETAIL,
+                            RECHARGE_GIVE_CONFIG)
 from horizon.models import model_to_dict
 from horizon.models import get_perfect_filter_params
 
@@ -250,6 +254,18 @@ class WalletAction(object):
         _trade = WalletTradeAction().create(request, orders)
         if isinstance(_trade, Exception):
             return _trade
+
+        # 送优惠券
+        loop = int(float(orders.payable) / RECHARGE_GIVE_CONFIG['start_amount'])
+        if loop > 0:
+            kwargs = {'type_detail': COUPONS_CONFIG_TYPE_DETAIL['recharge_give']}
+            coupons = CouponsConfig.filter_objects(**kwargs)
+            if isinstance(coupons, Exception) or not coupons:
+                pass
+            else:
+                user_ids = [request.user.id]
+                for coupons in coupons:
+                    CouponsAction().create_coupons(user_ids, coupons)
         return result
 
 
