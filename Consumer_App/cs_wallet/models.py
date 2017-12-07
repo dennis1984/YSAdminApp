@@ -8,7 +8,7 @@ from django.db import transaction
 from rest_framework.request import Request
 from decimal import Decimal
 
-from Consumer_App.cs_coupons.actions import CouponsAction
+from Consumer_App.cs_coupons.models import CouponsAction
 from coupons.models import (CouponsConfig,
                             COUPONS_CONFIG_TYPE_DETAIL,
                             RECHARGE_GIVE_CONFIG)
