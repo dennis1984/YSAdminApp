@@ -216,6 +216,10 @@ class DishesSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         if 'pk' in validated_data:
             validated_data.pop('pk')
+        price = validated_data.get('price', instance.price)
+        discount = validated_data.get('discount', instance.discount)
+        if price < discount:
+            raise Exception('[discount] can not greater than [price]')
         return super(DishesSerializer, self).update(instance, validated_data)
 
     def delete(self, instance):

@@ -475,9 +475,10 @@ class DishesAction(generics.GenericAPIView):
         if 'mark' in kwargs and kwargs['mark'] in DISHES_MARK_DISCOUNT_VALUES:
             if 'discount' not in kwargs:
                 return Exception('Field [discount] not be empty when mark in'
-                                 '%s' % DISHES_MARK_DISCOUNT_VALUES)
-            if kwargs['price'] < kwargs['discount']:
-                return Exception('Field [discount] can not greater than [price]')
+                                 ' %s' % DISHES_MARK_DISCOUNT_VALUES)
+            if 'price' in kwargs:
+                if kwargs['price'] < kwargs['discount']:
+                    return Exception('Field [discount] can not greater than [price]')
 
             if kwargs['mark'] == DISHES_MARK['night_discount']:
                 # 写成固定值，后期有需求再改（晚市特惠时间端为：17：30~19：30）
