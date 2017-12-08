@@ -17,7 +17,8 @@ from coupons.models import (CouponsConfig,
                             CouponsSendRecord,
                             CouponsUsedRecord,
                             COUPONS_CONFIG_TYPE,
-                            COUPONS_CONFIG_TYPE_CN_MATCH)
+                            COUPONS_CONFIG_TYPE_CN_MATCH,
+                            COUPONS_CONFIG_TYPE_DETAIL)
 from coupons.forms import (CouponsInputForm,
                            CouponsUpdateForm,
                            CouponsDeleteForm,
@@ -78,6 +79,14 @@ class CouponsAction(generics.GenericAPIView):
                 if service_ratio + business_ratio != 100:
                     return False, Exception('The sum of fields [service_ratio, business_ratio] '
                                             'must be 100')
+
+        if cld.get('type_detail') == COUPONS_CONFIG_TYPE_DETAIL['recharge_give']:
+            if not cld.get('each_count'):
+                return False, Exception('When [type_detail] is "recharge_give",'
+                                        'The field [each_count] does can not empty.')
+        else:
+            if cld.get('each_count'):
+                cld.pop('each_count')
 
         return True, cld
 
