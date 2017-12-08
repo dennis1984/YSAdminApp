@@ -13,6 +13,7 @@ class CouponsInputForm(forms.Form):
                                              (10, 2),
                                              (20, 3),
                                              (30, 4),
+                                             (40, 5),
                                              (100, 11),),
                                     required=False)
     amount_of_money = forms.FloatField(min_value=0.01, required=False)
