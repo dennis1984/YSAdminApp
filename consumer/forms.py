@@ -84,6 +84,8 @@ class WalletTradeDetailListForm(forms.Form):
 class RechargeActionFrom(forms.Form):
     user_id = forms.IntegerField(min_value=1)
     payable = forms.FloatField(min_value=0.01)
+    # 是否赠送优惠券标识
+    does_give_coupons = forms.BooleanField(required=False)
 
 
 class CommentListForm(forms.Form):

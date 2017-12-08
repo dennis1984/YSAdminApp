@@ -405,7 +405,7 @@ class WalletAction(generics.GenericAPIView):
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            wallet_detail = serializer.go_to_recharge()
+            wallet_detail = serializer.go_to_recharge(**cld)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         # 发送短信提醒用户充值成功

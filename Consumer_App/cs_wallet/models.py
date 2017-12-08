@@ -236,7 +236,7 @@ class WalletAction(object):
     """
     钱包相关功能
     """
-    def recharge(self, request, orders, gateway='auth'):
+    def recharge(self, request, orders, gateway='auth', does_give_coupons=False):
         """
         充值
         """
@@ -256,17 +256,18 @@ class WalletAction(object):
             return _trade
 
         # 送优惠券
-        loop = int(float(orders.payable) / RECHARGE_GIVE_CONFIG['start_amount'])
-        if loop > 0:
-            kwargs = {'type_detail': COUPONS_CONFIG_TYPE_DETAIL['recharge_give']}
-            coupons = CouponsConfig.filter_objects(**kwargs)
-            if isinstance(coupons, Exception) or not coupons:
-                pass
-            else:
-                user_ids = [request.user.id]
-                for i in range(loop):
-                    for coupon in coupons:
-                        CouponsAction().create_coupons(user_ids, coupon)
+        if does_give_coupons:
+            loop = int(float(orders.payable) / RECHARGE_GIVE_CONFIG['start_amount'])
+            if loop > 0:
+                kwargs = {'type_detail': COUPONS_CONFIG_TYPE_DETAIL['recharge_give']}
+                coupons = CouponsConfig.filter_objects(**kwargs)
+                if isinstance(coupons, Exception) or not coupons:
+                    pass
+                else:
+                    user_ids = [request.user.id]
+                    for i in range(loop):
+                        for coupon in coupons:
+                            CouponsAction().create_coupons(user_ids, coupon)
         return result
 
 

@@ -166,7 +166,11 @@ class PayOrdersSerializer(BaseModelSerializer):
             instance = self.save()
         except Exception as e:
             return e
-        wallet_instance = WalletAction().recharge(None, instance, gateway='admin_pay')
+
+        does_give_coupons = kwargs.get('does_give_coupons', False)
+        wallet_instance = WalletAction().recharge(None, instance,
+                                                  gateway='admin_pay',
+                                                  does_give_coupons=does_give_coupons)
         if isinstance(wallet_instance, Exception):
             raise wallet_instance
 
