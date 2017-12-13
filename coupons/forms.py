@@ -29,7 +29,7 @@ class CouponsInputForm(forms.Form):
     total_count = forms.IntegerField(min_value=1, required=False)
     each_count = forms.IntegerField(min_value=1, required=False)
     expire_in = forms.IntegerField(min_value=1, error_messages={'required': u'过期时间不能为空'})
-    description = forms.CharField(max_length=85, required=False)
+    description = forms.CharField(required=False)
     note = forms.CharField(max_length=256, required=False)
 
 

@@ -77,8 +77,7 @@ class CouponsConfig(models.Model):
     # 充值优惠券类型的优惠券配置此值
     each_count = models.IntegerField(u'满足条件发放的数量', null=True)
 
-    description = models.CharField(u'优惠券描述', max_length=256, default='',
-                                   blank=True, null=True)
+    description = models.TextField(u'优惠券描述', default='', blank=True, null=True)
     expire_in = models.IntegerField(u'过期天数', default=7)
     # 数据状态：1：正常 400：已过期 其它值：已删除
     status = models.IntegerField(u'数据状态', default=1)
