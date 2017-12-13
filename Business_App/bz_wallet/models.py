@@ -57,7 +57,7 @@ class WithdrawRecord(models.Model):
     """
     提现记录
     """
-    user_id = models.IntegerField('用户ID', db_index=True)
+    user_id = models.IntegerField('用户ID', db_index=True, unique=True)
 
     amount_of_money = models.CharField('申请提现金额', max_length=16)
     service_charge = models.CharField('手续费', max_length=16)
