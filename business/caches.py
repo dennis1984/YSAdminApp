@@ -19,38 +19,33 @@ class BusinessUserCache(object):
     def __init__(self):
         pool = redis.ConnectionPool(host=settings.REDIS_SETTINGS['host'],
                                     port=settings.REDIS_SETTINGS['port'],
-                                    db=settings.REDIS_SETTINGS['db_set']['consumer'])
+                                    db=settings.REDIS_SETTINGS['db_set']['business'])
         self.handle = redis.Redis(connection_pool=pool)
 
     def get_user_id_key(self, user_id):
         return 'user_instance_id:%s' % user_id
 
-    def get_user_name_key(self, user_name):
-        return 'user_instance_phone:%s' % user_name
+    def delete_from_data(self, key):
+        return self.handle.delete(key)
 
-    def set_user_to_cache(self, key, data):
-        self.handle.set(key, data)
-        self.handle.expire(key, EXPIRES_24_HOURS)
-
-    def get_user_by_id(self, request, user_id=None):
-        if not request.user.is_admin:
-            user_id = request.user.id
+    def delete_dishes_list_by_user_id(self, user_id):
         key = self.get_user_id_key(user_id)
-        user_instance = self.handle.get(key)
-        if not user_instance:
-            user_instance = AdminUser.get_object(**{'pk': user_id})
-            if isinstance(user_instance, Exception):
-                return user_instance
-            self.set_user_to_cache(key, user_instance)
-        return user_instance
+        return self.delete_from_data(key)
 
-    def get_user_by_username(self, user_name):
-        key = self.get_user_name_key(user_name)
-        user_instance = self.handle.get(key)
-        if not user_instance:
-            user_instance = AdminUser.get_object(**{'phone': user_name})
-            if isinstance(user_instance, Exception):
-                return user_instance
-            self.set_user_to_cache(key, user_instance)
-        return user_instance
 
+class ConsumerUserCache(object):
+    def __init__(self):
+        pool = redis.ConnectionPool(host=settings.REDIS_SETTINGS['host'],
+                                    port=settings.REDIS_SETTINGS['port'],
+                                    db=settings.REDIS_SETTINGS['db_set']['consumer'])
+        self.handle = redis.Redis(connection_pool=pool)
+
+    def get_hot_sale_list_key(self, food_court_id=1, mark=10):
+        return 'hot_sale_id_key:food_court_id:%s:mark:%s' % (food_court_id, mark)
+
+    def delete_from_data(self, key):
+        return self.handle.delete(key)
+
+    def delete_hot_sale_list(self, food_court_id, mark):
+        key = self.get_hot_sale_list_key(food_court_id, mark)
+        return self.delete_from_data(key)

@@ -24,6 +24,8 @@ from horizon.serializers import (BaseListSerializer,
 from horizon.decorators import has_permission_to_update
 from horizon.models import model_to_dict
 from horizon import main
+from business.caches import BusinessUserCache, ConsumerUserCache
+
 
 from django.conf import settings
 import urllib
@@ -206,12 +208,15 @@ class DishesSerializer(BaseModelSerializer):
         model = Dishes
         fields = '__all__'
 
+    def save(self, **kwargs):
+        instance = super(DishesSerializer, self).save(**kwargs)
+        # 删除缓存
+        self.delete_from_cache(instance)
+        return instance
+
     def update_dishes_recommend_status(self, instance, validated_data):
         kwargs = {'is_recommend': validated_data['is_recommend']}
-        try:
-            return super(DishesSerializer, self).update(instance, kwargs)
-        except Exception as e:
-            return e
+        return super(DishesSerializer, self).update(instance, kwargs)
 
     def update(self, instance, validated_data):
         if 'pk' in validated_data:
@@ -220,15 +225,25 @@ class DishesSerializer(BaseModelSerializer):
         discount = validated_data.get('discount', instance.discount)
         if price < discount:
             raise Exception('[discount] can not greater than [price]')
+
+        # 删除缓存
+        self.delete_from_cache(instance)
         return super(DishesSerializer, self).update(instance, validated_data)
 
     def delete(self, instance):
+        # 删除缓存
+        self.delete_from_cache(instance)
         validated_data = {'status': 2,
                           'title': '%s-%s' % (
                               instance.title,
                               main.make_random_char_and_number_of_string(5))
                           }
         return super(DishesSerializer, self).update(instance, validated_data)
+
+    def delete_from_cache(self, instance):
+        # 删除缓存
+        BusinessUserCache().delete_dishes_list_by_user_id(instance.user_id)
+        ConsumerUserCache().delete_hot_sale_list(instance.food_court_id, instance.mark)
 
 
 class DishesListSerializer(BaseListSerializer):
