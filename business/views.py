@@ -960,6 +960,13 @@ class BankCardAction(generics.GenericAPIView):
         instance = self.get_bank_card_instance(pk=cld['pk'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'bank_card_number' in cld:
+            bank_card_number = self.get_perfect_card_number(cld['bank_card_number'])
+            if isinstance(bank_card_number, Exception):
+                return Response({'Detail': bank_card_number.args}, status=status.HTTP_400_BAD_REQUEST)
+            cld['bank_card_number'] = bank_card_number
+
         serializer = BankCardSerializer(instance)
         try:
             serializer.update(instance, cld)
