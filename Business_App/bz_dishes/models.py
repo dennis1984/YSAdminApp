@@ -77,6 +77,9 @@ class Dishes(models.Model):
     # 菜品标记和排序顺序
     tag = models.CharField('标记', max_length=64, default='', null=True, blank=True)
     sort_orders = models.IntegerField('排序标记', default=None, null=True)
+    # 菜品类别:  0: 默认
+    classify = models.IntegerField('菜品类别', default=0)
+
     extend = models.TextField('扩展信息', default='', blank=True)
 
     objects = BaseManager()
