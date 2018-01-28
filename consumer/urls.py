@@ -27,7 +27,9 @@ urlpatterns = [
     url(r'^comment_list/$', views.CommentList.as_view()),
 
     url('^wallet_recharge_gift_action/$', views.WalletRechargeGiveGiftAction.as_view()),
-    
+    url('^wallet_recharge_gift_detail/$', views.WalletRechargeGiveGiftDetail.as_view()),
+    url('^wallet_recharge_gift_list/$', views.WalletRechargeGiveGiftList.as_view()),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
