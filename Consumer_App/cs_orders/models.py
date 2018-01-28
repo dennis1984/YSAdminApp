@@ -9,7 +9,7 @@ from horizon.models import (model_to_dict,
                             get_perfect_filter_params)
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment, ReplyComment
-from Business_App.bz_orders.models import OrdersIdGenerator
+from Business_App.bz_orders.models import OrdersIdGenerator, VerifyOrders
 
 from decimal import Decimal
 import json
@@ -34,6 +34,7 @@ ORDERS_PAYMENT_STATUS = {
     'unpaid': 0,
     'paid': 200,
     'consuming': 201,
+    'canceled': 204,
     'finished': 206,
     'expired': 400,
     'failed': 500,
@@ -293,7 +294,7 @@ class ConsumeOrders(models.Model):
     other_discount = models.CharField('其他优惠', max_length=16, default='0')
     payable = models.CharField('应付金额', max_length=16)
 
-    # 0:未支付 200:已支付 201:待消费 206:已完成 400: 已过期 500:支付失败
+    # 0:未支付 200:已支付 201:待消费 204:已取消 206:已完成 400: 已过期 500:支付失败
     payment_status = models.IntegerField('订单支付状态', default=201)
     # 支付方式：0:未指定支付方式 1：钱包支付 2：微信支付 3：支付宝支付
     payment_mode = models.IntegerField('订单支付方式', default=0)
@@ -325,6 +326,15 @@ class ConsumeOrders(models.Model):
 
     def __unicode__(self):
         return self.orders_id
+
+    @property
+    def is_consume_orders(self):
+        """
+        订单是否是待核销订单
+        """
+        if self.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+            return False
+        return True
 
     @classmethod
     def get_object(cls, **kwargs):
@@ -434,3 +444,42 @@ class SerialNumberGenerator(models.Model):
                 _instance.save()
         serial_no_str = cls.int_to_string(serial_no)
         return 'LS%s%s' % (date_day.strftime('%Y%m%d'), serial_no_str)
+
+
+class ConsumeOrdersAction(object):
+    """
+    子订单更新
+    """
+    def get_orders_instance(self, orders_id):
+        return ConsumeOrders.get_object(**{'orders_id': orders_id})
+
+    def update_payment_status_to_canceled(self, orders_id):
+        """
+        更新核销订单的支付状态为取消订单
+        return: orders instance: 成功
+                Exception：失败
+        """
+        orders = self.get_orders_instance(orders_id)
+        if isinstance(orders, Exception):
+            return orders
+        if orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+            return ValueError('The orders payment status is incorrect.')
+        orders.payment_status = ORDERS_PAYMENT_STATUS['canceled']
+        try:
+            orders.save()
+        except Exception as e:
+            return e
+
+        # 同步商户端核销订单支付状态
+        verify_orders = VerifyOrders.get_object(orders_id=orders_id)
+        if isinstance(verify_orders, Exception):
+            return verify_orders
+        if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+            return ValueError('The orders payment status is incorrect.')
+        verify_orders.payment_status = ORDERS_PAYMENT_STATUS['canceled']
+        try:
+            verify_orders.save()
+        except Exception as e:
+            return e
+
+        return orders

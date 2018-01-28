@@ -30,6 +30,9 @@ urlpatterns = [
     url('^wallet_recharge_gift_detail/$', views.WalletRechargeGiveGiftDetail.as_view()),
     url('^wallet_recharge_gift_list/$', views.WalletRechargeGiveGiftList.as_view()),
 
+    # 取消未核销订单
+    url('^cancel_consume_orders_action/$', views.CancelUnConsumedOrdersAction.as_view()),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

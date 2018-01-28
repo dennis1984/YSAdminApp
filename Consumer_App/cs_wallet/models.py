@@ -10,6 +10,7 @@ from decimal import Decimal
 
 from Consumer_App.cs_coupons.models import CouponsAction
 from Consumer_App.cs_users.models import ConsumerUser
+from Consumer_App.cs_orders.models import ORDERS_PAYMENT_STATUS
 from coupons.models import (CouponsConfig,
                             COUPONS_CONFIG_TYPE_DETAIL,
                             RECHARGE_GIVE_CONFIG)
@@ -39,6 +40,7 @@ WALLET_TRADE_DETAIL_TRADE_TYPE_DICT = {
     'recharge': 1,
     'consume': 2,
     'withdrawals': 3,
+    'orders_refund': 4,
 }
 
 WALLET_ACTION_METHOD = ('recharge', 'consume', 'withdrawals')
@@ -160,7 +162,7 @@ class WalletTradeDetail(models.Model):
 
     # 交易状态：0:未完成 200:已完成 500:交易失败
     trade_status = models.IntegerField('订单支付状态', default=200)
-    # 交易类型 0: 未指定 1: 充值 2：消费 3: 取现
+    # 交易类型 0: 未指定 1: 充值 2：消费 3: 取现 4: 订单退款
     trade_type = models.IntegerField('订单类型', default=0)
     # 金额是否同步到了钱包 0: 未同步 1: 已同步
     is_sync = models.IntegerField('金额是否同步', default=1)
@@ -271,6 +273,27 @@ class WalletAction(object):
                             CouponsAction().create_coupons(user_ids, coupon)
         return result
 
+    def orders_refund(self, request, orders, gateway='auth'):
+        """
+        订单退款（从订单的应付款中退款到钱包中）
+        适用场景：1.管理员取消用户的未核销订单，此时需要把订单的应付款返回到用户钱包中
+        """
+        if gateway == 'admin_pay':
+            request = Request(HttpRequest)
+            try:
+                setattr(request.user, 'id', orders.user_id)
+            except Exception as e:
+                return e
+        # 去充值
+        result = Wallet.update_balance(request=request,
+                                       orders=orders,
+                                       method=WALLET_ACTION_METHOD[0])
+        # 生成消费记录
+        _trade = WalletTradeAction().create(request, orders)
+        if isinstance(_trade, Exception):
+            return _trade
+        return result
+
 
 class WalletTradeAction(object):
     """
@@ -278,7 +301,7 @@ class WalletTradeAction(object):
     """
     def create(self, request, orders):
         """
-        创建交易明细（包含：充值、消费和提现（暂不支持）的交易明细）
+        创建交易明细（包含：充值、消费、订单退款和提现（暂不支持）的交易明细）
         """
         # if not isinstance(orders, PayOrders):
         #     return TypeError('Orders data error')
@@ -287,10 +310,13 @@ class WalletTradeAction(object):
         if not orders.is_success:
             return ValueError('Orders data error')
 
-        if orders.orders_type == 201:  # 交易类型：充值
+        if orders.orders_type == ORDERS_ORDERS_TYPE['wallet_recharge']:      # 交易类型：充值
             trade_type = WALLET_TRADE_DETAIL_TRADE_TYPE_DICT['recharge']
-        else:                          # 交易类型：消费
-            trade_type = WALLET_TRADE_DETAIL_TRADE_TYPE_DICT['consume']
+        else:                                                                # 交易类型：消费
+            if orders.payment_status == ORDERS_PAYMENT_STATUS['canceled']:   # 订单退款
+                trade_type = WALLET_TRADE_DETAIL_TRADE_TYPE_DICT['orders_refund']
+            else:
+                trade_type = WALLET_TRADE_DETAIL_TRADE_TYPE_DICT['consume']  # 正常消费
 
         kwargs = {'orders_id': orders.orders_id,
                   'user_id': request.user.id,

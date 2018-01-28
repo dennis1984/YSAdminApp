@@ -20,7 +20,8 @@ from consumer.serializers import (UserListSerializer,
                                   FeedbackListSerializer,
                                   WalletRechargeGiftSerializer,
                                   WalletRechargeGiftDetailSerializer,
-                                  WalletRechargeGiftListSerializer)
+                                  WalletRechargeGiftListSerializer,
+                                  ConsumeOrdersSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
                             UserDetailForm,
@@ -38,7 +39,8 @@ from consumer.forms import (UserListForm,
                             FeedbackDetailForm,
                             WalletRechargeGiftActionForm,
                             WalletRechargeGiftListForm,
-                            WalletRechargeGiftDetailForm)
+                            WalletRechargeGiftDetailForm,
+                            CancelUnConsumedOrdersActionForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
@@ -603,4 +605,39 @@ class WalletRechargeGiveGiftList(generics.GenericAPIView):
         if isinstance(list_data, Exception):
             return Response({'Detail': list_data.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(list_data, status=status.HTTP_200_OK)
+
+
+class CancelUnConsumedOrdersAction(generics.GenericAPIView):
+    """
+    管理员取消消费者的未核销订单
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_consume_orders(self, orders_id):
+        return ConsumeOrders.get_object(orders_id=orders_id)
+
+    def is_consume_orders(self, orders_instance):
+        if not orders_instance.is_consume_orders:
+            return False, 'The Orders\'s payment_status is incorrect.'
+        return True, None
+
+    def post(self, request, *args, **kwargs):
+        form = CancelUnConsumedOrdersActionForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_consume_orders(cld['orders_id'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        is_valid, error_message = self.is_consume_orders(instance)
+        if not is_valid:
+            return Response({'Detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ConsumeOrdersSerializer(instance)
+        try:
+            serializer.update_payment_status_to_cancel(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'Result': True}, status=status.HTTP_206_PARTIAL_CONTENT)
 

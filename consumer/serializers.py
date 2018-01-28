@@ -11,7 +11,10 @@ from Consumer_App.cs_wallet.models import (WalletTradeDetail,
                                            WalletAction,
                                            Wallet,
                                            WalletRechargeGift)
-from Consumer_App.cs_orders.models import PayOrders
+from Consumer_App.cs_orders.models import (PayOrders,
+                                           ConsumeOrders,
+                                           ORDERS_PAYMENT_STATUS,
+                                           ConsumeOrdersAction)
 from Consumer_App.cs_setup.models import Feedback
 
 import re
@@ -210,3 +213,23 @@ class WalletRechargeGiftDetailSerializer(BaseSerializer):
 
 class WalletRechargeGiftListSerializer(BaseListSerializer):
     child = WalletRechargeGiftDetailSerializer()
+
+
+class ConsumeOrdersSerializer(BaseModelSerializer):
+    class Meta:
+        model = ConsumeOrders
+        fields = '__all__'
+
+    def update_payment_status_to_cancel(self, instance):
+        # 同步订单支付状态
+        result = ConsumeOrdersAction().update_payment_status_to_canceled(instance.orders_id)
+        if isinstance(result, Exception):
+            raise result
+
+        # 将订单应付款返回到用户钱包中
+        wallet_instance = WalletAction().orders_refund(None, instance, gateway='admin_pay')
+        if isinstance(wallet_instance, Exception):
+            raise wallet_instance
+        return result
+
+

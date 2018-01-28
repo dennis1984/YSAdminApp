@@ -123,3 +123,7 @@ class WalletRechargeGiftListForm(forms.Form):
 
 class WalletRechargeGiftDetailForm(forms.Form):
     id = forms.IntegerField(min_value=1)
+
+
+class CancelUnConsumedOrdersActionForm(forms.Form):
+    orders_id = forms.CharField(min_length=14, max_length=64)
