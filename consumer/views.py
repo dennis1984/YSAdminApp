@@ -516,12 +516,12 @@ class WalletRechargeGiveGiftAction(generics.GenericAPIView):
         if isinstance(recharge_gift, Exception):
             return False, recharge_gift.args
 
-        if not getattr(self, '_recharge_gift'):
+        if not getattr(self, '_recharge_gift', None):
             self._recharge_gift = recharge_gift
         return True, None
 
     def put(self, request, *args, **kwargs):
-        form = WallectRechargeGiftActionForm(request.data)
+        form = WalletRechargeGiftActionForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 

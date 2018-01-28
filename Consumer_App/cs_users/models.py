@@ -86,7 +86,7 @@ class ConsumerUser(AbstractBaseUser):
         try:
             return cls.objects.get(**kwargs)
         except cls.DoesNotExist as e:
-            return Exception(e)
+            return e
 
     @classmethod
     def filter_objects(cls, **kwargs):

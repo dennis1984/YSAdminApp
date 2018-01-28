@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.timezone import now
 
+from Business_App.bz_dishes.models import Dishes
 from horizon.models import model_to_dict, get_perfect_detail_by_detail
 import json
 import datetime
