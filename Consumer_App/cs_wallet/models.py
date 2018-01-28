@@ -9,6 +9,7 @@ from rest_framework.request import Request
 from decimal import Decimal
 
 from Consumer_App.cs_coupons.models import CouponsAction
+from Consumer_App.cs_users.models import ConsumerUser
 from coupons.models import (CouponsConfig,
                             COUPONS_CONFIG_TYPE_DETAIL,
                             RECHARGE_GIVE_CONFIG)
@@ -57,7 +58,7 @@ class Wallet(models.Model):
     """
     用户钱包
     """
-    user_id = models.IntegerField('用户ID', db_index=True)
+    user_id = models.IntegerField('用户ID', unique=True)
     balance = models.CharField('余额', max_length=16, default='0')
     password = models.CharField('支付密码', max_length=560, null=True)
     created = models.DateTimeField('创建时间', default=now)
@@ -302,3 +303,65 @@ class WalletTradeAction(object):
         except Exception as e:
             return e
         return wallet_detail
+
+
+class WalletRechargeGift(models.Model):
+    """
+    充值送礼物Model
+    """
+    user_id = models.IntegerField('用户ID', db_index=True)
+    verification_code = models.CharField('验证码', max_length=6, db_index=True)
+    # 数据状态：1：正常  2：已使用
+    status = models.IntegerField('数据状态', default=1)
+    created = models.DateTimeField('创建时间', default=now)
+    updated = models.DateTimeField('更新时间', auto_now_add=True)
+
+    class Meta:
+        db_table = 'ys_wallet_recharge_gift'
+        ordering = ['-created']
+        app_label = 'Consumer_App.cs_wallet.models.WalletRechargeGift'
+
+    def __unicode__(self):
+        return self.verification_code
+
+    @property
+    def perfect_detail(self):
+        detail = model_to_dict(self)
+        user = ConsumerUser.get_object(id=self.user_id)
+        detail['phone'] = user.phone
+        return detail
+
+    @classmethod
+    def get_object(cls, not_used=False, **kwargs):
+        if not_used:
+            kwargs['status'] = 1
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def get_detail(cls, not_used=False, **kwargs):
+        instance = cls.get_object(not_used=not_used, **kwargs)
+        if isinstance(instance, Exception):
+            return instance
+        return instance.perfect_detail
+
+    @classmethod
+    def filter_objects(cls, not_used=False, **kwargs):
+        if not_used:
+            kwargs['status'] = 1
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_details(cls, not_used=False, **kwargs):
+        instances = cls.filter_objects(not_used, **kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        for ins in instances:
+            details.append(ins.perfect_detail)
+        return details

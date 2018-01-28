@@ -17,7 +17,10 @@ from consumer.serializers import (UserListSerializer,
                                   CommentListSerializer,
                                   PayOrdersSerializer,
                                   FeedbackSerializer,
-                                  FeedbackListSerializer)
+                                  FeedbackListSerializer,
+                                  WalletRechargeGiftSerializer,
+                                  WalletRechargeGiftDetailSerializer,
+                                  WalletRechargeGiftListSerializer)
 from consumer.permissions import IsAdminOrReadOnly
 from consumer.forms import (UserListForm,
                             UserDetailForm,
@@ -32,11 +35,14 @@ from consumer.forms import (UserListForm,
                             RechargeActionFrom,
                             CommentListForm,
                             FeedbackListForm,
-                            FeedbackDetailForm)
+                            FeedbackDetailForm,
+                            WalletRechargeGiftActionForm,
+                            WalletRechargeGiftListForm,
+                            WalletRechargeGiftDetailForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
-from Consumer_App.cs_wallet.models import Wallet, WalletTradeDetail
+from Consumer_App.cs_wallet.models import Wallet, WalletTradeDetail, WalletRechargeGift
 from Consumer_App.cs_orders.models import (PayOrders,
                                            ConsumeOrders,
                                            ORDERS_PAYMENT_MODE)
@@ -485,3 +491,116 @@ class CommentList(generics.GenericAPIView):
         if isinstance(datas, Exception):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
+
+
+class WalletRechargeGiveGiftAction(generics.GenericAPIView):
+    """
+    钱包充值领取礼物
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_user_by_phone_number(self, phone_number):
+        return ConsumerUser.get_object(phone=phone_number)
+
+    def get_wallet_recharge_gift(self, user, verification_code):
+        kwargs = {'user_id': user.id,
+                  'verification_code': verification_code}
+        return WalletRechargeGift.get_object(not_used=True, **kwargs)
+
+    def is_verification_code_valid(self, phone_number, verification_code):
+        user = self.get_user_by_phone_number(phone_number)
+        if isinstance(user, Exception):
+            return False, user.args
+
+        recharge_gift = self.get_wallet_recharge_gift(user, verification_code)
+        if isinstance(recharge_gift, Exception):
+            return False, recharge_gift.args
+
+        if not getattr(self, '_recharge_gift'):
+            self._recharge_gift = recharge_gift
+        return True, None
+
+    def put(self, request, *args, **kwargs):
+        form = WallectRechargeGiftActionForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        is_valid, error_message = self.is_verification_code_valid(cld['phone_number'],
+                                                                  cld['verification_code'])
+        if not is_valid:
+            return Response({'Detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = WalletRechargeGiftSerializer(self._recharge_gift)
+        try:
+            serializer.update_status_to_used(self._recharge_gift)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
+class WalletRechargeGiveGiftDetail(generics.GenericAPIView):
+    """
+    钱包充值领取礼物的兑奖码详情
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_wallet_recharge_gift_detail(self, pk):
+        return WalletRechargeGift.get_detail(id=pk)
+
+    def post(self, request, *args, **kwargs):
+        form = WalletRechargeGiftDetailForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        detail = self.get_wallet_recharge_gift_detail(cld['id'])
+        if isinstance(detail, Exception):
+            return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = WalletRechargeGiftDetailSerializer(data=detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class WalletRechargeGiveGiftList(generics.GenericAPIView):
+    """
+    钱包充值领取礼物的兑奖码列表
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_user_by_phone_number(self, phone_number):
+        return ConsumerUser.get_object(phone=phone_number)
+
+    def get_wallet_recharge_gift_detail_list(self, phone_number=None, verification_code=None):
+        kwargs = {}
+        if phone_number:
+            user = self.get_user_by_phone_number(phone_number)
+            if isinstance(user, Exception):
+                return user
+            kwargs.update(**{'user_id': user.id})
+        if verification_code:
+            kwargs.update(**{'verification_code': verification_code})
+        return WalletRechargeGift.filter_details(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = WalletRechargeGiftListForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_wallet_recharge_gift_detail_list(cld.get('phone_number'),
+                                                            cld.get('verification_code'))
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = WalletRechargeGiftListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        list_data = serializer.list_data(**cld)
+        if isinstance(list_data, Exception):
+            return Response({'Detail': list_data.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(list_data, status=status.HTTP_200_OK)
+

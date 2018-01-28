@@ -25,6 +25,9 @@ urlpatterns = [
     url(r'^feedback_detail/$', views.FeedbackDetail.as_view()),
 
     url(r'^comment_list/$', views.CommentList.as_view()),
+
+    url('^wallet_recharge_gift_action/$', views.WalletRechargeGiveGiftAction.as_view()),
+    
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

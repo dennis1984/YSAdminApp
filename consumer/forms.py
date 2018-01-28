@@ -107,3 +107,19 @@ class FeedbackListForm(forms.Form):
 
 class FeedbackDetailForm(forms.Form):
     pk = forms.IntegerField(min_value=1)
+
+
+class WalletRechargeGiftActionForm(forms.Form):
+    phone_number = forms.CharField(min_length=11, max_length=11)
+    verification_code = forms.CharField(min_length=6, max_length=6)
+
+
+class WalletRechargeGiftListForm(forms.Form):
+    phone_number = forms.CharField(min_length=11, max_length=11, required=False)
+    verification_code = forms.CharField(min_length=6, max_length=6, required=False)
+    page_size = forms.IntegerField(min_value=1, required=False)
+    page_index = forms.IntegerField(min_value=1, required=False)
+
+
+class WalletRechargeGiftDetailForm(forms.Form):
+    id = forms.IntegerField(min_value=1)

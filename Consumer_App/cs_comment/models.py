@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.timezone import now
 
-from horizon.models import model_to_dict
+from horizon.models import model_to_dict, get_perfect_detail_by_detail
 import json
 import datetime
 
@@ -48,6 +48,42 @@ class Comment(models.Model):
             return cls.objects.get(**kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def filter_objects(cls, **kwargs):
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_comment_details(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        for instance in instances:
+            ins_dict = model_to_dict(instance)
+            ins_dict['business_comment'] = json.loads(ins_dict['business_comment'])
+            ins_dict['dishes_comment'] = cls.get_perfect_dishes_comment(ins_dict['dishes_comment'])
+            details.append(ins_dict)
+        return details
+
+    @classmethod
+    def get_perfect_dishes_comment(cls, dishes_comment):
+        if isinstance(dishes_comment, (str, unicode)):
+            try:
+                dishes_comment = json.loads(dishes_comment)
+            except Exception as e:
+                return e
+        elif not isinstance(dishes_comment, (list, tuple)):
+            return Exception('Params data is error.')
+
+        details = []
+        for dishes_detail in dishes_comment:
+            perfect_detail = get_perfect_detail_by_detail(Dishes, dishes_detail)
+            details.append(perfect_detail)
+        return details
 
 
 class ReplyComment(models.Model):

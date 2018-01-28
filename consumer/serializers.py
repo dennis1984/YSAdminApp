@@ -9,7 +9,8 @@ from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import ReplyComment
 from Consumer_App.cs_wallet.models import (WalletTradeDetail,
                                            WalletAction,
-                                           Wallet)
+                                           Wallet,
+                                           WalletRechargeGift)
 from Consumer_App.cs_orders.models import PayOrders
 from Consumer_App.cs_setup.models import Feedback
 
@@ -186,3 +187,26 @@ class FeedbackSerializer(BaseModelSerializer):
 
 class FeedbackListSerializer(BaseListSerializer):
     child = FeedbackSerializer()
+
+
+class WalletRechargeGiftSerializer(BaseModelSerializer):
+    class Meta:
+        model = WalletRechargeGift
+        fields = '__all__'
+
+    def update_status_to_used(self, instance):
+        validated_data = {'status': 2}
+        return super(WalletRechargeGiftSerializer, self).update(instance, validated_data)
+
+
+class WalletRechargeGiftDetailSerializer(BaseSerializer):
+    user_id = serializers.IntegerField()
+    phone = serializers.CharField()
+    verification_code = serializers.CharField()
+    status = serializers.IntegerField()
+    created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
+
+
+class WalletRechargeGiftListSerializer(BaseListSerializer):
+    child = WalletRechargeGiftDetailSerializer()

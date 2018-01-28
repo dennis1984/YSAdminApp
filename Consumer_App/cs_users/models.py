@@ -36,6 +36,7 @@ class ConsumerUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+
 HEAD_PICTURE_PATH = settings.PICTURE_DIRS['consumer']['head_picture']
 
 
