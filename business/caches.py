@@ -24,7 +24,7 @@ class BusinessUserCache(object):
 
     def get_user_id_key(self, user_id):
         # return 'user_instance_id:%s' % user_id
-        return 'dishes_list_key:%s' % request.user.id
+        return 'dishes_list_key:%s' % user_id
 
     def delete_from_data(self, key):
         return self.handle.delete(key)
