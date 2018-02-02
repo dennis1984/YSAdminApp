@@ -222,14 +222,14 @@ class ConsumeOrdersSerializer(BaseModelSerializer):
 
     def update_payment_status_to_cancel(self, instance):
         # 同步订单支付状态
-        result = ConsumeOrdersAction().update_payment_status_to_canceled(instance.orders_id)
-        if isinstance(result, Exception):
-            raise result
+        instance = ConsumeOrdersAction().update_payment_status_to_canceled(instance.orders_id)
+        if isinstance(instance, Exception):
+            raise instance
 
         # 将订单应付款返回到用户钱包中
         wallet_instance = WalletAction().orders_refund(None, instance, gateway='admin_pay')
         if isinstance(wallet_instance, Exception):
             raise wallet_instance
-        return result
+        return instance
 
 
