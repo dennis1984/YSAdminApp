@@ -329,8 +329,12 @@ class WalletTradeAction(object):
         #     return TypeError('Orders data error')
         if orders.orders_type not in ORDERS_ORDERS_TYPE.values():
             return ValueError('Orders data error')
-        if not orders.is_success:
-            return ValueError('Orders data error')
+        if not getattr(orders, 'master_orders_id', None):    # 主订单
+            if not orders.is_success:
+                return ValueError('Orders data error')
+        else:                                                # 消费订单
+            if not orders.is_canceled_orders:                # 订单被取消，退款给用户
+                return ValueError('Orders data error')
 
         if orders.orders_type == ORDERS_ORDERS_TYPE['wallet_recharge']:      # 交易类型：充值
             trade_type = WALLET_TRADE_DETAIL_TRADE_TYPE_DICT['recharge']
