@@ -416,8 +416,8 @@ class WalletAction(generics.GenericAPIView):
             wallet_detail = serializer.go_to_recharge(**cld)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
-        # 发送短信提醒用户充值成功
-        main.send_message_to_phone(cld['payable'], user.phone, template_name='recharge')
+        # # 发送短信提醒用户充值成功
+        # main.send_message_to_phone(cld['payable'], user.phone, template_name='recharge')
         return Response(wallet_detail, status=status.HTTP_206_PARTIAL_CONTENT)
 
 
@@ -621,7 +621,7 @@ class CancelUnConsumedOrdersAction(generics.GenericAPIView):
             return False, 'The Orders\'s payment_status is incorrect.'
         return True, None
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         form = CancelUnConsumedOrdersActionForm(request.data)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)

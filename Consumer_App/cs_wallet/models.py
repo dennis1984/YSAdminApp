@@ -16,6 +16,7 @@ from coupons.models import (CouponsConfig,
                             RECHARGE_GIVE_CONFIG)
 from horizon.models import model_to_dict
 from horizon.models import get_perfect_filter_params
+from horizon import main
 
 import json
 import datetime
@@ -253,6 +254,9 @@ class WalletAction(object):
         result = Wallet.update_balance(request=request,
                                        orders=orders,
                                        method=WALLET_ACTION_METHOD[0])
+        if isinstance(result, Exception):
+            return result
+
         # 生成消费记录
         _trade = WalletTradeAction().create(request, orders)
         if isinstance(_trade, Exception):
@@ -271,12 +275,16 @@ class WalletAction(object):
                     for i in range(loop):
                         for coupon in coupons:
                             CouponsAction().create_coupons(user_ids, coupon)
+
+        # 发送短信提醒用户充值成功
+        user = ConsumerUser.get_object(id=orders.user_id)
+        main.send_message_to_phone(orders.payable, user.phone, template_name='recharge')
         return result
 
     def orders_refund(self, request, orders, gateway='auth'):
         """
         订单退款（从订单的应付款中退款到钱包中）
-        适用场景：1.管理员取消用户的未核销订单，此时需要把订单的应付款返回到用户钱包中
+        适用场景：1.管理员取消用户的未核销订单（此时需要把订单的应付款返回到用户钱包中）
         """
         if gateway == 'admin_pay':
             request = Request(HttpRequest)
@@ -288,10 +296,17 @@ class WalletAction(object):
         result = Wallet.update_balance(request=request,
                                        orders=orders,
                                        method=WALLET_ACTION_METHOD[0])
+        if isinstance(result, Exception):
+            return result
+
         # 生成消费记录
         _trade = WalletTradeAction().create(request, orders)
         if isinstance(_trade, Exception):
             return _trade
+
+        # 发送短信提醒用户充值成功
+        user = ConsumerUser.get_object(id=orders.user_id)
+        main.send_message_to_phone(orders.payable, user.phone, template_name='refund_for_cancel_consume_orders')
         return result
 
 

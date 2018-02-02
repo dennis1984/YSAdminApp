@@ -88,3 +88,30 @@ class Wallet(models.Model):
             return cls.objects.filter(**kwargs)
         except Exception as e:
             return e
+
+
+class AliYunPhoneMessageInformation(models.Model):
+    """
+    阿里云短信服务配置
+    """
+    region = models.CharField('区域', max_length=32)
+    access_id = models.CharField('ACCESS_ID_KEY', max_length=32)
+    access_secret = models.CharField('ACCESS_ID_SECRET', max_length=64)
+
+    created = models.DateTimeField(default=now)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'ys_aliyun_phone_message_information'
+        app_label = 'Consumer_App.cs_common.models.AliYunPhoneMessageInformation'
+
+    def __unicode__(self):
+        return self.access_id
+
+    @classmethod
+    def get_object(cls, *args, **kwargs):
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
