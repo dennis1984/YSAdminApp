@@ -44,7 +44,11 @@ WALLET_TRADE_DETAIL_TRADE_TYPE_DICT = {
     'orders_refund': 4,
 }
 
-WALLET_ACTION_METHOD = ('recharge', 'consume', 'withdrawals')
+WALLET_ACTION_METHOD = ('recharge',       # 充值
+                        'consume',        # 消费
+                        'withdrawals',    # 提现
+                        'orders_refund',  # 退款（系统往用户钱包里退款）
+                        )
 
 
 class WalletManager(models.Manager):
@@ -143,7 +147,7 @@ class Wallet(models.Model):
                 raise cls.DoesNotExist
             balance = _instance.balance
             # 充值
-            if method == WALLET_ACTION_METHOD[0]:
+            if method in (WALLET_ACTION_METHOD[0], WALLET_ACTION_METHOD[3]):
                 _instance.balance = str(Decimal(balance) + Decimal(amount_of_money))
             else:
                 _instance.balance = str(Decimal(balance) - Decimal(amount_of_money))
@@ -220,6 +224,9 @@ class WalletActionBase(object):
                 return ValueError('Orders Data is Error')
             if not orders.is_recharge_orders:
                 return ValueError('Orders Type is Error')
+        elif method == WALLET_ACTION_METHOD[3]:  # 订单退款操作
+            if not orders.is_canceled_orders:
+                return ValueError('Orders Type is incorrect.')
         else:
             if not orders.is_payable:
                 return ValueError('Orders status is incorrect')
@@ -295,7 +302,7 @@ class WalletAction(object):
         # 去充值
         result = Wallet.update_balance(request=request,
                                        orders=orders,
-                                       method=WALLET_ACTION_METHOD[0])
+                                       method=WALLET_ACTION_METHOD[3])
         if isinstance(result, Exception):
             return result
 

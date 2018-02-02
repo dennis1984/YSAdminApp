@@ -336,6 +336,15 @@ class ConsumeOrders(models.Model):
             return False
         return True
 
+    @property
+    def is_canceled_orders(self):
+        """
+        订单是否是已取消订单
+        """
+        if self.payment_status != ORDERS_PAYMENT_STATUS['canceled']:
+            return False
+        return True
+
     @classmethod
     def get_object(cls, **kwargs):
         try:
