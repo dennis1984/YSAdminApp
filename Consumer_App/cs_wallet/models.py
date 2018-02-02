@@ -226,7 +226,7 @@ class WalletActionBase(object):
                 return ValueError('Orders Type is Error')
         elif method == WALLET_ACTION_METHOD[3]:  # 订单退款操作
             if not orders.is_canceled_orders:
-                return ValueError('Orders Type is incorrect.')
+                return ValueError('Orders Status is incorrect.')
         else:
             if not orders.is_payable:
                 return ValueError('Orders status is incorrect')
