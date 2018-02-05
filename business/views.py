@@ -477,7 +477,7 @@ class DishesAction(generics.GenericAPIView):
 
     def get_dishes_classify_object(self, user_id, classify_id):
         kwargs = {'user_id': user_id,
-                  'classify_id': classify_id}
+                  'id': classify_id}
         return DishesClassify.get_object(**kwargs)
 
     def get_perfect_request_data(self, **kwargs):
