@@ -260,3 +260,69 @@ class City(models.Model):
 #     class Meta:
 #         db_table = 'ys_dishes_extend'
 #         app_label = 'Business_App.bz_dishes.models.DishesExtend'
+
+
+class DishesClassify(models.Model):
+    """
+    菜品分类信息表
+    """
+    name = models.CharField('类别名称', max_length=64, unique=True)
+    description = models.CharField('类别描述', max_length=256, null=True, blank=True)
+    user_id = models.IntegerField('用户ID')
+    # 状态：1：有效 非1：已删除
+    status = models.IntegerField('数据状态', default=1)
+    created = models.DateTimeField('创建时间', default=now)
+    updated = models.DateTimeField('更新时间', auto_now=True)
+
+    objects = BaseManager()
+
+    class Meta:
+        db_table = 'ys_dishes_classify'
+        unique_together = ('user_id', 'name', 'status')
+        ordering = ('name',)
+        app_label = 'Business_App.bz_dishes.models.DishesClassify'
+
+    @property
+    def perfect_data(self):
+        detail = model_to_dict(self)
+        user = BusinessUser.get_object(id=self.user_id)
+        if isinstance(user, Exception):
+            return user
+        detail['user_phone'] = user.phone
+        detail['business_name'] = user.business_name
+        detail['food_court_id'] = user.food_court_id
+        return detail
+
+    @classmethod
+    def get_object(cls, **kwargs):
+        try:
+            return cls.objects.get(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def get_detail(cls, **kwargs):
+        instance = cls.get_object(**kwargs)
+        if isinstance(instance, Exception):
+            return instance
+        return instance.perfect_data
+
+    @classmethod
+    def filter_objects(cls, **kwargs):
+        try:
+            return cls.objects.filter(**kwargs)
+        except Exception as e:
+            return e
+
+    @classmethod
+    def filter_details(cls, **kwargs):
+        instances = cls.filter_objects(**kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        for ins in instances:
+            detail = ins.perfect_data
+            if isinstance(detail, Exception):
+                continue
+            details.append(detail)
+        return details

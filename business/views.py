@@ -12,7 +12,8 @@ from business.serializers import (
     WithdrawRecordListSerializer, WithdrawRecordInstanceSerializer,
     OrdersDetailSerializer, OrdersListSerializer, BankCardSerializer,
     BankCardListSerializer, AdvertPictureSerializer, AdvertPictureDetailSerializer,
-    AdvertPictureListSerializer, AppVersionSerializer, AppVersionListSerializer
+    AdvertPictureListSerializer, AppVersionSerializer, AppVersionListSerializer,
+    DishesClassifySerializer, DishesClassifyListSerializer, DishesClassifyDetailSerializer,
 )
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (
@@ -29,14 +30,17 @@ from business.forms import (
     BankCardDetailForm, AdvertPictureInputForm, AdvertPictureUpdateForm,
     AdvertPictureDeleteForm, AdvertPictureListForm, AdvertPictureDetailForm,
     AppVersionCreateForm, AppVersionUpdateForm, AppVersionDeleteForm,
-    AppVersionDetailForm, AppVersionListForm
+    AppVersionDetailForm, AppVersionListForm, DishesClassifyListForm,
+    DishesClassifyInputForm, DishesClassifyUpdateForm, DishesClassifyDeleteForm,
+    DishesClassifyDetailForm,
 )
 
 from Business_App.bz_dishes.models import (City,
                                            Dishes,
                                            FoodCourt,
                                            DISHES_MARK_DISCOUNT_VALUES,
-                                           DISHES_MARK)
+                                           DISHES_MARK,
+                                           DishesClassify)
 from Business_App.bz_dishes.caches import DishesCache
 from Business_App.bz_users.models import (BusinessUser,
                                           AdvertPicture)
@@ -471,6 +475,11 @@ class DishesAction(generics.GenericAPIView):
     def get_user_object(self, user_id):
         return BusinessUser.get_object(pk=user_id)
 
+    def get_dishes_classify_object(self, user_id, classify_id):
+        kwargs = {'user_id': user_id,
+                  'classify_id': classify_id}
+        return DishesClassify.get_object(**kwargs)
+
     def get_perfect_request_data(self, **kwargs):
         if 'mark' in kwargs and kwargs['mark'] in DISHES_MARK_DISCOUNT_VALUES:
             if 'discount' not in kwargs:
@@ -484,12 +493,15 @@ class DishesAction(generics.GenericAPIView):
                 # 写成固定值，后期有需求再改（晚市特惠时间端为：17：30~19：30）
                 kwargs['discount_time_slot_start'] = '17:30'
                 kwargs['discount_time_slot_end'] = '19:30'
-
         if 'user_id' in kwargs:
             user = self.get_user_object(kwargs['user_id'])
             if isinstance(user, Exception):
                 return user
             kwargs['food_court_id'] = user.food_court_id
+        if 'classify' in kwargs:
+            dishes_classify_ins = self.get_dishes_classify_object(kwargs['user_id'], kwargs['classify'])
+            if isinstance(dishes_classify_ins, Exception):
+                return False, dishes_classify_ins.args
         return kwargs
 
     def post(self, request, *args, **kwargs):
@@ -1307,3 +1319,142 @@ class AppVersionList(generics.GenericAPIView):
             return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(datas, status=status.HTTP_200_OK)
 
+
+class DishesClassifyAction(generics.GenericAPIView):
+    """
+    创建菜品类别
+    """
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_dishes_classify_object(self, request, dishes_classify_id):
+        kwargs = {'user_id': request.user.id,
+                  'id': dishes_classify_id}
+        return DishesClassify.get_object(**kwargs)
+
+    def is_request_data_valid(self, **kwargs):
+        business_id = kwargs['business_id']
+        business_user = BusinessUser.get_object(id=business_id)
+        if isinstance(business_user, Exception):
+            return False, business_user.args
+        return True, None
+
+    def post(self, request, *args, **kwargs):
+        """
+        创建菜品类别
+        """
+        form = DishesClassifyInputForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        is_valid, error_message = self.is_request_data_valid(**cld)
+        if not is_valid:
+            return Response({'Detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = DishesClassifySerializer(data=cld, request=request)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer.save()
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        """
+        更改菜品类别
+        """
+        form = DishesClassifyUpdateForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_dishes_classify_object(request, cld['id'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = DishesClassifySerializer(instance)
+        try:
+            serializer.update(instance, cld)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        删除菜品
+        """
+        form = DishesClassifyDeleteForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_dishes_classify_object(request, cld['id'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = DishesClassifySerializer(instance)
+        try:
+            serializer.delete(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+
+
+class DishesClassifyDetail(generics.GenericAPIView):
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_dishes_object(self, dishes_id):
+        kwargs = {'id': dishes_id}
+        return DishesClassify.get_detail(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        获取商户菜品分类详情
+        """
+        form = DishesClassifyDetailForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        detail = self.get_dishes_object(cld['id'])
+        if isinstance(detail, Exception):
+            return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = DishesClassifyDetailSerializer(data=detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DishesClassifyList(generics.GenericAPIView):
+    permission_classes = (IsAdminOrReadOnly, )
+
+    def get_object_list(self, request):
+        kwargs = {'user_id': request.user.id}
+        return DishesClassify.filter_details(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        带分页功能
+        返回数据格式为：{'count': 当前返回的数据量,
+                       'all_count': 总数据量,
+                       'has_next': 是否有下一页,
+                       'data': [{
+                                 FoodCourt model数据
+                                },...]
+                       }
+        """
+        form = DishesClassifyListForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        details = self.get_object_list(request)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = DishesClassifyListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        data_list = serializer.list_data(**cld)
+        if isinstance(data_list, Exception):
+            return Response({'Detail': data_list.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data_list, status=status.HTTP_200_OK)
