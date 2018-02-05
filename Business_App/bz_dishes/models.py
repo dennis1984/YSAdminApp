@@ -94,6 +94,23 @@ class Dishes(models.Model):
     def __unicode__(self):
         return self.title
 
+    @property
+    def perfect_data(self):
+        detail = model_to_dict(self)
+        detail['classify_name'] = ''
+        if self.classify:
+            dishes_classify = DishesClassify.get_object(pk=self.classify)
+            if not isinstance(dishes_classify, Exception):
+                detail['classify_name'] = dishes_classify.name
+        return detail
+
+    @classmethod
+    def get_detail(cls, *args, **kwargs):
+        instance = cls.get_object(*args, **kwargs)
+        if isinstance(instance, Exception):
+            return instance
+        return instance.perfect_data
+
     @classmethod
     def get_object(cls, *args, **kwargs):
         _kwargs = get_perfect_filter_params(cls, **kwargs)
@@ -111,6 +128,16 @@ class Dishes(models.Model):
             return cls.objects.filter(*args, **_kwargs)
         except Exception as e:
             return e
+
+    @classmethod
+    def filter_details(cls, *args, **kwargs):
+        instances = cls.filter_objects(*args, **kwargs)
+        if isinstance(instances, Exception):
+            return instances
+        details = []
+        for ins in instances:
+            details.append(ins.perfect_data)
+        return details
 
     @classmethod
     def get_discount_details(cls, **kwargs):

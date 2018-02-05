@@ -14,6 +14,7 @@ from business.serializers import (
     BankCardListSerializer, AdvertPictureSerializer, AdvertPictureDetailSerializer,
     AdvertPictureListSerializer, AppVersionSerializer, AppVersionListSerializer,
     DishesClassifySerializer, DishesClassifyListSerializer, DishesClassifyDetailSerializer,
+    DishesDetailSerializer,
 )
 from business.permissions import IsAdminOrReadOnly
 from business.forms import (
@@ -422,7 +423,7 @@ class DishesList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
     def get_objects_list(self, **kwargs):
-        return Dishes.filter_objects(**kwargs)
+        return Dishes.filter_details(**kwargs)
 
     def post(self, request, *args, **kwargs):
         form = DishesListForm(request.data)
@@ -430,15 +431,17 @@ class DishesList(generics.GenericAPIView):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instances = self.get_objects_list(**cld)
-        if isinstance(instances, Exception):
-            return Response({'Detail': instances.args}, status=status.HTTP_400_BAD_REQUEST)
+        details = self.get_objects_list(**cld)
+        if isinstance(details, Exception):
+            return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = DishesListSerializer(instances)
-        datas = serializer.list_data(**cld)
-        if isinstance(datas, Exception):
-            return Response({'Detail': datas.args}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(datas, status=status.HTTP_200_OK)
+        serializer = DishesListSerializer(data=details)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        list_data = serializer.list_data(**cld)
+        if isinstance(list_data, Exception):
+            return Response({'Detail': list_data.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(list_data, status=status.HTTP_200_OK)
 
 
 class DishesDetail(generics.GenericAPIView):
@@ -447,8 +450,8 @@ class DishesDetail(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get_dishes_object(self, dishes_id):
-        return Dishes.get_object(pk=dishes_id)
+    def get_dishes_detail(self, dishes_id):
+        return Dishes.get_detail(pk=dishes_id)
 
     def post(self, request, *args, **kwargs):
         form = DishesDetailForm(request.data)
@@ -456,10 +459,12 @@ class DishesDetail(generics.GenericAPIView):
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instance = self.get_dishes_object(cld['pk'])
-        if isinstance(instance, Exception):
-            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = DishesSerializer(instance)
+        detail = self.get_dishes_detail(cld['pk'])
+        if isinstance(detail, Exception):
+            return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = DishesSerializer(data=detail)
+        if not serializer.is_valid():
+            return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
