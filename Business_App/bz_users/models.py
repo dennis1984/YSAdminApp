@@ -102,8 +102,8 @@ class BusinessUser(AbstractBaseUser):
     def get_object(cls, **kwargs):
         try:
             return cls.objects.get(**kwargs)
-        except cls.DoesNotExist:
-            return None
+        except Exception as e:
+            return e
 
     @classmethod
     def filter_objects(cls, fuzzy=False, **kwargs):
