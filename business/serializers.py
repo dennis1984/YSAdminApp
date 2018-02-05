@@ -531,6 +531,7 @@ class DishesClassifySerializer(BaseModelSerializer):
 
 
 class DishesClassifyDetailSerializer(BaseSerializer):
+    id = serializers.IntegerField()
     name = serializers.CharField()
     description = serializers.CharField(allow_null=True, allow_blank=True)
     user_id = serializers.IntegerField()

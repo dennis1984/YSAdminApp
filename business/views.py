@@ -504,12 +504,12 @@ class DishesAction(generics.GenericAPIView):
             elif 'pk' in kwargs:
                 dishes = self.get_dishes_instance(kwargs['pk'])
                 if isinstance(dishes, Exception):
-                    return False, dishes.args
+                    return dishes
                 dishes_classify_ins = self.get_dishes_classify_object(dishes.user_id, kwargs['classify'])
             else:
-                return False, 'Params error.'
+                return Exception('Params error.')
             if isinstance(dishes_classify_ins, Exception):
-                return False, dishes_classify_ins.args
+                return dishes_classify_ins
         return kwargs
 
     def post(self, request, *args, **kwargs):
