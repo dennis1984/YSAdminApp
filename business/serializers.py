@@ -272,7 +272,7 @@ class DishesDetailSerializer(BaseSerializer):
     tag = serializers.CharField(allow_null=True, allow_blank=True)
     sort_orders = serializers.IntegerField(allow_null=True)
     classify = serializers.IntegerField()
-    classify_name = serializers.CharField()
+    classify_name = serializers.CharField(allow_null=True, allow_blank=True)
 
 
 class DishesListSerializer(BaseListSerializer):
