@@ -43,6 +43,10 @@ urlpatterns = [
     url(r'^app_version_action/$', views.AppVersionAction.as_view()),
     url(r'^app_version_detail/$', views.AppVersionDetail.as_view()),
     url(r'^app_version_list/$', views.AppVersionList.as_view()),
+
+    url(r'^dishes_classify_action/$', views.DishesClassifyAction.as_view()),
+    url(r'^dishes_classify_detail/$', views.DishesClassifyDetail.as_view()),
+    url(r'^dishes_classify_list/$', views.DishesClassifyList.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

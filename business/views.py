@@ -499,7 +499,15 @@ class DishesAction(generics.GenericAPIView):
                 return user
             kwargs['food_court_id'] = user.food_court_id
         if 'classify' in kwargs:
-            dishes_classify_ins = self.get_dishes_classify_object(kwargs['user_id'], kwargs['classify'])
+            if 'user_id' in kwargs:
+                dishes_classify_ins = self.get_dishes_classify_object(kwargs['user_id'], kwargs['classify'])
+            elif 'pk' in kwargs:
+                dishes = self.get_dishes_instance(kwargs['pk'])
+                if isinstance(dishes, Exception):
+                    return False, dishes.args
+                dishes_classify_ins = self.get_dishes_classify_object(dishes.user_id, kwargs['classify'])
+            else:
+                return False, 'Params error.'
             if isinstance(dishes_classify_ins, Exception):
                 return False, dishes_classify_ins.args
         return kwargs
@@ -566,6 +574,7 @@ class DishesAction(generics.GenericAPIView):
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 USER_INITIAL_PASSWORD = '123456'
 
