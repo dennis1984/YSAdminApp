@@ -1335,9 +1335,8 @@ class DishesClassifyAction(generics.GenericAPIView):
     """
     permission_classes = (IsAdminOrReadOnly, )
 
-    def get_dishes_classify_object(self, request, dishes_classify_id):
-        kwargs = {'user_id': request.user.id,
-                  'id': dishes_classify_id}
+    def get_dishes_classify_object(self, dishes_classify_id):
+        kwargs = {'id': dishes_classify_id}
         return DishesClassify.get_object(**kwargs)
 
     def is_request_data_valid(self, **kwargs):
@@ -1377,7 +1376,7 @@ class DishesClassifyAction(generics.GenericAPIView):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instance = self.get_dishes_classify_object(request, cld['id'])
+        instance = self.get_dishes_classify_object(cld['id'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
         serializer = DishesClassifySerializer(instance)
@@ -1396,7 +1395,7 @@ class DishesClassifyAction(generics.GenericAPIView):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        instance = self.get_dishes_classify_object(request, cld['id'])
+        instance = self.get_dishes_classify_object(cld['id'])
         if isinstance(instance, Exception):
             return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
         serializer = DishesClassifySerializer(instance)
