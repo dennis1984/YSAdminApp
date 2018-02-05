@@ -1359,7 +1359,7 @@ class DishesClassifyAction(generics.GenericAPIView):
         is_valid, error_message = self.is_request_data_valid(**cld)
         if not is_valid:
             return Response({'Detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = DishesClassifySerializer(data=cld, request=request)
+        serializer = DishesClassifySerializer(data=cld)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         try:
