@@ -1435,9 +1435,25 @@ class DishesClassifyDetail(generics.GenericAPIView):
 class DishesClassifyList(generics.GenericAPIView):
     permission_classes = (IsAdminOrReadOnly, )
 
-    def get_object_list(self, request):
-        kwargs = {'user_id': request.user.id}
-        return DishesClassify.filter_details(**kwargs)
+    def get_business_user(self, **kwargs):
+        return BusinessUser.get_object(**kwargs)
+
+    def get_object_list(self, **kwargs):
+        _kwargs = {}
+        if 'user_id' in kwargs:
+            _kwargs['user_id'] = kwargs['user_id']
+        if 'phone' in kwargs:
+            user_kwargs = {'phone': kwargs['phone']}
+            business_user = self.get_business_user(**user_kwargs)
+            if isinstance(business_user, Exception):
+                return business_user
+            input_user_id = _kwargs.get('user_id')
+            if input_user_id:
+                if input_user_id != business_user.id:
+                    return Exception('DishesClassify matching query does not exist.')
+            else:
+                _kwargs['user_id'] = business_user.id
+        return DishesClassify.filter_details(**_kwargs)
 
     def post(self, request, *args, **kwargs):
         """
@@ -1455,7 +1471,7 @@ class DishesClassifyList(generics.GenericAPIView):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
         cld = form.cleaned_data
-        details = self.get_object_list(request)
+        details = self.get_object_list(**cld)
         if isinstance(details, Exception):
             return Response({'Detail': details.args}, status=status.HTTP_400_BAD_REQUEST)
 
