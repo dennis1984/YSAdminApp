@@ -462,7 +462,7 @@ class DishesDetail(generics.GenericAPIView):
         detail = self.get_dishes_detail(cld['pk'])
         if isinstance(detail, Exception):
             return Response({'Detail': detail.args}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = DishesSerializer(data=detail)
+        serializer = DishesDetailSerializer(data=detail)
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
