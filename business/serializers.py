@@ -413,6 +413,7 @@ class OrdersDetailSerializer(BaseSerializer):
     payment_mode = serializers.IntegerField()
     orders_type = serializers.IntegerField()
     created = serializers.DateTimeField()
+    payment_time = serializers.DateTimeField(allow_null=True)
 
 
 class OrdersListSerializer(BaseListSerializer):

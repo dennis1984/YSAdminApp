@@ -84,6 +84,7 @@ class ConsumerOrdersSerializer(BaseSerializer):
     payment_status = serializers.IntegerField()
     orders_type = serializers.IntegerField()
     created = serializers.DateTimeField()
+    payment_time = serializers.DateTimeField(allow_null=True)
     updated = serializers.DateTimeField()
     is_commented = serializers.IntegerField()
     comment_messaged = serializers.CharField(allow_blank=True, allow_null=True)
