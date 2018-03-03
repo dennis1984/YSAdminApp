@@ -271,11 +271,11 @@ class Wallet(models.Model):
         return instance
 
     @classmethod
-    def update_balance_with_income(cls, user_id, verify_orders):
-        verify_orders = VerifyOrders.get_object(orders_id=verify_orders.orders_id)
+    def update_balance_with_income(cls, user_id, verify_orders_id):
+        verify_orders = VerifyOrders.get_object(orders_id=verify_orders_id)
         if isinstance(verify_orders, Exception):
             return verify_orders
-        if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+        if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['finished']:
             return ValueError('The orders payment status is incorrect.')
 
         instance = None
@@ -415,7 +415,7 @@ class WalletAction(object):
                 return e
         # 订单收入
         result = Wallet.update_balance_with_income(user_id=request.user.id,
-                                                   verify_orders=orders)
+                                                   verify_orders_id=orders.orders_id)
         # 生成交易记录
         _trade = WalletTradeAction().create(request, orders)
         if isinstance(_trade, Exception):

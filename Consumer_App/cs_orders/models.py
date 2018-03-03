@@ -519,6 +519,7 @@ class ConsumeOrdersAction(object):
         if orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
             return ValueError('The orders payment status is incorrect.')
         orders.payment_status = ORDERS_PAYMENT_STATUS['finished']
+        orders.confirm_time = now()
         try:
             orders.save()
         except Exception as e:
@@ -531,6 +532,7 @@ class ConsumeOrdersAction(object):
         if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
             return ValueError('The orders payment status is incorrect.')
         verify_orders.payment_status = ORDERS_PAYMENT_STATUS['finished']
+        verify_orders.confirm_time = now()
         try:
             verify_orders.save()
         except Exception as e:
