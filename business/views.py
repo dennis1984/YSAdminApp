@@ -503,7 +503,7 @@ class DishesAction(generics.GenericAPIView):
             if isinstance(user, Exception):
                 return user
             kwargs['food_court_id'] = user.food_court_id
-        if 'classify' in kwargs:
+        if kwargs.get('classify'):
             if 'user_id' in kwargs:
                 dishes_classify_ins = self.get_dishes_classify_object(kwargs['user_id'], kwargs['classify'])
             elif 'pk' in kwargs:

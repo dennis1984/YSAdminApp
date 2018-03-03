@@ -97,7 +97,7 @@ class Dishes(models.Model):
     @property
     def perfect_data(self):
         detail = model_to_dict(self)
-        detail['classify_name'] = ''
+        detail['classify_name'] = u'默认'
         if self.classify:
             dishes_classify = DishesClassify.get_object(pk=self.classify)
             if not isinstance(dishes_classify, Exception):
