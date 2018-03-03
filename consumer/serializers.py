@@ -115,6 +115,9 @@ class ConsumerOrdersSerializer(BaseSerializer):
     notes = serializers.CharField(allow_blank=True, allow_null=True)
     # 核销时段：例如：17:30~20:30
     consumer_time_slot = serializers.CharField(allow_blank=True, allow_null=True)
+    confirm_time = serializers.DateTimeField(allow_null=True)
+    service_dishes_subsidy = serializers.CharField()
+    service_coupons_subsidy = serializers.CharField()
     expires = serializers.DateTimeField()
     extend = serializers.CharField(allow_blank=True, allow_null=True)
 
