@@ -34,6 +34,7 @@ import os
 import json
 import re
 import copy
+from decimal import Decimal
 
 
 class CitySerializer(BaseModelSerializer):
@@ -224,7 +225,7 @@ class DishesSerializer(BaseModelSerializer):
             validated_data.pop('pk')
         price = validated_data.get('price', instance.price)
         discount = validated_data.get('discount', instance.discount)
-        if price < discount:
+        if Decimal(price) < Decimal(discount):
             raise Exception('[discount] can not greater than [price]')
 
         # 删除缓存
