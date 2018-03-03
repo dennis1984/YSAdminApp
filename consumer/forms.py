@@ -127,3 +127,7 @@ class WalletRechargeGiftDetailForm(forms.Form):
 
 class CancelUnConsumedOrdersActionForm(forms.Form):
     orders_id = forms.CharField(min_length=14, max_length=64)
+
+
+class ConfirmUnConsumedOrdersActionForm(forms.Form):
+    orders_id = forms.CharField(min_length=14, max_length=64)

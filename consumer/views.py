@@ -40,7 +40,8 @@ from consumer.forms import (UserListForm,
                             WalletRechargeGiftActionForm,
                             WalletRechargeGiftListForm,
                             WalletRechargeGiftDetailForm,
-                            CancelUnConsumedOrdersActionForm)
+                            CancelUnConsumedOrdersActionForm,
+                            ConfirmUnConsumedOrdersActionForm)
 
 from Consumer_App.cs_users.models import ConsumerUser
 from Consumer_App.cs_comment.models import Comment
@@ -641,3 +642,37 @@ class CancelUnConsumedOrdersAction(generics.GenericAPIView):
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'Result': True}, status=status.HTTP_206_PARTIAL_CONTENT)
 
+
+class ConfirmUnConsumedOrdersAction(generics.GenericAPIView):
+    """
+    确认核销消费者的未核销订单
+    """
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_consume_orders(self, orders_id):
+        return ConsumeOrders.get_object(orders_id=orders_id)
+
+    def is_consume_orders(self, orders_instance):
+        if not orders_instance.is_consume_orders:
+            return False, 'The Orders\'s payment_status is incorrect.'
+        return True, None
+
+    def put(self, request, *args, **kwargs):
+        form = ConfirmUnConsumedOrdersActionForm(request.data)
+        if not form.is_valid():
+            return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        cld = form.cleaned_data
+        instance = self.get_consume_orders(cld['orders_id'])
+        if isinstance(instance, Exception):
+            return Response({'Detail': instance.args}, status=status.HTTP_400_BAD_REQUEST)
+        is_valid, error_message = self.is_consume_orders(instance)
+        if not is_valid:
+            return Response({'Detail': error_message}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ConsumeOrdersSerializer(instance)
+        try:
+            serializer.update_payment_status_to_consumed(instance)
+        except Exception as e:
+            return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'Result': True}, status=status.HTTP_206_PARTIAL_CONTENT)

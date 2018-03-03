@@ -13,7 +13,9 @@ from horizon.models import get_perfect_filter_params
 from horizon.models import model_to_dict, BaseManager
 
 from Business_App.bz_users.models import BusinessUser
-from Business_App.bz_orders.models import ORDERS_ORDERS_TYPE
+from Business_App.bz_orders.models import (ORDERS_ORDERS_TYPE,
+                                           VerifyOrders,
+                                           ORDERS_PAYMENT_STATUS)
 from Consumer_App.cs_orders.models import SerialNumberGenerator
 
 from horizon.models import BaseManager
@@ -268,6 +270,27 @@ class Wallet(models.Model):
             instance = _instance
         return instance
 
+    @classmethod
+    def update_balance_with_income(cls, user_id, verify_orders):
+        verify_orders = VerifyOrders.get_object(orders_id=verify_orders.orders_id)
+        if isinstance(verify_orders, Exception):
+            return verify_orders
+        if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+            return ValueError('The orders payment status is incorrect.')
+
+        instance = None
+        # 数据库加排它锁，保证更改信息是列队操作的，防止数据混乱
+        with transaction.atomic(using='business'):
+            try:
+                _instance = cls.objects.select_for_update().get(user_id=user_id)
+            except cls.DoesNotExist:
+                raise cls.DoesNotExist
+
+            _instance.balance = str(Decimal(_instance.balance) + Decimal(verify_orders.payable))
+            _instance.save()
+            instance = _instance
+        return instance
+
 
 class WalletTradeDetail(models.Model):
     """
@@ -322,6 +345,12 @@ class WalletTradeAction(object):
                       'user_id': orders.user_id,
                       'amount_of_money': orders.amount_of_money,
                       }
+        elif method == 'income':
+            kwargs = {'trade_type': WALLET_TRADE_DETAIL_TRADE_TYPE_DICT['income'],   # 交易类型：充值
+                      'orders_id': orders.orders_id,
+                      'user_id': orders.user_id,
+                      'amount_of_money': orders.payable,
+                      }
 
         kwargs['serial_number'] = serial_number
         wallet_detail = WalletTradeDetail(**kwargs)
@@ -373,3 +402,22 @@ class WalletAction(object):
         instance = Wallet.unblock_blocked_money(withdraw_record.user_id,
                                                 withdraw_record.amount_of_money)
         return instance
+
+    def income(self, request, orders, gateway='auth'):
+        """
+        订单收入
+        """
+        if gateway == 'admin_pay':
+            request = Request(HttpRequest)
+            try:
+                setattr(request.user, 'id', orders.user_id)
+            except Exception as e:
+                return e
+        # 订单收入
+        result = Wallet.update_balance_with_income(user_id=request.user.id,
+                                                   verify_orders=orders)
+        # 生成交易记录
+        _trade = WalletTradeAction().create(request, orders)
+        if isinstance(_trade, Exception):
+            return _trade
+        return result

@@ -16,6 +16,8 @@ from Consumer_App.cs_orders.models import (PayOrders,
                                            ORDERS_PAYMENT_STATUS,
                                            ConsumeOrdersAction)
 from Consumer_App.cs_setup.models import Feedback
+from Business_App.bz_wallet.models import WalletAction as BZ_WalletAction
+from Business_App.bz_orders.models import VerifyOrders
 
 import re
 import copy
@@ -90,6 +92,31 @@ class ConsumerOrdersSerializer(BaseSerializer):
     comment_messaged = serializers.CharField(allow_blank=True, allow_null=True)
     comment_id = serializers.IntegerField(allow_null=True)
     reply_messaged = serializers.CharField(allow_blank=True, allow_null=True)
+
+    business_id = serializers.IntegerField()
+    stalls_number = serializers.CharField(allow_blank=True, allow_null=True)
+    food_court_id = serializers.IntegerField()
+    food_court_name = serializers.CharField()
+
+    dishes_ids = serializers.ListField()
+    total_amount = serializers.CharField()
+    member_discount = serializers.CharField()
+    online_discount = serializers.CharField()
+    other_discount = serializers.CharField()
+    coupons_discount = serializers.CharField()
+    coupons_id = serializers.IntegerField(allow_null=True)
+
+    # 支付方式：0:未指定支付方式 1：钱包支付 2：微信支付 3：支付宝支付
+    payment_mode = serializers.IntegerField()
+    # 所属主订单
+    master_orders_id = serializers.CharField()
+    # 核销码：如果已经核销，该字段不为空，如果没有核销，该字段为空
+    confirm_code = serializers.CharField(allow_blank=True, allow_null=True)
+    notes = serializers.CharField(allow_blank=True, allow_null=True)
+    # 核销时段：例如：17:30~20:30
+    consumer_time_slot = serializers.CharField(allow_blank=True, allow_null=True)
+    expires = serializers.DateTimeField()
+    extend = serializers.CharField(allow_blank=True, allow_null=True)
 
 
 class ConsumeOrdersListSerializer(BaseListSerializer):
@@ -222,6 +249,9 @@ class ConsumeOrdersSerializer(BaseModelSerializer):
         fields = '__all__'
 
     def update_payment_status_to_cancel(self, instance):
+        """
+        取消用户的待核销订单
+        """
         # 同步订单支付状态
         instance = ConsumeOrdersAction().update_payment_status_to_canceled(instance.orders_id)
         if isinstance(instance, Exception):
@@ -231,6 +261,23 @@ class ConsumeOrdersSerializer(BaseModelSerializer):
         wallet_instance = WalletAction().orders_refund(None, instance, gateway='admin_pay')
         if isinstance(wallet_instance, Exception):
             raise wallet_instance
+        return instance
+
+    def update_payment_status_to_consumed(self, instance):
+        """
+        确认核销用户的待核销订单
+        """
+        # 同步订单支付状态
+        instance = ConsumeOrdersAction().update_payment_status_to_consumed(instance.orders_id)
+        if isinstance(instance, Exception):
+            raise instance
+
+        # 钱包余额更新 (订单收入)
+        verify_orders = VerifyOrders.get_object(orders_id=instance.orders_id)
+        result = BZ_WalletAction().income(None, verify_orders, gateway='admin_pay')
+        if isinstance(result, Exception):
+            raise result
+
         return instance
 
 

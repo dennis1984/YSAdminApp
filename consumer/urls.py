@@ -32,6 +32,9 @@ urlpatterns = [
 
     # 取消未核销订单
     url('^cancel_consume_orders_action/$', views.CancelUnConsumedOrdersAction.as_view()),
+    # 确认核销未核销订单
+    url('^confirm_consume_orders_action/$', views.ConfirmUnConsumedOrdersAction.as_view()),
+    
 
 ]
 

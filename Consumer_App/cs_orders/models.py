@@ -284,6 +284,8 @@ class ConsumeOrders(models.Model):
 
     business_name = models.CharField('商户名字', max_length=200)
     business_id = models.IntegerField('商户ID')
+    stalls_number = models.CharField('档口编号', max_length=20, default='',
+                                     null=True, blank=True)
     food_court_id = models.IntegerField('美食城ID')
     food_court_name = models.CharField('美食城名字', max_length=200)
 
@@ -293,6 +295,10 @@ class ConsumeOrders(models.Model):
     member_discount = models.CharField('会员优惠', max_length=16, default='0')
     online_discount = models.CharField('在线下单优惠', max_length=16, default='0')
     other_discount = models.CharField('其他优惠', max_length=16, default='0')
+    coupons_discount = models.CharField('优惠券优惠', max_length=16, default='0')
+    coupons_id = models.IntegerField('优惠券ID', null=True)
+    service_dishes_subsidy = models.CharField('菜品优惠平台补贴', max_length=16, default='0')
+    service_coupons_subsidy = models.CharField('优惠券优惠平台补贴', max_length=16, default='0')
     payable = models.CharField('应付金额', max_length=16)
 
     # 0:未支付 200:已支付 201:待消费 204:已取消 206:已完成 400: 已过期 500:支付失败
@@ -312,6 +318,8 @@ class ConsumeOrders(models.Model):
     notes = models.CharField('订单备注', max_length=40, default='', blank=True, null=True)
     # 核销时段：例如：17:30~20:30
     consumer_time_slot = models.CharField('订单核销时间段', max_length=32, null=True, blank=True)
+    # 核销时间
+    confirm_time = models.DateTimeField('核销时间', null=True)
 
     created = models.DateTimeField('创建时间', default=now)
     payment_time = models.DateTimeField('订单支付时间', default=now)
@@ -391,6 +399,10 @@ class ConsumeOrders(models.Model):
             if 'max_payable' in kwargs:
                 if float(orders_dict['payable']) > float(kwargs['max_payable']):
                     continue
+            try:
+                orders_dict['dishes_ids'] = json.loads(orders_dict['dishes_ids'])
+            except:
+                orders_dict['dishes_ids'] = []
             user = users_dict.get(instance.user_id)
             if user:
                 phone = user.phone
@@ -488,6 +500,37 @@ class ConsumeOrdersAction(object):
         if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
             return ValueError('The orders payment status is incorrect.')
         verify_orders.payment_status = ORDERS_PAYMENT_STATUS['canceled']
+        try:
+            verify_orders.save()
+        except Exception as e:
+            return e
+
+        return orders
+
+    def update_payment_status_to_consumed(self, orders_id):
+        """
+        更新核销订单的支付状态为确认核销
+        return: orders instance: 成功
+                Exception：失败
+        """
+        orders = self.get_orders_instance(orders_id)
+        if isinstance(orders, Exception):
+            return orders
+        if orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+            return ValueError('The orders payment status is incorrect.')
+        orders.payment_status = ORDERS_PAYMENT_STATUS['finished']
+        try:
+            orders.save()
+        except Exception as e:
+            return e
+
+        # 同步商户端核销订单支付状态
+        verify_orders = VerifyOrders.get_object(orders_id=orders_id)
+        if isinstance(verify_orders, Exception):
+            return verify_orders
+        if verify_orders.payment_status != ORDERS_PAYMENT_STATUS['consuming']:
+            return ValueError('The orders payment status is incorrect.')
+        verify_orders.payment_status = ORDERS_PAYMENT_STATUS['finished']
         try:
             verify_orders.save()
         except Exception as e:
