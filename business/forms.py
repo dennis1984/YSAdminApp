@@ -41,6 +41,8 @@ class FoodCourtInputForm(forms.Form):
     mall = forms.CharField(min_length=2, max_length=60)
     address = forms.CharField(min_length=2, max_length=60)
     image = forms.ImageField(required=False)
+    longitude = forms.CharField(max_length=32)
+    latitude = forms.CharField(max_length=32)
 
 
 class FoodCourtUpdateForm(forms.Form):
@@ -54,6 +56,8 @@ class FoodCourtUpdateForm(forms.Form):
     mall = forms.CharField(min_length=2, max_length=60, required=False)
     address = forms.CharField(min_length=2, max_length=60, required=False)
     image = forms.ImageField(required=False)
+    longitude = forms.CharField(max_length=32, required=False)
+    latitude = forms.CharField(max_length=32, required=False)
 
 
 class FoodCourtDeleteForm(forms.Form):
