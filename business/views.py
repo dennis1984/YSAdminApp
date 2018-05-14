@@ -604,6 +604,7 @@ class UserAction(generics.GenericAPIView):
          创建用户
         """
         form = UsersInputForm(request.data, request.FILES)
+
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -621,6 +622,8 @@ class UserAction(generics.GenericAPIView):
         """
         修改用户信息（修改普通信息、添加/移除黑名单）
         """
+
+
         form = UserUpdateForm(request.data, request.FILES)
         if not form.is_valid():
             return Response({'Detail': form.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -629,6 +632,8 @@ class UserAction(generics.GenericAPIView):
         if not self.is_request_data_valid(cld):
             return Response({'Detail': 'The Params data is incorrect.'})
         user = self.get_user_object(cld['user_id'])
+
+
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -637,7 +642,10 @@ class UserAction(generics.GenericAPIView):
             serializer.update(user, cld)
         except Exception as e:
             return Response({'Detail': e.args}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.data, status=status.HTTP_206_PARTIAL_CONTENT)
+
+
 
     def patch(self, request, *args, **kwargs):
         """
@@ -699,6 +707,7 @@ class UserDetail(generics.GenericAPIView):
 
     def get_user_object(self, user_id):
         user_list = BusinessUser.filter_users_detail(pk=user_id)
+
         if isinstance(user_list, Exception):
             return user_list
         if len(user_list) != 1:
@@ -712,10 +721,12 @@ class UserDetail(generics.GenericAPIView):
 
         cld = form.cleaned_data
         user = self.get_user_object(cld['user_id'])
+
         if isinstance(user, Exception):
             return Response({'Detail': user.args}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = UserDetailSerializer(data=user)
+
         if not serializer.is_valid():
             return Response({'Detail': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_200_OK)
